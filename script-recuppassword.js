@@ -16,6 +16,7 @@ document.querySelectorAll('.ent input').forEach(input => {
     // Verifica ao carregar a página (para inputs com valor inicial)
     window.addEventListener('DOMContentLoaded', checkInput);
 });
+
 const passwordInput = document.getElementById('password');
 const togglePassword = document.getElementById('togglePassword');
 
@@ -31,4 +32,39 @@ btna.addEventListener('click', () => {
     btna.classList.toggle('active'); // Alterna a classe active
     // Para desativar, você pode usar:
     // botao.disabled = !botao.disabled;
+});
+
+
+
+const updatePasswordForm = document.getElementById("updatePasswordForm");
+const updatePasswordResponseDiv = document.getElementById("updatePasswordResponseDiv");
+
+updatePasswordForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = encodeURIComponent(updatePasswordForm.email.value);
+    const currentPassword = encodeURIComponent(updatePasswordForm.currentPassword.value);
+    const newPassword = encodeURIComponent(updatePasswordForm.password.value);
+
+    const url = `https://bff-relaunch-production.up.railway.app/v1/user?email=${email}&currentPassword=${currentPassword}&newPassword=${newPassword}`;
+    try {
+        const res = await fetch(url, {
+            method: "PATCH"
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            updatePasswordResponseDiv.innerHTML = "Senha alterada com sucesso!";
+
+            setTimeout(() => {
+                window.location.href = "./index.html"; 
+            }, 2000);
+        } else {
+            updatePasswordResponseDiv.innerHTML = ` ${data.message || JSON.stringify(data)}`;
+        }
+    } catch (err) {
+        updatePasswordResponseDiv.innerHTML = "Erro ao conectar à API.";
+        console.error(err);
+    }
 });

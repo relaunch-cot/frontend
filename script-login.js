@@ -37,13 +37,12 @@ const loginForm = document.getElementById("loginForm");
 const loginResponseDiv = document.getElementById("loginResponse");
 
 loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault(); // evita reload
+    e.preventDefault();
 
     const email = encodeURIComponent(loginForm.email.value);
     const password = encodeURIComponent(loginForm.password.value);
 
     const url = `https://bff-relaunch-production.up.railway.app/v1/user/login?email=${email}&password=${password}`;
-    console.log(url);
     try {
         const res = await fetch(url, {
             method: "POST"
@@ -51,9 +50,13 @@ loginForm.addEventListener("submit", async (e) => {
 
         const data = await res.json();
 
-        if (res.ok && data.token) {
-            localStorage.setItem("token", response.headers.get("Authorization"));
+        if (res.ok && res.headers.get("Authorization")) {
+            localStorage.setItem("token", res.headers.get("Authorization"));
             loginResponseDiv.innerHTML = "Login realizado com sucesso!";
+
+            setTimeout(() => {
+                window.location.href = "./index.html"; 
+            }, 2000);
         } else {
             loginResponseDiv.innerHTML = ` ${data.message || JSON.stringify(data)}`;
         }
@@ -62,39 +65,3 @@ loginForm.addEventListener("submit", async (e) => {
         console.error(err);
     }
 });
-
-// async function fetchWithToken(url, options = {}) {
-//     const token = localStorage.getItem("authToken"); // pega token
-
-//     // Garante que headers existem
-//     options.headers = options.headers || {};
-
-//     if (token) {
-//         options.headers["Authorization"] = `Bearer ${token}`;
-//     }
-
-//     try {
-//         const response = await fetch(url, options);
-//         return response;
-//     } catch (err) {
-//         console.error("Erro na requisição com token:", err);
-//         throw err;
-//     }
-// }
-
-// const btnLogout = document.getElementById("logout");
-
-// function updateLogoutButton() {
-//     if (localStorage.getItem("authToken")) {
-//         btnLogout.style.display = "block"; 
-//     } else {
-//         btnLogout.style.display = "none"; 
-//     }
-// }
-
-// document.addEventListener("DOMContentLoaded", updateLogoutButton);
-
-// btnLogout.addEventListener("click", () => {
-//     localStorage.removeItem("authToken"); 
-//     updateLogoutButton(); 
-// });
