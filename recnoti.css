@@ -1,0 +1,161 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-image: url(BackgroundLogin.png);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+main{
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: right ;
+    
+}
+
+.page{
+    height: 100vh;
+    width: 50%;
+    background: rgba(255, 255, 255, 0.2); 
+    backdrop-filter: blur(10px); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.relaunch {
+  font-family: 'Poppins', sans-serif;
+  font-size: 4em; 
+  text-decoration: none;
+  color: #2C3E50; 
+  font-weight: 700; 
+}
+
+.primeiras-duas {
+  color: #4FC3F7; 
+  font-weight: 700; 
+}
+
+main>div{
+    width: 50%;
+    height: 100vh;
+    padding: 2%;
+}
+
+.ent {
+    position: relative;
+    display: flex;
+  align-items: center;
+  width: 60vh;
+  padding-bottom: 3vh;
+}
+
+.ent:hover {
+    color: #46B1D5;
+}
+
+input {
+    font-size: 16px;
+    padding: 10px 10px 10px 5px;
+    display: block;
+    width: 100%;
+    outline: none;
+    border: none;
+    background: transparent;
+    border-bottom: 2px solid #2C3E50;
+}
+
+label {
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    font-family: 'Poppins', sans-serif;
+    user-select: none;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.ent.filled label,
+input:focus ~ label {
+    top: -20px;
+    font-size: 14px;
+    color: #46B1D5;
+}
+
+input:focus {
+    border-width: 2px;
+    border-bottom-color: #46B1D5;
+}
+#togglePassword{
+    position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.1s ease;
+  font-family: 'poppins';
+}
+
+#togglePassword.active{
+    color: #46B1D5;
+}
+
+#submit{
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    font-family: 'poppins';
+}
+
+#submit>button{
+    height: 5vh;
+    width: 100%;
+    background-color: #46B1D5;
+    border-radius: 8px;
+    border: #46B1D5 4px solid;
+    color: white;
+    font-size: large;
+    font-family: 'poppins';
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#submit>button:hover{
+    border: #AEEBFF 4px solid;
+}
+
+#submit button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+#submit>a{
+    text-decoration: none;
+    color: #2C3E50;
+}
+
+#submit>a:hover{
+    text-decoration: underline;
+    color: #46B1D5;
+}
+
+#cadastro{
+    padding-top: 4vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'poppins';    
+}
+
+#cadastro>a{
+    color: #46B1D5;
+    padding-left: 1vh;
+}

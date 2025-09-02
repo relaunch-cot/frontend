@@ -1,0 +1,280 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Gudea", sans-serif;
+    background: #f5f7fb;
+    color: #222;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 70px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+#logo {
+    height: 50px;
+}
+
+#pesquisa {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex: 1;
+    margin: 0 20px;
+}
+
+#pesquisa input {
+    width: 100%;
+    padding: 5px 35px 5px 10px;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+#lampada{
+    background-image: url('lampada-incandescente\ \(1\).png');
+}
+
+#sino{
+    background-image: url('notificacao\ \(1\).png');
+}
+#menu{
+    background-image: url('menu-aberto\ \(1\).png');
+}
+
+
+#pesquisa svg.lupa {
+    position: absolute;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+}
+
+.icones {
+    display: flex;
+    gap: 15px;
+    color: #46B1D5;
+}
+
+.icone {
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+}
+
+.search-bar input {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px 0 0 20px;
+    outline: none;
+}
+
+.search-bar button {
+    border: 1px solid #ccc;
+    background: #f4f4f4;
+    padding: 6px 10px;
+    border-radius: 0 20px 20px 0;
+    cursor: pointer;
+}
+
+.header-icons span {
+    margin-left: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.perfil-container {
+    display: flex;
+    justify-content: space-between;
+    background: #1f2c33;
+    color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    margin: 20px;
+}
+
+.perfil-esquerda {
+    display: flex;
+    align-items: flex-start;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px; 
+}
+.avatar img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.info h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.info p {
+    font-size: 14px;
+    margin-bottom: 15px;
+    max-width: 600px;
+}
+
+.tags {
+    display: flex;
+    gap: 10px;
+}
+
+.tag {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    color: white;
+}
+
+.tag.backend { background: #0073e6; }
+.tag.frontend { background: #0073e6; }
+.tag.web { background: #0073e6; }
+
+.perfil-direita {
+    text-align: right;
+}
+
+.projetos {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.projetos span {
+    color: #4ab2d8;
+}
+
+.estrelas {
+    font-size: 22px;
+    color: gold;
+}
+
+footer{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15vh;
+    background-color: #2A3B41;
+    display: grid;
+    grid-template: 15vh / 2fr 1fr 1fr 3fr 1fr;
+}
+
+footer>div>a{
+    width: 70%;
+}
+
+footer>:nth-child(1){
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+footer>:nth-child(2),
+footer>:nth-child(3){
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 15vh;
+}
+
+
+footer a{
+    font-size: 1.5vh;
+    color: aliceblue;
+    text-decoration: 0;
+    text-align: left;
+    font-family: "Poppins";
+
+}
+
+footer a:hover{
+    color: #aeebff;
+    text-decoration: underline ;
+}
+
+footer>:nth-child(2)>div,
+footer>:nth-child(3)>div{
+    display: flex;
+    align-items: left;
+    justify-content: space-evenly;
+    flex-direction: column;
+    border-left: #F9F9F9 1px solid;
+    height: 7vh;
+    padding-left: 10px;
+}
+
+footer>:nth-child(4){
+    display: flex;
+    align-items: center;
+    justify-content: right;
+}
+
+footer svg{
+    height: 30px;
+    width: 30px;
+}
+
+footer>:nth-child(4)>a{
+    height: 30px;
+    width: 30px;
+    margin-right: 20px;
+}
+
+footer>:nth-child(5)>img{
+    height: 10px;
+    width: 10px;
+    padding-right: 2px;
+}
+footer>:nth-child(5)>img{
+    height: 20px;
+    width: 20px;
+}
+
+footer>:nth-child(5){
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+footer>div>select{
+    height: 20px;
+    font-size: 15px;
+    appearance: none;    
+    -webkit-appearance: none;  
+    -moz-appearance: none; 
+    background: none;
+    color: white;
+    border: none;
+}
+
+footer>div>select:hover{
+    color: #aeebff;
+}
