@@ -55,7 +55,7 @@ loginForm.addEventListener("submit", async (e) => {
             loginResponseDiv.innerHTML = "Login realizado com sucesso!";
 
             setTimeout(() => {
-                window.location.href = "./index.html"; 
+                window.location.href = "../home/index.html"; 
             }, 2000);
         } else {
             loginResponseDiv.innerHTML = ` ${data.message || JSON.stringify(data)}`;

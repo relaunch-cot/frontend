@@ -20,5 +20,5 @@ btnLogout.addEventListener("click", () => {
 });
 
 btnLogin.addEventListener("click", () => {
-    window.location.href = "./login.html";
+    window.location.href = "../login/login.html";
 });

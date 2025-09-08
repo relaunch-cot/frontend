@@ -70,14 +70,14 @@ header>:nth-child(1){
 }
 
 #lampada{
-    background-image: url('assets/lampada-incandescente.png');
+    background-image: url('../../assets/lampada-incandescente.png');
 }
 
 #sino{
-    background-image: url('assets/notificacao.png');
+    background-image: url('../../assets/notificacao.png');
 }
 #menu{
-    background-image: url('assets/menu-aberto.png');
+    background-image: url('../../assets/menu-aberto.png');
 }
 
 .icones{

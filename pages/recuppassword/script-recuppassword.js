@@ -58,7 +58,7 @@ updatePasswordForm.addEventListener("submit", async (e) => {
             updatePasswordResponseDiv.innerHTML = "Senha alterada com sucesso!";
 
             setTimeout(() => {
-                window.location.href = "./index.html"; 
+                window.location.href = "../home/index.html"; 
             }, 2000);
         } else {
             updatePasswordResponseDiv.innerHTML = ` ${data.message || JSON.stringify(data)}`;
