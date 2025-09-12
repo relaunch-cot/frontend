@@ -20,6 +20,7 @@ document.querySelectorAll('.ent input').forEach(input => {
 document.addEventListener('DOMContentLoaded', () => {
     const emailInput = document.getElementById('emailInput');
     const btn = document.getElementById('btnSubmit');
+    const recnotiResponseDiv = document.getElementById("recnotiResponseDiv");
 
     // Desabilita por padrão
     btn.disabled = true;
@@ -33,10 +34,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ao clicar no botão
-    btn.addEventListener('click', () => {
-        btn.textContent = 'Enviado!';
-        btn.disabled = true;
-    });
+    btn.addEventListener('click', async () => {
+    const email = encodeURIComponent(emailInput.value.trim());
+    const recoveryLink = encodeURIComponent("https://relaunch-cot.netlify.app/pages/recuppassword/recuppassword");
+
+    const url = `https://bff-relaunch-production.up.railway.app/v1/user/send-email?email=${email}&recovery-link=${recoveryLink}`;
+
+    try {
+        const res = await fetch(url, {
+            method: "POST"
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            btn.textContent = "Enviado!";
+            emailInput.value = "";
+            btn.disabled = true;
+        } else {
+            recnotiResponseDiv.innerHTML = `${data.message || JSON.stringify(data)}`;
+        }
+    } catch (err) {
+        recnotiResponseDiv.innerHTML = "Erro ao conectar à API.";
+        console.error(err);
+    }
+});
 });
 
