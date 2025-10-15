@@ -101,12 +101,14 @@ form.addEventListener("submit", async (e) => {
         const data = await res.json();
 
         if (res.ok) {
-            responseDiv.innerHTML = "Usuário registrado com sucesso!";
+            showSuccess("Cadastro realizado com sucesso!");
+            setTimeout(() => {
+                window.location.href = "../login/login.html";
+            }, 2000);
         } else {
-            responseDiv.innerHTML = `Erro: ${data.message || JSON.stringify(data)}`;
+            showError("Erro ao realizar cadastro. Verifique os dados.");
         }
     } catch (err) {
-        responseDiv.innerHTML = "Erro ao conectar à API.";
-        console.error(err);
+        showError("Erro de conexão. Tente novamente.");
     }
 });

@@ -1,0 +1,149 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Gudea", sans-serif;
+  background: #f5f7fb;
+  color: #222;
+}
+
+main {
+  height: 73vh;
+  width: 100%;
+  display: flex;
+}
+
+nav {
+  height: 73vh;
+  width: 15%;
+  background-color: #2A3B41;
+}
+
+.item {
+  height: 12vh;
+  border-left: 15px #46B1D5 solid;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  padding-left: 10px;
+  text-decoration: none;
+  color: #ffffff;
+  font-family: "Poppins";
+  font-size: large;
+}
+
+.item:hover {
+  color: #aeebff;
+  border-left-color: #aeebff;
+}
+
+.item.active {
+  border-left-color: #aeebff;
+  color: #aeebff;
+}
+
+.container {
+  flex: 1;
+  background: #fff;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #0f1824;
+  font-size: 2rem;
+}
+
+.chat-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chat-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e6edf4;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+  color: inherit;
+}
+
+.chat-item:hover {
+  background: #f7fbfe;
+}
+
+.chat-item:last-child {
+  border-bottom: none;
+}
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #46B1D5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.avatar svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+}
+
+.chat-info {
+  flex: 1;
+}
+
+.chat-name {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+  color: #0f1824;
+}
+
+.chat-preview {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.chat-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.chat-time {
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.unread-badge {
+  background: #46B1D5;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.empty {
+  text-align: center;
+  color: #777;
+  margin: 2rem 0;
+  font-size: 1.1rem;
+}

@@ -1,4 +1,4 @@
-
+const API_BASE = 'http://localhost:8080/v1/user';
 document.querySelectorAll('.ent input').forEach(input => {
     const ent = input.parentElement;
 
@@ -42,7 +42,7 @@ loginForm.addEventListener("submit", async (e) => {
     const email = encodeURIComponent(loginForm.email.value);
     const password = encodeURIComponent(loginForm.password.value);
 
-    const url = `https://bff-relaunch-production.up.railway.app/v1/user/login?email=${email}&password=${password}`;
+    const url = `${API_BASE}/login?email=${email}&password=${password}`;
     try {
         const res = await fetch(url, {
             method: "POST"
@@ -52,16 +52,15 @@ loginForm.addEventListener("submit", async (e) => {
 
         if (res.ok && res.headers.get("Authorization")) {
             localStorage.setItem("token", res.headers.get("Authorization"));
-            loginResponseDiv.innerHTML = "Login realizado com sucesso!";
+            showSuccess("Login realizado com sucesso!");
 
             setTimeout(() => {
                 window.location.href = "../home/index.html"; 
             }, 2000);
         } else {
-            loginResponseDiv.innerHTML = ` ${data.message || JSON.stringify(data)}`;
+            showError("Email ou senha incorretos.");
         }
     } catch (err) {
-        loginResponseDiv.innerHTML = "Erro ao conectar à API.";
-        console.error(err);
+        showError("Erro de conexão. Tente novamente.");
     }
 });
