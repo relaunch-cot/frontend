@@ -63,6 +63,17 @@
   color: #c82333 !important;
 }
 
+.hamburger-menu a svg {
+  margin-right: 8px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.hamburger-menu a {
+  display: flex;
+  align-items: center;
+}
+
 .logout-modal {
   position: fixed;
   top: 0;

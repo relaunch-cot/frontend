@@ -47,14 +47,14 @@ header {
     font-size: 14px;
 }
 #lampada{
-    background-image: url('../../assets/lampada-incandescente\ \(1\).png');
+    background-image: url('../../src/images/lampada-incandescente\ \(1\).png');
 }
 
 #sino{
-    background-image: url('../../assets/notificacao\ \(1\).png');
+    background-image: url('../../src/images/notificacao\ \(1\).png');
 }
 #menu{
-    background-image: url('../../assets/menu-aberto\ \(1\).png');
+    background-image: url('../../src/images/menu-aberto\ \(1\).png');
 }
 
 
@@ -83,7 +83,7 @@ header {
     align-items: center;
     text-align: center;
     height: 600px;
-    background: url('../../assets/imagem-principal.jpeg') center/cover no-repeat;
+    background: url('../../src/images/imagem-principal.jpeg') center/cover no-repeat;
     position: relative;
     color: #ffffff;
 }
