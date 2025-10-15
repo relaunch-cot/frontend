@@ -134,6 +134,13 @@ header {
     margin-bottom: 10px;
 }
 
+.info p.email {
+    font-size: 14px;
+    color: #46B1D5;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
 .info p {
     font-size: 14px;
     margin-bottom: 15px;
