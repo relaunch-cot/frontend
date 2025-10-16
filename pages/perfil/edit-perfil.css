@@ -47,6 +47,17 @@
     font-weight: 500;
 }
 
+.input-with-edit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-with-edit input,
+.input-with-edit textarea {
+    flex: 1;
+}
+
 .form-group input,
 .form-group textarea {
     width: 100%;
@@ -57,11 +68,51 @@
     transition: border-color 0.3s;
 }
 
+.form-group input[readonly],
+.form-group textarea[readonly] {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.edit-btn {
+    background: #46B1D5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.edit-btn:hover {
+    background: #3a9bc1;
+}
+
+.edit-btn.editing {
+    background: #28a745;
+}
+
+.edit-btn.editing:hover {
+    background: #218838;
+}
+
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
     border-color: #46B1D5;
     box-shadow: 0 0 5px rgba(70, 177, 213, 0.3);
+}
+
+.form-group input:not([readonly]):focus,
+.form-group textarea:not([readonly]):focus {
+    background-color: white;
+    color: #333;
 }
 
 .form-group textarea {

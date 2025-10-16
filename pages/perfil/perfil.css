@@ -149,19 +149,21 @@ header {
 
 .tags {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
 }
 
 .tag {
-    padding: 5px 10px;
+    background: #46B1D5;
+    color: white;
+    padding: 5px 12px;
     border-radius: 15px;
     font-size: 12px;
-    color: white;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
-
-.tag.backend { background: #0073e6; }
-.tag.frontend { background: #0073e6; }
-.tag.web { background: #0073e6; }
 
 .edit-profile {
     margin-top: 20px;
