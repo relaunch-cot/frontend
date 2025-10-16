@@ -74,6 +74,27 @@
   align-items: center;
 }
 
+.auth-btn {
+  padding: 6px 14px;
+  border: 2px solid #46B1D5;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 12px;
+  background: transparent;
+  color: #46B1D5;
+}
+
+.auth-btn.login:hover {
+  background: #46B1D5;
+  color: white;
+  box-shadow: 0 2px 8px rgba(70, 177, 213, 0.3);
+}
+
+
+
 .logout-modal {
   position: fixed;
   top: 0;

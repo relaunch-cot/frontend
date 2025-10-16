@@ -1,10 +1,8 @@
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 
-// Verificar se o usuário está logado
 const token = localStorage.getItem('token');
 if (!token) {
-  showError('Você precisa estar logado para acessar o perfil.');
-  setTimeout(() => window.location.href = '../home/index.html', 2000);
+  window.location.href = '../login/login.html';
 }
 
 // Função para decodificar JWT
@@ -30,9 +28,8 @@ const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 
 if (!userId) {
-  showError('Sessão expirada. Faça login novamente.');
   localStorage.removeItem('token');
-  setTimeout(() => window.location.href = '../login/login.html', 2000);
+  window.location.href = '../login/login.html';
 }
 
 // Função para carregar dados do perfil

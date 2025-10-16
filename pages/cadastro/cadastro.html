@@ -29,32 +29,32 @@
             <form action="" id="registerForm">
                 <div class="ent">
                     <input type="text" maxlength="60" name="name" id="name">
-                    <label for="">Nome</label>
+                    <label for="name">Nome</label>
                 </div>
                 <div class="ent">
                     <input type="email" maxlength="60" name="email" id="email">
-                    <label for="">Email</label>
+                    <label for="email">Email</label>
                 </div>
                 <div class="ent">
                     <input type="date" id="dataInput">
-                    <label for="">Data de Nascimento</label>
+                    <label for="dataInput">Data de Nascimento</label>
                 </div>
                 <div class="ent">
                     <input type="text" maxlength="60" id="telefone">
-                    <label for="">Telefone</label>
+                    <label for="telefone">Telefone</label>
                 </div>
                 <div class="ent">
                     <input type="text" maxlength="60" id="cpf">
-                    <label for="">CPF</label>
+                    <label for="cpf">CPF</label>
                 </div>
                 <div class="ent">
-                    <input type="password" name="" id="" maxlength="45">
-                    <label for="">Senha</label>
+                    <input type="password" name="password" id="password" maxlength="45" autocomplete="new-password" data-lpignore="true">
+                    <label for="password">Senha</label>
                     <button type="button" id="togglePassword">Mostrar</button>
                 </div>
                 <div class="ent">
-                    <input type="password" id="password" maxlength="45">
-                    <label for="">Confimar Senha</label>
+                    <input type="password" id="confirmPassword" maxlength="45" autocomplete="new-password" data-lpignore="true">
+                    <label for="confirmPassword">Confirmar Senha</label>
                     
                 </div>
                 <div id="sub">
@@ -80,6 +80,7 @@
 
     </main>
 </body>
+    <script src="../../src/config/env.js"></script>
     <script src="../../src/scripts/notifications.js"></script>
     <script src="script-cadastro.js"></script>
 </html>

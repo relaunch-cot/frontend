@@ -83,32 +83,110 @@ document.getElementById("cpf").addEventListener("input", function () {
 
 const form = document.getElementById("registerForm");
 const responseDiv = document.getElementById("response");
+let selectedUserType = 'freelancer';
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault(); 
+// Capturar clique nos botões de tipo de usuário
+const submitButtons = document.querySelectorAll('#submit button');
+submitButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectedUserType = button.textContent.toLowerCase() === 'cliente' ? 'client' : 'freelancer';
+        submitForm();
+    });
+});
 
-    const name = encodeURIComponent(form.name.value);
-    const email = encodeURIComponent(form.email.value);
-    const password = encodeURIComponent(form.password.value);
+async function submitForm() {
+    const passwordEl = document.getElementById('password');
+    const confirmPasswordEl = document.getElementById('confirmPassword');
+    
+    if (passwordEl.value !== confirmPasswordEl.value) {
+        showError("As senhas não coincidem.");
+        return;
+    }
+    
+    const password = passwordEl.value;
+    
+    // Validação mais rigorosa
+    if (password.length < 8) {
+        showError("A senha deve ter pelo menos 8 caracteres.");
+        return;
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+        showError("A senha deve conter pelo menos uma letra maiúscula.");
+        return;
+    }
+    
+    if (!/[0-9]/.test(password)) {
+        showError("A senha deve conter pelo menos um número.");
+        return;
+    }
+    
+    // Verifica se não é uma senha comum
+    const commonPasswords = ['12345678', 'password', '123456789', 'qwerty123'];
+    if (commonPasswords.includes(password.toLowerCase())) {
+        showError("Senha muito comum. Escolha uma senha mais segura.");
+        return;
+    }
+    
+    // Limpa campos imediatamente após validação
+    passwordEl.value = '';
+    confirmPasswordEl.value = '';
+    
+    const requestBody = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        password: password,
+        settings: {
+            phone: document.getElementById('telefone').value,
+            cpf: document.getElementById('cpf').value,
+            dateOfBirth: document.getElementById('dataInput').value
+        },
+        type: selectedUserType
+    };
 
-    const url = `https://bff-relaunch-production.up.railway.app/v1/user/register?name=${name}&email=${email}&password=${password}`;
+    const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
+    const url = `${BASE_URL}/v1/user/register`;
 
     try {
         const res = await fetch(url, {
-            method: "POST"
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
         });
+        
+        // Remove senha do objeto após envio
+        delete requestBody.password;
 
         const data = await res.json();
+        
+        // Verifica se a resposta contém dados sensíveis
+        const responseText = JSON.stringify(data);
+        if (responseText.includes('password') || responseText.includes('senha')) {
+            console.warn('Backend retornando dados sensíveis');
+        }
 
         if (res.ok) {
+            // Limpa todos os campos
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('dataInput').value = '';
+            document.getElementById('telefone').value = '';
+            document.getElementById('cpf').value = '';
+            
             showSuccess("Cadastro realizado com sucesso!");
             setTimeout(() => {
                 window.location.href = "../login/login.html";
             }, 2000);
         } else {
-            showError("Erro ao realizar cadastro. Verifique os dados.");
+            showError(data.message || "Erro ao realizar cadastro. Tente novamente.");
+            // Limpa senhas em caso de erro
+            passwordEl.value = '';
+            confirmPasswordEl.value = '';
         }
     } catch (err) {
         showError("Erro de conexão. Tente novamente.");
     }
-});
+}

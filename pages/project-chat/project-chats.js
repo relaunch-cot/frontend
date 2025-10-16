@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 const chatList = document.getElementById('chatList');
 const emptyMsg = document.getElementById('emptyMsg');
 
