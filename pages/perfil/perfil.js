@@ -5,7 +5,6 @@ if (!token) {
   window.location.href = '../login/login.html';
 }
 
-// Função para decodificar JWT
 function parseJwt(token) {
   try {
     const base64Url = token.split('.')[1];
@@ -23,7 +22,6 @@ function parseJwt(token) {
   }
 }
 
-// Obter userId do token
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 
@@ -32,7 +30,6 @@ if (!userId) {
   window.location.href = '../login/login.html';
 }
 
-// Função para carregar dados do perfil
 async function carregarPerfil() {
   try {
     const response = await fetch(`${BASE_URL}/v1/user/${userId}`, {
@@ -50,7 +47,6 @@ async function carregarPerfil() {
     const data = await response.json();
     console.log('Dados do perfil:', data);
 
-    // Atualizar elementos da página
     const userNameElement = document.getElementById('userName');
     const userEmailElement = document.getElementById('userEmail');
     
@@ -66,11 +62,9 @@ async function carregarPerfil() {
     console.error('Erro ao carregar perfil:', error);
     showError('Erro ao carregar dados do perfil. Tente novamente.');
     
-    // Fallback para dados padrão
     document.getElementById('userName').textContent = 'Erro ao carregar perfil';
     document.getElementById('userEmail').textContent = 'Email não disponível';
   }
 }
 
-// Carregar perfil quando a página carregar
 document.addEventListener('DOMContentLoaded', carregarPerfil);

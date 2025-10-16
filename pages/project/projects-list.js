@@ -28,7 +28,6 @@ function parseJwt(token) {
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 
-// Dados mockados para demonstração
 const mockProjects = [
   {
     id: 1,
@@ -108,12 +107,6 @@ function getStatusText(status) {
 
 function carregarProjetos() {
   try {
-    // Simulando carregamento de projetos
-    // Quando a API estiver pronta, substituir por:
-    // const res = await fetch(`${BASE_URL}/v1/projects/${userId}`, {
-    //   headers: { 'Authorization': token }
-    // });
-
     if (mockProjects.length === 0) {
       emptyMsg.style.display = 'block';
       return;
@@ -166,7 +159,6 @@ function carregarProjetos() {
   }
 }
 
-// Função de pesquisa
 document.querySelector('#pesquisa input').addEventListener('input', function(e) {
   const searchTerm = e.target.value.toLowerCase();
   const projectCards = document.querySelectorAll('.project-card');

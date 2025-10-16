@@ -1,4 +1,3 @@
-// Seleciona todos os inputs dentro de .ent
 document.querySelectorAll('.ent input').forEach(input => {
     const ent = input.parentElement;
 
@@ -10,10 +9,7 @@ document.querySelectorAll('.ent input').forEach(input => {
         }
     }
 
-    // Verifica ao digitar
     input.addEventListener('input', checkInput);
-
-    // Verifica ao carregar a página (para inputs com valor inicial)
     window.addEventListener('DOMContentLoaded', checkInput);
 });
 
@@ -21,17 +17,9 @@ const passwordInput = document.getElementById('password');
 const togglePassword = document.getElementById('togglePassword');
 
 togglePassword.addEventListener('click', () => {
-  const isPassword = passwordInput.type === 'password';
-  passwordInput.type = isPassword ? 'text' : 'password';
-  
-});
-
-const btna = document.getElementById('togglePassword');
-
-btna.addEventListener('click', () => {
-    btna.classList.toggle('active'); // Alterna a classe active
-    // Para desativar, você pode usar:
-    // botao.disabled = !botao.disabled;
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    togglePassword.classList.toggle('active');
 });
 
 

@@ -19,7 +19,7 @@ if (btnLogout) {
     btnLogout.addEventListener("click", () => {
         localStorage.removeItem("token");
         updateAuthButtons();
-        location.reload(); 
+        location.reload();
     });
 }
 

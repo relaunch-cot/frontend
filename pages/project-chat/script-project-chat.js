@@ -7,7 +7,6 @@ if (!token) {
   setTimeout(() => window.location.href = '../login/index.html', 2000);
 }
 
-// ====================== FUNÇÃO PARA PEGAR userId DO JWT ======================
 function parseJwt(token) {
   try {
     const base64Url = token.split('.')[1];
@@ -33,11 +32,9 @@ if (!userId) {
   setTimeout(() => window.location.href = '../login/index.html', 2000);
 }
 
-// ====================== ELEMENTOS ======================
 const entrada = document.getElementById('entradaMensagem');
 const mensagensContainer = document.getElementById('mensagens');
 
-// Recupera chatId e contactName da URL
 const urlParams = new URLSearchParams(window.location.search);
 const chatId = urlParams.get('chatId') || 1;
 const contactName = urlParams.get('contactName') || 'Contato';
@@ -47,17 +44,13 @@ if (!chatId) {
   setTimeout(() => window.location.href = '../home/index.html', 2000);
 }
 
-// Atualiza o nome do contato no cabeçalho
 document.getElementById('contactName').textContent = contactName;
 
-// ====================== AJUSTAR ALTURA TEXTAREA ======================
 entrada.addEventListener('input', ajustarAltura);
 function ajustarAltura() {
   entrada.style.height = 'auto';
   entrada.style.height = entrada.scrollHeight + 'px';
 }
-
-// ====================== ENVIAR MENSAGEM ======================
 async function enviarMensagem() {
   const texto = entrada.value.trim();
   if (texto) {
@@ -75,10 +68,8 @@ entrada.addEventListener('keydown', async function (evento) {
   }
 });
 
-// Botão de envio
 document.getElementById('btnEnviar').addEventListener('click', enviarMensagem);
 
-// ====================== ADICIONAR MENSAGEM NO DOM ======================
 function adicionarMensagem(texto, tipo, timestamp) {
   const novaMensagem = document.createElement('div');
   novaMensagem.className = `mensagem ${tipo}`;
@@ -109,7 +100,6 @@ function adicionarMensagem(texto, tipo, timestamp) {
   novaMensagem.appendChild(mensagemHora);
   mensagensContainer.appendChild(novaMensagem);
   
-  // Verificar se a mensagem tem múltiplas linhas após renderização
   setTimeout(() => {
     const textoHeight = mensagemTexto.scrollHeight;
     const lineHeight = parseInt(window.getComputedStyle(mensagemTexto).lineHeight);
@@ -123,7 +113,6 @@ function adicionarMensagem(texto, tipo, timestamp) {
   mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
 }
 
-// ====================== ADICIONAR SEPARADOR DE DATA ======================
 function adicionarSeparadorData(data) {
   const separador = document.createElement('div');
   separador.className = 'separador-data';
@@ -147,7 +136,6 @@ function adicionarSeparadorData(data) {
   mensagensContainer.appendChild(separador);
 }
 
-// ====================== BUSCAR MENSAGENS DO CHAT ======================
 async function carregarMensagens() {
   try {
     const res = await fetch(`${API_BASE}/messages/${chatId}`, {
@@ -172,7 +160,6 @@ async function carregarMensagens() {
         const dataMsg = new Date(msg.createdAt || msg.timestamp || Date.now());
         const dataAtual = dataMsg.toDateString();
         
-        // Adicionar separador se for um dia diferente
         if (ultimaData !== dataAtual) {
           adicionarSeparadorData(dataMsg);
           ultimaData = dataAtual;
@@ -187,7 +174,6 @@ async function carregarMensagens() {
   }
 }
 
-// ====================== ENVIAR MENSAGEM PARA BACKEND ======================
 async function enviarMensagemParaBackend(texto) {
   try {
     const body = {
@@ -209,7 +195,6 @@ async function enviarMensagemParaBackend(texto) {
       return;
     }
 
-    // Atualiza mensagens após enviar
     await carregarMensagens();
 
   } catch (err) {
@@ -219,5 +204,4 @@ async function enviarMensagemParaBackend(texto) {
 
 
 
-// ====================== INICIALIZAÇÃO ======================
 document.addEventListener('DOMContentLoaded', carregarMensagens);

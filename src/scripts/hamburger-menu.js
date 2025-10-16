@@ -26,7 +26,6 @@ function updateMenuContent() {
   const token = localStorage.getItem('token');
   
   if (token) {
-    // Usuário logado
     menu.innerHTML = `
       <a href="../../pages/home/index.html" class="home-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Início</a>
       <a href="../../pages/project/project.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg> Projetos</a>
@@ -35,7 +34,6 @@ function updateMenuContent() {
       <a href="#" class="logout-btn" onclick="showLogoutModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z"/></svg> Sair</a>
     `;
   } else {
-    // Usuário não logado - apenas opções públicas
     menu.innerHTML = `
       <a href="../../pages/home/index.html" class="home-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Início</a>
       <a href="../../pages/cadastro/cadastro.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M6,10V7H4V10H1V12H4V15H6V12H9V10M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12Z"/></svg> Cadastro</a>
@@ -45,8 +43,7 @@ function updateMenuContent() {
 }
 
 function showLogoutModal() {
-  // Criar modal se não existir
-  if (!document.getElementById('logout-modal')) {
+    if (!document.getElementById('logout-modal')) {
     const modal = document.createElement('div');
     modal.id = 'logout-modal';
     modal.className = 'logout-modal';
@@ -81,10 +78,8 @@ function confirmLogout() {
   }, 1500);
 }
 
-// Inicializar botão de autenticação quando a página carregar
 document.addEventListener('DOMContentLoaded', updateAuthButton);
 
-// Fechar menu ao clicar fora
 document.addEventListener('click', function(event) {
   const menu = document.getElementById('hamburger-menu');
   const menuIcon = document.getElementById('menu');
@@ -94,7 +89,6 @@ document.addEventListener('click', function(event) {
     menu.classList.remove('show');
   }
   
-  // Fechar modal ao clicar fora
   if (modal && event.target === modal) {
     closeLogoutModal();
   }

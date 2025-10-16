@@ -38,7 +38,6 @@ function formatarTempo(timestamp) {
   const agora = new Date();
   const dataMsg = new Date(timestamp);
   
-  // Adicionar 3 horas para corrigir fuso horário
   const dataCorrigida = new Date(dataMsg.getTime() + (3 * 60 * 60 * 1000));
   
   const diffMs = agora - dataCorrigida;
@@ -149,6 +148,4 @@ async function carregarChats() {
 
 
 carregarChats();
-
-// Atualizar a cada 30 segundos
 setInterval(carregarChats, 30000);
