@@ -34,6 +34,50 @@ if (!userId) {
   setTimeout(() => window.location.href = '../login/index.html', 2000);
 }
 
+function formatarTempo(timestamp) {
+  const agora = new Date();
+  const dataMsg = new Date(timestamp);
+  
+  // Adicionar 3 horas para corrigir fuso horário
+  const dataCorrigida = new Date(dataMsg.getTime() + (3 * 60 * 60 * 1000));
+  
+  const diffMs = agora - dataCorrigida;
+  const diffMin = Math.floor(diffMs / (1000 * 60));
+  
+  if (diffMin < 1) return 'agora';
+  if (diffMin < 60) return `${diffMin}min`;
+  
+  const diffHoras = Math.floor(diffMin / 60);
+  if (diffHoras < 24) return `${diffHoras}h`;
+  
+  const diffDias = Math.floor(diffHoras / 24);
+  return `${diffDias}d`;
+}
+
+async function buscarUltimaMensagem(chatId) {
+  try {
+    const res = await fetch(`${BASE_URL}/v1/chat/messages/${chatId}`, {
+      headers: {
+        'Authorization': token
+      }
+    });
+    
+    if (!res.ok) return null;
+    
+    const data = await res.json();
+    if (data.messages && data.messages.length > 0) {
+      const ultimaMsg = data.messages[data.messages.length - 1];
+      return {
+        conteudo: ultimaMsg.messageContent,
+        timestamp: ultimaMsg.createdAt || ultimaMsg.timestamp
+      };
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
+}
+
 async function carregarChats() {
   try {
     const res = await fetch(`${BASE_URL}/v1/chat/${userId}`, {
@@ -59,10 +103,9 @@ async function carregarChats() {
     chatList.innerHTML = '';
     emptyMsg.style.display = 'none';
 
-    data.chats.forEach(chat => {
+    for (const chat of data.chats) {
       let nomeOutroUsuario = 'Desconhecido';
 
-      // A API retorna user1 e user2 como objetos com { userId, name, email }
       if (chat.user1 && chat.user2) {
         if (chat.user1.userId === userId) {
           nomeOutroUsuario = chat.user2.name || `Usuário ${chat.user2.userId}`;
@@ -70,6 +113,13 @@ async function carregarChats() {
           nomeOutroUsuario = chat.user1.name || `Usuário ${chat.user1.userId}`;
         }
       }
+
+      const ultimaMsg = await buscarUltimaMensagem(chat.chatId);
+      let preview = ultimaMsg ? ultimaMsg.conteudo : 'Clique para abrir o chat';
+      if (preview.length > 50) {
+        preview = preview.substring(0, 50) + '...';
+      }
+      const tempo = ultimaMsg ? formatarTempo(ultimaMsg.timestamp) : 'agora';
 
       const li = document.createElement('li');
       li.innerHTML = `
@@ -81,15 +131,15 @@ async function carregarChats() {
           </div>
           <div class="chat-info">
             <div class="chat-name">${nomeOutroUsuario}</div>
-            <div class="chat-preview">Clique para abrir o chat</div>
+            <div class="chat-preview">${preview}</div>
           </div>
           <div class="chat-meta">
-            <div class="chat-time">Agora</div>
+            <div class="chat-time">${tempo}</div>
           </div>
         </a>
       `;
       chatList.appendChild(li);
-    });
+    }
 
   } catch (err) {
     showError('Erro de conexão. Tente novamente.');
@@ -99,3 +149,6 @@ async function carregarChats() {
 
 
 carregarChats();
+
+// Atualizar a cada 30 segundos
+setInterval(carregarChats, 30000);

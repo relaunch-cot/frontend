@@ -92,7 +92,9 @@ function adicionarMensagem(texto, tipo, timestamp) {
   
   if (timestamp) {
     const data = new Date(timestamp);
-    mensagemHora.textContent = data.toLocaleTimeString('pt-BR', { 
+    // Adicionar 3 horas para corrigir fuso horário
+    const dataCorrigida = new Date(data.getTime() + (3 * 60 * 60 * 1000));
+    mensagemHora.textContent = dataCorrigida.toLocaleTimeString('pt-BR', { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
