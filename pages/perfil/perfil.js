@@ -53,6 +53,25 @@ async function carregarPerfil() {
     if (data.user) {
       userNameElement.textContent = data.user.name || 'Nome não disponível';
       userEmailElement.textContent = data.user.email || 'Email não disponível';
+      
+      if (data.user.settings) {
+        const biografiaElement = document.getElementById('userBiografia');
+        const tagsElement = document.getElementById('userTags');
+        
+        if (data.user.settings.biography) {
+          biografiaElement.textContent = data.user.settings.biography;
+        } else {
+          biografiaElement.textContent = 'Adicione uma biografia';
+        }
+        
+        if (data.user.settings.skills && Array.isArray(data.user.settings.skills) && data.user.settings.skills.length > 0) {
+          tagsElement.innerHTML = data.user.settings.skills.map(skill => 
+            `<span class="tag">${skill}</span>`
+          ).join('');
+        } else {
+          tagsElement.innerHTML = '<span class="tag">Adicione suas competências</span>';
+        }
+      }
     } else {
       userNameElement.textContent = 'Erro ao carregar dados';
       userEmailElement.textContent = 'Email não disponível';

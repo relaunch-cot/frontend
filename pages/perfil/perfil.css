@@ -163,6 +163,24 @@ header {
 .tag.frontend { background: #0073e6; }
 .tag.web { background: #0073e6; }
 
+.edit-profile {
+    margin-top: 20px;
+}
+
+.edit-btn {
+    background: #46B1D5;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.edit-btn:hover {
+    background: #3a9bc1;
+}
+
 .perfil-direita {
     text-align: right;
 }
