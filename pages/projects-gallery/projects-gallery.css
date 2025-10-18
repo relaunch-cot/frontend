@@ -67,17 +67,18 @@ header>:nth-child(1){
     background-repeat: no-repeat;
     background-position: center;
     text-decoration: none;
+    cursor: pointer;
 }
 
 #lampada{
-    background-image: url('../../assets/lampada-incandescente.png');
+    background-image: url('../../src/images/lampada-incandescente.png');
 }
 
 #sino{
-    background-image: url('../../assets/notificacao.png');
+    background-image: url('../../src/images/notificacao.png');
 }
 #menu{
-    background-image: url('../../assets/menu-aberto.png');
+    background-image: url('../../src/images/menu-aberto.png');
 }
 
 .icones{
@@ -213,8 +214,8 @@ main{
   font-size: 40px;
   cursor: pointer;
   z-index: 1000;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
-    font-family: "Poppins", sans-serif;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+  font-family: "Poppins", sans-serif;
 }
 
 
