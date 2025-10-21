@@ -199,6 +199,18 @@ main{
     display: flex;
     flex-wrap: wrap;
     overflow: auto;
+    position: relative;
+}
+
+.empty-message {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #777;
+    margin: 2rem 0;
+    font-size: 1.1rem;
 }
 
 .fixed-btn {
@@ -252,9 +264,7 @@ main{
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-            border-radius: 7px;
-
-    
+    border-radius: 7px;
 }
 
 .title>h1{
@@ -477,8 +487,8 @@ form {
 
 /* Textarea específico */
 .input-group textarea {
-    min-height: 120px;
-    resize: vertical;
+    min-height: 135px;
+    resize: none;
     font-family: 'Gudea', sans-serif;
     line-height: 1.5;
 }
@@ -508,6 +518,14 @@ form {
 .input-group input[type="date"] ~ label {
     top: -18px;
     font-size: 13px;
+    color: #7f8c8d;
+    font-weight: 400;
+    transition: all 0.3s ease;
+}
+
+/* Label azul apenas quando tiver valor ou estiver focado */
+.input-group input[type="date"]:focus ~ label,
+.input-group input[type="date"].has-value ~ label {
     color: #46B1D5;
     font-weight: 500;
 }
@@ -540,10 +558,11 @@ form {
 .file-input-group .file-label {
     position: absolute;
     left: 5px;
-    top: 12px;
+    top: -18px;
     font-family: 'Poppins', sans-serif;
-    font-size: 16px;
+    font-size: 13px;
     color: #7f8c8d;
+    font-weight: 400;
     user-select: none;
     pointer-events: none;
     transition: all 0.3s ease;
@@ -566,10 +585,13 @@ form {
     border-bottom-color: #46B1D5;
 }
 
-.file-input-group input[type="file"]:focus ~ .file-label,
-.file-input-group input[type="file"]:valid ~ .file-label {
-    top: -18px;
-    font-size: 13px;
+/* Label azul apenas quando tiver arquivo selecionado ou focado */
+.file-input-group input[type="file"]:focus ~ .file-label {
+    color: #46B1D5;
+    font-weight: 500;
+}
+
+.file-input-group input[type="file"].has-file ~ .file-label {
     color: #46B1D5;
     font-weight: 500;
 }

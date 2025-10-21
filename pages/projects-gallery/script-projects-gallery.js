@@ -6,6 +6,7 @@ const close = document.querySelector('.close');
 const main = document.querySelector('main');
 const form = document.getElementById('createProjectForm');
 const cancelBtn = document.getElementById('cancelBtn');
+const emptyMsg = document.getElementById('emptyMsg');
 
 const token = localStorage.getItem('token');
 if (!token) {
@@ -52,6 +53,11 @@ function closeModal() {
   setTimeout(() => {
     modal.style.display = 'none';
     form.reset();
+    // Remove classes ao fechar
+    const fileInput = document.getElementById('logo');
+    const dateInput = document.getElementById('projectDeliveryDeadline');
+    if (fileInput) fileInput.classList.remove('has-file');
+    if (dateInput) dateInput.classList.remove('has-value');
   }, 300);
 }
 
@@ -64,6 +70,42 @@ window.onclick = (e) => {
     closeModal();
   }
 };
+
+// ==========================
+// File Input Handler
+// ==========================
+const fileInput = document.getElementById('logo');
+if (fileInput) {
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      e.target.classList.add('has-file');
+    } else {
+      e.target.classList.remove('has-file');
+    }
+  });
+}
+
+// ==========================
+// Date Input Handler
+// ==========================
+const dateInput = document.getElementById('projectDeliveryDeadline');
+if (dateInput) {
+  // Adiciona classe quando tem valor
+  dateInput.addEventListener('change', (e) => {
+    if (e.target.value) {
+      e.target.classList.add('has-value');
+    } else {
+      e.target.classList.remove('has-value');
+    }
+  });
+  
+  // Remove classe ao resetar
+  dateInput.addEventListener('input', (e) => {
+    if (!e.target.value) {
+      e.target.classList.remove('has-value');
+    }
+  });
+}
 
 // ==========================
 // Tipo de usuário
@@ -163,6 +205,8 @@ function renderProjectCard(project) {
 async function fetchProjects() {
   if (!userId) {
     console.warn("Usuário não autenticado");
+    showError('Usuário não autenticado');
+    emptyMsg.style.display = 'block';
     return;
   }
 
@@ -178,22 +222,15 @@ async function fetchProjects() {
     const data = await res.json();
 
     if (Array.isArray(data.projects) && data.projects.length > 0) {
+      emptyMsg.style.display = 'none';
       data.projects.forEach(renderProjectCard);
     } else {
-      const message = document.createElement('p');
-      message.textContent = 'Nenhum projeto encontrado.';
-      message.style.textAlign = 'center';
-      message.style.marginTop = '2rem';
-      message.style.fontSize = '1.1rem';
-      main.appendChild(message);
+      emptyMsg.style.display = 'block';
     }
   } catch (err) {
     console.error(err);
-    const errorMsg = document.createElement('p');
-    errorMsg.textContent = 'Erro ao carregar projetos.';
-    errorMsg.style.textAlign = 'center';
-    errorMsg.style.marginTop = '2rem';
-    main.appendChild(errorMsg);
+    showError('Erro ao carregar projetos.');
+    emptyMsg.style.display = 'block';
   }
 }
 
@@ -221,6 +258,12 @@ form.addEventListener('submit', async (e) => {
   };
 
   try {
+    // Mostra loading no modal
+    const submitBtn = form.querySelector('.btn-submit');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Criando...';
+    submitBtn.disabled = true;
+
     const res = await fetch(`${BASE_URL}/v1/project/${userId}`, {
       method: 'POST',
       headers: {
@@ -234,13 +277,27 @@ form.addEventListener('submit', async (e) => {
 
     await res.json();
 
+    // Fecha o modal
     modal.classList.remove('show');
     setTimeout(() => modal.style.display = 'none', 300);
 
-    window.location.reload();
+    // Mostra mensagem de sucesso
+    showSuccess('Projeto criado com sucesso!');
+    
+    // Recarrega após 1 segundo
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   } catch (err) {
     console.error(err);
-    alert('Erro ao criar projeto.');
+    
+    // Restaura o botão
+    const submitBtn = form.querySelector('.btn-submit');
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+    
+    // Mostra erro
+    showError('Erro ao criar projeto. Tente novamente.');
   }
 });
 
