@@ -44,6 +44,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /**
+ * Valida e normaliza o status do projeto
+ */
+function validarStatus(status) {
+  const statusValidos = ['pendente', 'concluido'];
+  const statusNormalizado = status?.toLowerCase().trim();
+  
+  if (!statusNormalizado || !statusValidos.includes(statusNormalizado)) {
+    console.warn(`Status inválido recebido: "${status}". Usando "pendente" como padrão.`);
+    return 'pendente';
+  }
+  
+  return statusNormalizado;
+}
+
+/**
  * Preenche os elementos HTML com os dados do projeto.
  */
 function preencherPaginaComProjeto(project) {
@@ -53,52 +68,70 @@ function preencherPaginaComProjeto(project) {
 
   // Descrição
   const descEl = document.querySelector("#desc span");
-    if (descEl) descEl.textContent = project.description || "Sem descrição";
+  if (descEl) descEl.textContent = project.description || "Sem descrição";
 
-  // Cliente
+  // Cliente (usando clientName do novo modelo)
   const clienteEl = document.getElementById("client");
   if (clienteEl) clienteEl.textContent = project.clientName || "Cliente não informado";
 
-  // Prazo
-  const prazoEl = document.querySelector('div:nth-of-type(4) label');
-if (prazoEl && project.createdAt && project.projectDeliveryDeadline) {
-  const createdAt = new Date(project.createdAt);
-  const deadline = new Date(project.projectDeliveryDeadline);
+  // Prazo (usando createdAt e projectDeliveryDeadline)
+  const prazoEl = document.getElementById("prazo");
+  if (prazoEl && project.createdAt && project.projectDeliveryDeadline) {
+    const createdAt = new Date(project.createdAt);
+    const deadline = new Date(project.projectDeliveryDeadline);
 
-  const formatData = (date) => {
-    const dia = String(date.getDate()).padStart(2, '0');
-    const mes = String(date.getMonth() + 1).padStart(2, '0');
-    const ano = date.getFullYear();
-    return `${dia}/${mes}/${ano}`;
+    const formatData = (date) => {
+      const dia = String(date.getDate()).padStart(2, '0');
+      const mes = String(date.getMonth() + 1).padStart(2, '0');
+      const ano = date.getFullYear();
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    prazoEl.textContent = `${formatData(createdAt)} - ${formatData(deadline)}`;
   }
 
-  prazoEl.textContent = `${formatData(createdAt)} - ${formatData(deadline)}`;
-}
-
-  // Desenvolvedor
+  // Desenvolvedor (freelancerName - pode não existir ainda)
   const devEl = document.getElementById("freelancer");
-  if (devEl) devEl.textContent = project.freelancerName || "Sem desenvolvedor";
+  if (devEl) devEl.textContent = project.freelancerName || "Aguardando seleção";
 
-  // Categoria
-  const categoryContainer = document.querySelector("#category");
+  // Categoria (agora vem como string única, não array)
+  const categoryContainer = document.getElementById("category");
   if (categoryContainer) {
     categoryContainer.innerHTML = "";
-    if (project.categories && project.categories.length > 0) {
-      project.categories.forEach(cat => {
-        const article = document.createElement("article");
-        article.textContent = cat;
-        categoryContainer.appendChild(article);
-      });
+    if (project.category) {
+      const article = document.createElement("article");
+      // Tradução das categorias para português
+      const categorias = {
+        'web': 'Desenvolvimento Web',
+        'mobile': 'Desenvolvimento Mobile',
+        'design': 'Design Gráfico',
+        'marketing': 'Marketing Digital',
+        'data': 'Análise de Dados',
+        'content': 'Criação de Conteúdo'
+      };
+      article.textContent = categorias[project.category] || project.category;
+      categoryContainer.appendChild(article);
     } else {
-      categoryContainer.innerHTML = "<article>Sem categorias</article>";
+      const article = document.createElement("article");
+      article.textContent = "Sem categoria";
+      categoryContainer.appendChild(article);
     }
   }
 
+  // Status (NOVO CAMPO - com validação)
+  const statusBadge = document.getElementById("status-badge");
+  if (statusBadge) {
+    const statusValido = validarStatus(project.status);
+    statusBadge.textContent = statusValido;
+    statusBadge.className = `status-badge ${statusValido}`;
+  }
+
   // Valor
-  const valorEl = document.querySelector('div:nth-of-type(9) label');
+  const valorEl = document.getElementById("valor");
   if (valorEl) valorEl.textContent = `R$ ${project.amount?.toFixed(2) || "0.00"}`;
 
-  const tempoEl = document.querySelector('div:nth-of-type(7) label');
+  // Tempo Restante
+  const tempoEl = document.getElementById("tempo-restante");
   if (tempoEl && project.projectDeliveryDeadline) {
     const atualizarTempoRestante = () => {
       const deadline = new Date(project.projectDeliveryDeadline);
@@ -107,6 +140,7 @@ if (prazoEl && project.createdAt && project.projectDeliveryDeadline) {
 
       if (diffMs <= 0) {
         tempoEl.textContent = "Prazo expirado";
+        tempoEl.classList.add("expired");
       } else {
         const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         diffMs %= (1000 * 60 * 60 * 24);
