@@ -4,7 +4,8 @@ const modal = document.getElementById('modal');
 const btn = document.getElementById('openModal');
 const close = document.querySelector('.close');
 const main = document.querySelector('main');
-const form = modal.querySelector('form');
+const form = document.getElementById('createProjectForm');
+const cancelBtn = document.getElementById('cancelBtn');
 
 const token = localStorage.getItem('token');
 if (!token) {
@@ -41,20 +42,26 @@ let userType = null;
 // ==========================
 // Modal
 // ==========================
-btn.onclick = () => {
+function openModal() {
   modal.style.display = 'block';
   setTimeout(() => modal.classList.add('show'), 10);
-};
+}
 
-close.onclick = () => {
+function closeModal() {
   modal.classList.remove('show');
-  setTimeout(() => modal.style.display = 'none', 300);
-};
+  setTimeout(() => {
+    modal.style.display = 'none';
+    form.reset();
+  }, 300);
+}
+
+btn.onclick = openModal;
+close.onclick = closeModal;
+cancelBtn.onclick = closeModal;
 
 window.onclick = (e) => {
   if (e.target === modal) {
-    modal.classList.remove('show');
-    setTimeout(() => modal.style.display = 'none', 300);
+    closeModal();
   }
 };
 

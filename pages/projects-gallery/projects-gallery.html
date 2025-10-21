@@ -44,44 +44,72 @@
 
     <div id="modal" class="modal">
         <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Criar Projeto</h2>
-        <form>
-            <div class="form-content">
-                <label for="name">Nome do Projeto</label>
-                <input name="name" id="name" type="text" placeholder="" required>
-                <label for="description">Descrição </label>
-                <textarea name="description" id="description" placeholder="Descrição do projeto" required></textarea>
-                <Label for="category">Categoria</Label>
-                <select name="category" id="category" required>
-                    <option value="web">Desenvolvimento Web</option>
-                    <option value="mobile">Desenvolvimento Mobile</option>
-                    <option value="design">Design</option>
-                    <option value="marketing">Marketing</option>
-                </select>
-
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h2>Criar Novo Projeto</h2>
+                <p class="modal-subtitle">Preencha os dados do seu projeto</p>
             </div>
             
-            <div class="form-content">
-                <label for="date">Data de Conclusão</label>
-                <input name="projectDeliveryDeadline" id="projectDeliveryDeadline" type="date" required>
-                <label for="amount">Valor</label>
-                <input name="amount" id="amount" type="number" placeholder="Valor (R$)" step="0.01" required>
-                
-                <label for="logo">Logo do Projeto</label>
-                <input name="logo" id="logo" type="file" accept="image/*" placeholder="Imagem do projeto">
-                <label for="paymentMethod">Método de pagamento</label>
-                <select name="paymentMethod" id="paymentMethod" required>
-                    <option value="">Método de pagamento</option>
-                    <option value="pix">PIX</option>
-                    <option value="cartao" disabled>Cartão de Crédito</option>
-                    <option value="boleto" disabled>Boleto</option>
-                </select>
-                <button type="submit">Selecionar Profissional</button>
-            </div>
+            <form id="createProjectForm">
+                <div class="form-grid">
+                    <div class="form-column">
+                        <div class="input-group">
+                            <input name="name" id="name" type="text" required>
+                            <label for="name">Nome do Projeto</label>
+                        </div>
 
-            
-        </form>
+                        <div class="input-group">
+                            <textarea name="description" id="description" required></textarea>
+                            <label for="description">Descrição do Projeto</label>
+                        </div>
+
+                        <div class="input-group">
+                            <select name="category" id="category" required>
+                                <option value="" disabled selected></option>
+                                <option value="web">Desenvolvimento Web</option>
+                                <option value="mobile">Desenvolvimento Mobile</option>
+                                <option value="design">Design Gráfico</option>
+                                <option value="marketing">Marketing Digital</option>
+                                <option value="data">Análise de Dados</option>
+                                <option value="content">Criação de Conteúdo</option>
+                            </select>
+                            <label for="category">Categoria</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-column">
+                        <div class="input-group">
+                            <input name="projectDeliveryDeadline" id="projectDeliveryDeadline" type="date" required>
+                            <label for="projectDeliveryDeadline">Data de Conclusão</label>
+                        </div>
+
+                        <div class="input-group">
+                            <input name="amount" id="amount" type="number" step="0.01" required>
+                            <label for="amount">Valor (R$)</label>
+                        </div>
+                        
+                        <div class="input-group file-input-group">
+                            <input name="logo" id="logo" type="file" accept="image/*">
+                            <label for="logo" class="file-label">Logo do Projeto</label>
+                        </div>
+
+                        <div class="input-group">
+                            <select name="paymentMethod" id="paymentMethod" required>
+                                <option value="" disabled selected></option>
+                                <option value="pix">PIX</option>
+                                <option value="cartao" disabled>Cartão de Crédito (em breve)</option>
+                                <option value="boleto" disabled>Boleto (em breve)</option>
+                            </select>
+                            <label for="paymentMethod">Método de Pagamento</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancelBtn">Cancelar</button>
+                    <button type="submit" class="btn-submit">Adicionar Projeto</button>
+                </div>
+            </form>
         </div>
     </div>
     </main>
