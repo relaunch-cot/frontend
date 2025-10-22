@@ -232,27 +232,17 @@ section{
     height: 73vh;
     width:85%;
     display: grid;
-    grid-template: 10vh 10vh 10vh 10vh / 2fr 1fr;
+    grid-template: 10vh 10vh / 1fr 1fr;
     font-family: "Poppins";
 }
 
-#confimacao-banco{
-    background-color: #2A3B41;
-    color: #F9F9F9;
-    border-radius: 10px;
-    width: 90%;
-    height: 7vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: medium;
-}
 
 section>div{
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
 button{
   position: relative;                 
   background-color: #2A3B41;
@@ -268,6 +258,18 @@ button{
   padding-left: 48px;    
   padding-right: 48px;           
   cursor: pointer;
+}
+
+#complete-project{
+    background-color: #46B1D5;
+    color: white;
+    border: none;
+}
+
+#close-project{
+    background-color: #E64447;
+    color: white;
+    border: none;
 }
 
 button > svg{
@@ -294,7 +296,7 @@ button > svg{
     
 }
 
-#comprovante{
+#arquivos{
     background-color: #2A3B41;
   color: #aeebff;
   border-radius: 10px;
@@ -309,6 +311,12 @@ button > svg{
   padding-right: 48px;            
   text-align: center;
 }
+
+#input-zip{
+  grid-area: 1 / 1 / 2 / 3;
+  /* linha 1 / coluna 1 / linha 2 / coluna 3 */
+}
+
 
 input {
     cursor: pointer;
