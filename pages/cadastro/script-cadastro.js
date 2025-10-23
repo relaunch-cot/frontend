@@ -144,7 +144,7 @@ async function submitForm() {
                 window.location.href = "../login/login.html";
             }, 2000);
         } else {
-            showError(data.message || "Erro ao realizar cadastro. Tente novamente.");
+            showError("Erro ao realizar cadastro. Verifique os dados e tente novamente.");
             passwordEl.value = '';
             confirmPasswordEl.value = '';
         }

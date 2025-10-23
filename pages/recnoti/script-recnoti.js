@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 emailInput.value = "";
                 btn.disabled = true;
             } else {
-                recnotiResponseDiv.innerHTML = `${data.message || JSON.stringify(data)}`;
+                recnotiResponseDiv.innerHTML = "Não foi possível enviar o email. Verifique o endereço e tente novamente.";
             }
         } catch (err) {
             recnotiResponseDiv.innerHTML = "Erro ao conectar à API.";

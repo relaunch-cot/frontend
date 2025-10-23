@@ -49,7 +49,7 @@ updatePasswordForm.addEventListener("submit", async (e) => {
                 window.location.href = "../home/index.html"; 
             }, 2000);
         } else {
-            updatePasswordResponseDiv.innerHTML = ` ${data.message || JSON.stringify(data)}`;
+            updatePasswordResponseDiv.innerHTML = "Não foi possível alterar a senha. Verifique os dados e tente novamente.";
         }
     } catch (err) {
         updatePasswordResponseDiv.innerHTML = "Erro ao conectar à API.";

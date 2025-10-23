@@ -407,3 +407,44 @@ article{
     font-size: 15px;
     font-style: italic;
 }
+/* === Botão de Adicionar Freelancer === */
+#add-freelancer-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.action-btn {
+    background: linear-gradient(135deg, #46B1D5 0%, #3a9dbf 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(70, 177, 213, 0.3);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(70, 177, 213, 0.4);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(70, 177, 213, 0.3);
+}
+
+.action-btn:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.action-btn:disabled:hover {
+    transform: none;
+}

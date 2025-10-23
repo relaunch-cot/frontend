@@ -64,7 +64,7 @@ loginForm.addEventListener("submit", async (e) => {
                 window.location.href = "../home/index.html"; 
             }, 2000);
         } else {
-            showError(data.message || "Erro no login. Tente novamente.");
+            showError("Email ou senha incorretos. Tente novamente.");
             loginForm.password.value = '';
         }
     } catch (err) {

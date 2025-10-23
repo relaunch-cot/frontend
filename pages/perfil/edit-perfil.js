@@ -216,7 +216,7 @@ async function confirmChanges() {
             }, 2000);
         } else {
             closeModal();
-            showError(data.message || "Erro ao atualizar perfil. Tente novamente.");
+            showError("Não foi possível atualizar o perfil. Verifique os dados e tente novamente.");
         }
     } catch (error) {
         closeModal();

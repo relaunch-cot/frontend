@@ -165,3 +165,98 @@ function formatarData(date) {
   const ano = date.getFullYear();
   return `${dia}/${mes}/${ano}`;
 }
+
+/**
+ * Adiciona um freelancer ao projeto
+ * @param {string} projectId - ID do projeto
+ * @param {string} freelancerId - ID do freelancer a ser adicionado
+ */
+async function adicionarFreelancerAoProjeto(projectId, freelancerId) {
+  const token = localStorage.getItem("token");
+  
+  if (!token) {
+    showError("Você precisa estar autenticado para realizar esta ação.");
+    return;
+  }
+
+  if (!freelancerId) {
+    showError("ID do freelancer não foi fornecido.");
+    return;
+  }
+
+  const addFreelancerBtn = document.getElementById("add-freelancer-btn");
+  if (addFreelancerBtn) {
+    addFreelancerBtn.disabled = true;
+    addFreelancerBtn.textContent = "Processando...";
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/v1/project/add-freelancer/${projectId}`, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        freelancerId: freelancerId
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      showSuccess("Freelancer adicionado ao projeto com sucesso!");
+      
+      // Recarrega a página após 1.5 segundos para mostrar as alterações
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } else {
+      showError("Não foi possível adicionar o freelancer ao projeto. Tente novamente.");
+      
+      // Reabilita o botão em caso de erro
+      if (addFreelancerBtn) {
+        addFreelancerBtn.disabled = false;
+        addFreelancerBtn.textContent = "Aceitar Solicitação";
+      }
+    }
+  } catch (error) {
+    console.error("Erro ao adicionar freelancer:", error);
+    showError("Erro de conexão. Tente novamente.");
+    
+    // Reabilita o botão em caso de erro
+    if (addFreelancerBtn) {
+      addFreelancerBtn.disabled = false;
+      addFreelancerBtn.textContent = "Aceitar Solicitação";
+    }
+  }
+}
+
+// Event listener para o botão de adicionar freelancer
+document.addEventListener("DOMContentLoaded", () => {
+  const addFreelancerBtn = document.getElementById("add-freelancer-btn");
+  
+  if (addFreelancerBtn) {
+    addFreelancerBtn.addEventListener("click", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const projectId = urlParams.get("id");
+      
+      // TEMPORÁRIO: Por enquanto, você precisará passar o freelancerId via URL
+      // Exemplo: ?id=projectId&freelancerId=freelancerId
+      // Quando o sistema de notificações for implementado, o freelancerId virá da notificação
+      const freelancerId = urlParams.get("freelancerId");
+      
+      if (!projectId) {
+        showError("ID do projeto não encontrado.");
+        return;
+      }
+      
+      if (!freelancerId) {
+        showError("ID do freelancer não encontrado. Aguardando implementação do sistema de notificações.");
+        return;
+      }
+      
+      await adicionarFreelancerAoProjeto(projectId, freelancerId);
+    });
+  }
+});
