@@ -29,6 +29,7 @@ function parseJwt(token) {
 // Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
+const userType = decodedToken?.userType;
 
 if (!userId) {
   localStorage.removeItem('token');
@@ -36,39 +37,15 @@ if (!userId) {
 }
 
 // Validação: apenas freelancers podem acessar esta página
-async function verificarTipoUsuario() {
-  try {
-    const response = await fetch(`${BASE_URL}/v1/user/userType/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': token,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Erro ao verificar tipo de usuário');
-    }
-
-    const data = await response.json();
-    const userType = data.type || data.userType;
-
-    if (userType !== 'freelancer') {
-      showError('Acesso negado. Esta página é exclusiva para freelancers.');
-      setTimeout(() => {
-        window.location.href = '../projects-gallery/projects-gallery.html';
-      }, 2000);
-      return false;
-    }
-    return true;
-  } catch (error) {
-    console.error('Erro ao verificar tipo de usuário:', error);
-    showError('Erro ao verificar permissões de acesso.');
+function verificarTipoUsuario() {
+  if (userType !== 'freelancer') {
+    showError('Acesso negado. Esta página é exclusiva para freelancers.');
     setTimeout(() => {
       window.location.href = '../projects-gallery/projects-gallery.html';
     }, 2000);
     return false;
   }
+  return true;
 }
 
 // Global variables
@@ -324,9 +301,9 @@ async function solicitarParticipacao(projectId, projectName) {
 }
 
 // Event listeners
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   // Primeiro verifica se o usuário é freelancer
-  const isFreelancer = await verificarTipoUsuario();
+  const isFreelancer = verificarTipoUsuario();
   
   if (!isFreelancer) {
     return; // Não carrega os projetos se não for freelancer

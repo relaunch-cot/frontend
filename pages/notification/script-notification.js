@@ -413,7 +413,7 @@ async function startChat(userId) {
     try {
         const currentUserId = getUserIdFromToken();
         
-        // Cria chat
+        // 1. Tenta criar o chat
         const response = await fetch(`${BASE_URL}/v1/chat`, {
             method: 'POST',
             headers: {
@@ -426,30 +426,59 @@ async function startChat(userId) {
             })
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Erro ao criar chat:', errorText);
-            
-            // Verifica se o chat já existe
-            if (errorText.includes('already exists an chat with these participants') || 
-                errorText.includes('AlreadyExists')) {
-                showSuccessBadge('Redirecionando para o chat existente...');
-                setTimeout(() => {
-                    window.location.href = '../project-chat/project-chats.html';
-                }, 1000);
-                return;
-            }
-            
-            throw new Error('Erro ao criar chat');
-        }
+        let chatId = null;
 
-        const data = await response.json();
+        if (response.ok) {
+            // Chat criado com sucesso
+            const data = await response.json();
+            chatId = data.chatId;
+            showSuccessBadge('Chat criado com sucesso!');
+            
+            // Redireciona para o chat específico
+            setTimeout(() => {
+                window.location.href = `../project-chat/project-chat.html?chatId=${chatId}`;
+            }, 1000);
+        } else {
+            const errorText = await response.text();
+            console.log('Resposta do servidor:', errorText);
+            
+            // 2. Se chat já existe, busca pelo endpoint específico
+            if (errorText.includes('already exists') || errorText.includes('AlreadyExists')) {
+                showSuccessBadge('Redirecionando para o chat...');
+                
+                // Busca chat pelos userIds usando query params
+                const chatsResponse = await fetch(
+                    `${BASE_URL}/v1/chat/users?user1Id=${currentUserId}&user2Id=${userId}`,
+                    {
+                        headers: { 'Authorization': token }
+                    }
+                );
+                
+                if (chatsResponse.ok) {
+                    const chatData = await chatsResponse.json();
+                    console.log('Chat encontrado:', chatData);
+                    
+                    if (chatData && chatData.chatId) {
+                        chatId = chatData.chatId;
+                        
+                        // Redireciona para o chat específico
+                        setTimeout(() => {
+                            window.location.href = `../project-chat/project-chat.html?chatId=${chatId}`;
+                        }, 1000);
+                    } else {
+                        console.error('Chat não encontrado na resposta');
+                        showErrorBadge('Chat não encontrado');
+                    }
+                } else {
+                    console.error('Erro ao buscar chat pelos userIds');
+                    showErrorBadge('Erro ao buscar chat');
+                }
+            } else {
+                // Erro diferente de chat já existente
+                showErrorBadge('Erro ao criar chat');
+            }
+        }
         
-        // Redireciona para a página de listagem de chats
-        showSuccessBadge('Chat criado com sucesso!');
-        setTimeout(() => {
-            window.location.href = '../project-chat/project-chats.html';
-        }, 1000);
     } catch (error) {
         console.error('Erro ao iniciar chat:', error);
         showErrorBadge('Erro ao iniciar chat');

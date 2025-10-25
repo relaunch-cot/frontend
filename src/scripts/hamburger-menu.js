@@ -26,8 +26,9 @@ function updateMenuContent() {
   const token = localStorage.getItem('token');
   
   if (token) {
-    // Parse token to get user ID
+    // Parse token to get user ID and userType
     let userId = null;
+    let userType = null;
     try {
       const base64Url = token.replace('Bearer ', '').split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -39,39 +40,14 @@ function updateMenuContent() {
       );
       const decoded = JSON.parse(jsonPayload);
       userId = decoded.userId;
+      userType = decoded.userType;
+      console.log('Token decodificado - userId:', userId, 'userType:', userType);
     } catch (e) {
       console.error('Erro ao decodificar token:', e);
     }
 
-    // Busca o tipo de usuário da API
-    if (userId) {
-      const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
-      fetch(`${BASE_URL}/v1/user/userType/${userId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': token,
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Erro na resposta da API');
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Resposta da API userType:', data);
-        const userType = data.userType || data.type;
-        console.log('Tipo de usuário extraído:', userType);
-        renderMenu(userType);
-      })
-      .catch(error => {
-        console.error('Erro ao buscar tipo de usuário:', error);
-        renderMenu(null); // Renderiza menu sem o link de projetos disponíveis em caso de erro
-      });
-    } else {
-      renderMenu(null);
-    }
+    // Renderiza menu com userType do token
+    renderMenu(userType);
   } else {
     menu.innerHTML = `
       <a href="../../pages/home/index.html" class="home-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Início</a>

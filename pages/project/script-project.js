@@ -293,25 +293,14 @@ async function verificarSeEhCliente() {
   if (!token) return false;
   
   try {
-    // Decodifica o token para pegar o userId
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const userId = payload.userId;
+    // Decodifica o token para pegar o userId e userType
+    const tokenWithoutBearer = token.replace('Bearer ', '');
+    const payload = JSON.parse(atob(tokenWithoutBearer.split('.')[1]));
+    const userType = payload.userType;
     
-    // Busca o tipo do usuário
-    const response = await fetch(`${BASE_URL}/v1/user/userType/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': token,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (!response.ok) return false;
-    
-    const data = await response.json();
-    return data.userType === 'client';
+    return userType === 'client';
   } catch (error) {
-    console.error('Erro ao verificar tipo de usu�rio:', error);
+    console.error('Erro ao verificar tipo de usuário:', error);
     return false;
   }
 }

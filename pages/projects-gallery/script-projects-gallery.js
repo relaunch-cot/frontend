@@ -33,13 +33,12 @@ function parseJwt(token) {
 // Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
+const userType = decodedToken?.userType;
 
 if (!userId) {
   localStorage.removeItem('token');
   window.location.href = '../login/login.html';
 }
-
-let userType = null;
 
 // ==========================
 // Modal
@@ -112,29 +111,7 @@ if (dateInput) {
 // Tipo de usuário
 // ==========================
 
-async function getUserType() {
-  try {
-    const response = await fetch(`${BASE_URL}/v1/user/userType/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': token,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Erro ${response.status}: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    console.log('tipo de usuario:', data);
-
-    return data.userType;
-  } catch (error) {
-    console.error('Erro ao obter tipo de usuário:', error);
-    return null;
-  }
-}
+// userType agora vem do token JWT (removida função getUserType)
 
 // ==========================
 // Renderizar um projeto
@@ -311,6 +288,6 @@ form.addEventListener('submit', async (e) => {
 // Inicializar
 // ==========================
 document.addEventListener('DOMContentLoaded', async () => {
-  userType = await getUserType();
+  // userType já vem do token JWT
   await fetchProjects();
 });
