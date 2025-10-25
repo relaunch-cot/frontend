@@ -62,6 +62,25 @@ function validarStatus(status) {
  * Preenche os elementos HTML com os dados do projeto.
  */
 function preencherPaginaComProjeto(project) {
+  // Armazena os dados do projeto para uso posterior (edição)
+  projectData = project;
+  
+  // Imagem do projeto
+  const profileImg = document.querySelector("#profile img");
+  if (profileImg) {
+    if (project.urlImageProject && project.urlImageProject.trim() !== '') {
+      // Se tem imagem no banco, usa ela
+      profileImg.src = project.urlImageProject;
+      profileImg.alt = project.name || "Imagem do projeto";
+      profileImg.style.objectFit = "cover";
+    } else {
+      // Se não tem imagem, usa ícone padrão de projeto (placeholder)
+      profileImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23e0e0e0' width='200' height='200'/%3E%3Cpath fill='%2346B1D5' d='M60 40h60l20 20v90c0 5.5-4.5 10-10 10H60c-5.5 0-10-4.5-10-10V50c0-5.5 4.5-10 10-10z'/%3E%3Cpath fill='%233a9dbf' d='M120 40v20h20z'/%3E%3Crect fill='white' x='70' y='80' width='60' height='6' rx='3'/%3E%3Crect fill='white' x='70' y='95' width='60' height='6' rx='3'/%3E%3Crect fill='white' x='70' y='110' width='40' height='6' rx='3'/%3E%3Ccircle fill='%2346B1D5' cx='100' cy='135' r='15'/%3E%3Cpath fill='white' d='M95 135l4 4 6-8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
+      profileImg.alt = "Projeto sem imagem";
+      profileImg.style.objectFit = "contain";
+    }
+  }
+  
   // Nome do projeto
   const nomeEl = document.querySelector("#desc h1");
   if (nomeEl) nomeEl.textContent = project.name || "Projeto sem nome";
@@ -260,3 +279,260 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+
+// ========================================
+// EDI��O DE PROJETO (somente para clients)
+// ========================================
+
+let projectData = null; // Armazena dados do projeto carregado
+
+// Fun��o para verificar se o usu�rio � client
+async function verificarSeEhCliente() {
+  const token = localStorage.getItem('token');
+  if (!token) return false;
+  
+  try {
+    // Decodifica o token para pegar o userId
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const userId = payload.userId;
+    
+    // Busca o tipo do usuário
+    const response = await fetch(`${BASE_URL}/v1/user/userType/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) return false;
+    
+    const data = await response.json();
+    return data.userType === 'client';
+  } catch (error) {
+    console.error('Erro ao verificar tipo de usu�rio:', error);
+    return false;
+  }
+}
+
+// Fun��o para abrir o modal de edi��o
+function openEditModal() {
+  if (!projectData) {
+    showError('Dados do projeto n�o encontrados.');
+    return;
+  }
+  
+  const modal = document.getElementById('edit-project-modal');
+  
+  // Preenche o formulário com os dados atuais
+  document.getElementById('edit-name').value = projectData.name || '';
+  document.getElementById('edit-description').value = projectData.description || '';
+  document.getElementById('edit-category').value = projectData.category || '';
+  document.getElementById('edit-status').value = validarStatus(projectData.status);
+  document.getElementById('edit-amount').value = projectData.amount || '';
+  // Nota: Input file não pode ter valor pré-definido por segurança
+  // Se houver imagem, ela permanecerá a mesma se nenhum arquivo for selecionado
+  
+  // Formata a data de deadline para o input date
+  if (projectData.projectDeliveryDeadline) {
+    const deadline = new Date(projectData.projectDeliveryDeadline);
+    const year = deadline.getFullYear();
+    const month = String(deadline.getMonth() + 1).padStart(2, '0');
+    const day = String(deadline.getDate()).padStart(2, '0');
+    document.getElementById('edit-deadline').value = `${year}-${month}-${day}`;
+  }
+  
+  modal.classList.add('active');
+}
+
+// Função para fechar o modal de edição
+function closeEditModal() {
+  const modal = document.getElementById('edit-project-modal');
+  modal.classList.remove('active');
+}
+
+// Função para converter e comprimir imagem em base64
+function converterImagemParaBase64(file) {
+  return new Promise((resolve, reject) => {
+    // Validação de tamanho do arquivo (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      reject(new Error('A imagem selecionada é muito grande. Tamanho máximo permitido: 5MB. Por favor, escolha uma imagem menor.'));
+      return;
+    }
+
+    // Validação do tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('O arquivo selecionado não é uma imagem válida. Por favor, selecione um arquivo de imagem (JPG, PNG, GIF, etc).'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // Define dimensões máximas (reduz imagens grandes)
+        const maxWidth = 800;
+        const maxHeight = 800;
+        let width = img.width;
+        let height = img.height;
+
+        // Calcula novo tamanho mantendo proporção
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+
+        // Cria canvas para redimensionar
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Converte para base64 com compressão (0.7 = 70% qualidade)
+        const base64 = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(base64);
+      };
+      img.onerror = () => reject(new Error('Não foi possível processar a imagem selecionada. Verifique se o arquivo está corrompido ou tente outra imagem.'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Erro ao ler o arquivo de imagem. Por favor, tente novamente.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// Função para atualizar o projeto
+async function atualizarProjeto(projectId, updateData) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    showError('Voc� precisa estar autenticado.');
+    return;
+  }
+  
+  const submitBtn = document.querySelector('.btn-save');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Salvando...';
+  
+  try {
+    const response = await fetch(`${BASE_URL}/v1/project/${projectId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updateData)
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      
+      // Verifica se o erro está relacionado à imagem
+      if (response.status === 413 || (errorData.message && errorData.message.toLowerCase().includes('image'))) {
+        throw new Error('A imagem é muito grande para ser salva. Por favor, escolha uma imagem menor ou de menor resolução.');
+      }
+      
+      if (errorData.message && errorData.message.toLowerCase().includes('urlimageproject')) {
+        throw new Error('Erro ao salvar a imagem do projeto. Verifique o arquivo e tente novamente.');
+      }
+      
+      throw new Error('Erro ao atualizar projeto');
+    }
+    
+    showSuccess('Projeto atualizado com sucesso!');
+    closeEditModal();
+    
+    // Recarrega a página após 1.5 segundos para mostrar as mudanças
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  } catch (error) {
+    console.error('Erro ao atualizar projeto:', error);
+    showError(error.message || 'Não foi possível atualizar o projeto. Tente novamente.');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Salvar Alterações';
+  }
+}
+
+// Event listener para o formul�rio de edi��o
+document.addEventListener('DOMContentLoaded', async () => {
+  // Verificar se � cliente e mostrar bot�o de editar
+  const isClient = await verificarSeEhCliente();
+  if (isClient) {
+    const editBtn = document.getElementById('edit-project-btn');
+    if (editBtn) {
+      editBtn.style.display = 'flex';
+      editBtn.addEventListener('click', openEditModal);
+    }
+  }
+  
+  // Event listener para o formul�rio
+  const editForm = document.getElementById('edit-project-form');
+  if (editForm) {
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const projectId = urlParams.get('id');
+      
+      if (!projectId) {
+        showError('ID do projeto não encontrado.');
+        return;
+      }
+      
+      // Pega o userId do token
+      const token = localStorage.getItem('token');
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.userId;
+      
+      // Processa a imagem se houver
+      const imageInput = document.getElementById('edit-image-url');
+      let urlImageProject = projectData.urlImageProject || ''; // Mantém a imagem atual
+      
+      if (imageInput.files && imageInput.files[0]) {
+        try {
+          urlImageProject = await converterImagemParaBase64(imageInput.files[0]);
+        } catch (error) {
+          console.error('Erro ao processar imagem:', error);
+          // Mostra a mensagem específica do erro da imagem
+          showError(error.message || 'Erro ao processar a imagem. Tente novamente.');
+          return;
+        }
+      }
+      
+      // Monta o objeto com os dados atualizados
+      const updateData = {
+        userId: userId,
+        name: document.getElementById('edit-name').value,
+        description: document.getElementById('edit-description').value,
+        category: document.getElementById('edit-category').value,
+        status: document.getElementById('edit-status').value,
+        amount: parseFloat(document.getElementById('edit-amount').value),
+        projectDeliveryDeadline: new Date(document.getElementById('edit-deadline').value).toISOString(),
+        urlImageProject: urlImageProject
+      };
+      
+      await atualizarProjeto(projectId, updateData);
+    });
+  }
+  
+  // Fecha modal ao clicar fora
+  const modal = document.getElementById('edit-project-modal');
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeEditModal();
+      }
+    });
+  }
+});
+
+// Torna as fun��es dispon�veis globalmente para o onclick no HTML
+window.closeEditModal = closeEditModal;

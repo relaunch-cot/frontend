@@ -106,8 +106,13 @@
                 <h2>Valor</h2>
                 <label id="valor"></label>
             </div>
+            <button id="edit-project-btn" class="edit-project-btn" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+                Editar Projeto
+            </button>
         </section>
-
     </main>
 
     <footer>
@@ -147,6 +152,75 @@
 
         </div>
     </footer>
+
+    <!-- Modal de Edição do Projeto -->
+    <div id="edit-project-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Projeto</h2>
+                <button class="close-modal" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="edit-project-form" class="edit-form">
+                <div class="form-group">
+                    <label for="edit-name">Nome do Projeto</label>
+                    <input type="text" id="edit-name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-description">Descrição</label>
+                    <textarea id="edit-description" name="description" rows="4" required></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-category">Categoria</label>
+                        <select id="edit-category" name="category" required>
+                            <option value="">Selecione</option>
+                            <option value="web">Desenvolvimento Web</option>
+                            <option value="mobile">Desenvolvimento Mobile</option>
+                            <option value="design">Design</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="data">Análise de Dados</option>
+                            <option value="content">Criação de Conteúdo</option>
+                            <option value="front-end">Front-end</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-status">Status</label>
+                        <select id="edit-status" name="status" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="concluido">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-deadline">Prazo de Entrega</label>
+                        <input type="date" id="edit-deadline" name="projectDeliveryDeadline" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-amount">Valor (R$)</label>
+                        <input type="number" id="edit-amount" name="amount" step="0.01" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-image-url">Imagem do Projeto</label>
+                    <input type="file" id="edit-image-url" name="urlImageProject" accept="image/*">
+                    <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">Formatos aceitos: JPG, PNG, GIF, WebP</small>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancelar</button>
+                    <button type="submit" class="btn-save">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
     <script src="../../src/config/env.js"></script>
     <script src="../../src/scripts/notifications.js"></script>

@@ -179,6 +179,11 @@ function renderProjectCard(project) {
   const card = document.createElement('div');
   card.className = 'Projeto';
 
+  // Define a imagem do projeto (do banco ou placeholder)
+  const imagemProjeto = project.urlImageProject && project.urlImageProject.trim() !== ''
+    ? project.urlImageProject
+    : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23e0e0e0' width='200' height='200'/%3E%3Cpath fill='%2346B1D5' d='M60 40h60l20 20v90c0 5.5-4.5 10-10 10H60c-5.5 0-10-4.5-10-10V50c0-5.5 4.5-10 10-10z'/%3E%3Cpath fill='%233a9dbf' d='M120 40v20h20z'/%3E%3Crect fill='white' x='70' y='80' width='60' height='6' rx='3'/%3E%3Crect fill='white' x='70' y='95' width='60' height='6' rx='3'/%3E%3Crect fill='white' x='70' y='110' width='40' height='6' rx='3'/%3E%3Ccircle fill='%2346B1D5' cx='100' cy='135' r='15'/%3E%3Cpath fill='white' d='M95 135l4 4 6-8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
+
   card.innerHTML = `
     <div class="title">
       <h1>${project.name}</h1>
@@ -188,7 +193,7 @@ function renderProjectCard(project) {
     <div id="content">
       <div>${project.description}</div>
       <div id="projeto-logo">
-        <img src="../../src/images/ReLaunch Logo.png" alt="">
+        <img src="${imagemProjeto}" alt="${project.name || 'Projeto'}">
       </div>
       <div id="project-open">
         <a href="../project/project.html?id=${project.projectId}" class="project-page">Abrir</a>

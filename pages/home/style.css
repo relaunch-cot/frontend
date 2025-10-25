@@ -18,63 +18,90 @@ a {
 
 
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    height: 70px;
+    height: 12vh;
+    display: grid;
+    grid-template: 12vh / 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     background: #fff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 #logo {
-    height: 50px;
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
+
+header > div > a {
+    width: 80%;
 }
 
 #pesquisa {
+    grid-area: 1/4/1/6;
     display: flex;
     align-items: center;
     position: relative;
-    flex: 1;
-    margin: 0 20px;
 }
 
-#pesquisa input {
+header > :nth-child(1) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#pesquisa > input {
     width: 100%;
-    padding: 5px 35px 5px 10px;
+    height: 4vh;
+    font-size: 2vh;
+    font-family: "Gudea", sans-serif;
     border-radius: 15px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-}
-#lampada{
-    background-image: url('../../src/images/lampada-incandescente\ \(1\).png');
-}
-
-#sino{
-    background-image: url('../../src/images/notificacao\ \(1\).png');
-}
-#menu{
-    background-image: url('../../src/images/menu-aberto\ \(1\).png');
+    border: 0;
+    padding-right: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    padding-left: 5px;
 }
 
-
-#pesquisa svg.lupa {
+#pesquisa > svg.lupa {
     position: absolute;
     right: 10px;
     width: 20px;
     height: 20px;
+    pointer-events: none;
 }
 
-.icones {
-    display: flex;
-    gap: 15px;
-    color: #46B1D5;
-}
 .icone {
+    position: relative;
+    display: inline-block;
     width: 30px;
     height: 30px;
     background-size: contain;
     background-repeat: no-repeat;
+    background-position: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#lampada {
+    background-image: url('../../src/images/lampada-incandescente.png');
+}
+
+#sino {
+    background-image: url('../../src/images/notificacao.png');
+}
+
+#menu {
+    background-image: url('../../src/images/menu-aberto.png');
+}
+
+.icones {
+    grid-area: 1/6/1/8;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+}
+
+.icones > a,
+.icones > button {
+    margin-right: 3vh;
 }
 
 .banner {
