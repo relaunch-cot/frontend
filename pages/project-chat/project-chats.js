@@ -26,6 +26,7 @@ function parseJwt(token) {
   }
 }
 
+// Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 if (!userId) {

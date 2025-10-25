@@ -49,7 +49,7 @@ function updateMenuContent() {
       fetch(`${BASE_URL}/v1/user/userType/${userId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': token,
           'Content-Type': 'application/json'
         }
       })

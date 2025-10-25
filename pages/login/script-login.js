@@ -55,6 +55,7 @@ loginForm.addEventListener("submit", async (e) => {
         }
 
         if (res.ok && res.headers.get("Authorization")) {
+            // Salva o token com Bearer já incluído do backend
             localStorage.setItem("token", res.headers.get("Authorization"));
             loginForm.email.value = '';
             

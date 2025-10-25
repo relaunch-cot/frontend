@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const response = await fetch(`${BASE_URL}/v1/project/${projectId}`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        "Authorization": token,
         "Content-Type": "application/json",
       },
     });
@@ -213,7 +213,7 @@ async function adicionarFreelancerAoProjeto(projectId, freelancerId) {
     const response = await fetch(`${BASE_URL}/v1/project/add-freelancer/${projectId}`, {
       method: "PATCH",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        "Authorization": token,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -301,7 +301,7 @@ async function verificarSeEhCliente() {
     const response = await fetch(`${BASE_URL}/v1/user/userType/${userId}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': token,
         'Content-Type': 'application/json'
       }
     });
@@ -425,7 +425,7 @@ async function atualizarProjeto(projectId, updateData) {
     const response = await fetch(`${BASE_URL}/v1/project/${projectId}`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': token,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(updateData)

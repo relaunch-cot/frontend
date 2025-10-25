@@ -26,6 +26,7 @@ function parseJwt(token) {
   }
 }
 
+// Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 
@@ -40,7 +41,7 @@ async function verificarTipoUsuario() {
     const response = await fetch(`${BASE_URL}/v1/user/userType/${userId}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': token,
         'Content-Type': 'application/json'
       }
     });
@@ -211,7 +212,7 @@ async function buscarProjetos() {
     const response = await fetch(`${BASE_URL}/v1/project`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': token,
         'Content-Type': 'application/json'
       }
     });
@@ -256,25 +257,70 @@ function aplicarFiltros() {
 }
 
 /**
- * Request to join a project
- * NOTA: Esta é uma implementação temporária que apenas mostra uma notificação.
- * Quando o sistema de notificações for implementado, esta função será atualizada.
+ * Request to join a project - Envia notificação para o dono do projeto
  */
-function solicitarParticipacao(projectId, projectName) {
-  // Por enquanto, apenas redireciona para a página do projeto com o freelancerId
-  // O sistema de notificações real será implementado posteriormente
-  
-  showSuccess(`Solicitação para o projeto "${projectName}" será implementada com o sistema de notificações.`);
-  
-  // TEMPORÁRIO: Redireciona para a página do projeto com o freelancerId do usuário logado
-  // para que o botão de aceitar apareça (para fins de teste)
-  // window.location.href = `../project/project.html?id=${projectId}&freelancerId=${userId}`;
-  
-  console.log('Solicitação de participação:', {
-    projectId,
-    freelancerId: userId,
-    projectName
-  });
+async function solicitarParticipacao(projectId, projectName) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    showError('Você precisa estar autenticado para solicitar participação.');
+    return;
+  }
+
+  try {
+    // Busca os dados do projeto para pegar o clientId
+    const projectResponse = await fetch(`${BASE_URL}/v1/project/${projectId}`, {
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!projectResponse.ok) {
+      throw new Error('Erro ao buscar dados do projeto');
+    }
+
+    const projectData = await projectResponse.json();
+    const clientId = projectData.project.clientId;
+
+    // Decodifica o token para pegar o userId do freelancer (remove Bearer se presente)
+    const tokenWithoutBearer = token.replace('Bearer ', '');
+    const payload = JSON.parse(atob(tokenWithoutBearer.split('.')[1]));
+    const freelancerId = payload.userId;
+
+    // Envia a notificação para o cliente
+    const notificationData = {
+      receiverId: clientId,
+      title: 'Nova Solicitação de Projeto',
+      content: `Um freelancer solicitou participação no projeto "${projectName}". ID do Projeto: ${projectId}`,
+      type: 'PROJECT_REQUEST'
+    };
+
+    const notificationResponse = await fetch(`${BASE_URL}/v1/notification/${freelancerId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(notificationData)
+    });
+
+    if (!notificationResponse.ok) {
+      throw new Error('Erro ao enviar notificação');
+    }
+
+    showSuccess(`Solicitação enviada para o projeto "${projectName}"!`);
+    
+    console.log('Solicitação de participação enviada:', {
+      projectId,
+      freelancerId,
+      clientId,
+      projectName
+    });
+
+  } catch (error) {
+    console.error('Erro ao solicitar participação:', error);
+    showError('Não foi possível enviar a solicitação. Tente novamente.');
+  }
 }
 
 // Event listeners

@@ -9,8 +9,8 @@ header{
     height: 12vh;
     display: grid;
     grid-template: 12vh / 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    background: #fff;
 }
 
 #logo{
@@ -372,61 +372,296 @@ textarea{
     resize: none;
 }
 
-.request{
-    display: grid;
-    grid-template: 10vh / 0.5fr 2fr 1fr 1fr 1fr 1fr 1fr;
-    width: 100%;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    height: 10vh;
+/* Estilos das notificações */
+.page-header {
+    padding: 3vh 5vw;
+    background: linear-gradient(135deg, #46B1D5 0%, #3498DB 100%);
+    color: white;
+    margin-bottom: 3vh;
 }
 
-.request>div{
+.page-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header h1 {
+    font-size: 3vh;
+    font-weight: 600;
+    margin: 0;
+}
+
+.clear-all-btn {
     display: flex;
     align-items: center;
-    justify-content: center;    
-}
-
-#btn-details{
-    padding: 1.5vh;
-    border-radius: 15px;
-    border: none;
+    gap: 0.8vh;
+    padding: 1.2vh 2.5vh;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    color: white;
+    font-size: 1.6vh;
+    font-weight: 600;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-#btn-details:hover{
-    background-color: #97eaff;
-    transition: 0.2s;
+.clear-all-btn svg {
+    width: 18px;
+    height: 18px;
 }
 
-#btn-accept{
-    padding: 1.5vh;
-    border-radius: 15px;
+.clear-all-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+}
+
+#notifications-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2vh;
+    padding: 2vh 5vw;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.notification-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2vh;
+    padding: 2vh;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #46B1D5;
+    transition: all 0.3s ease;
+}
+
+.notification-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.notification-card.project-request {
+    border-left-color: #46B1D5;
+}
+
+.notification-card.project-accepted {
+    border-left-color: #27AE60;
+}
+
+.notification-card.project-rejected {
+    border-left-color: #E74C3C;
+}
+
+.notification-card.chat-message {
+    border-left-color: #3498DB;
+}
+
+.notification-card.payment-pending {
+    border-left-color: #F39C12;
+}
+
+.notification-card.deadline-approaching {
+    border-left-color: #E67E22;
+}
+
+.notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+}
+
+.notification-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5vh;
+}
+
+.notification-title {
+    font-size: 2vh;
+    font-weight: 600;
+    color: #2C3E50;
+    margin: 0;
+}
+
+.notification-message {
+    font-size: 1.7vh;
+    color: #6c6f72;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.notification-time {
+    font-size: 1.4vh;
+    color: #95a5a6;
+    font-style: italic;
+}
+
+.notification-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.notification-actions button {
+    display: flex;
+    align-items: center;
+    gap: 0.8vh;
+    padding: 1vh 2vh;
     border: none;
-    background-color: #baffca;
-    color: rgb(0, 0, 0);
-        cursor: pointer;
-
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.6vh;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    justify-content: center;
 }
 
-#btn-accept:hover{
-    background-color: #6ce787;
-    transition: 0.2s;
+.notification-actions button svg {
+    width: 16px;
+    height: 16px;
 }
 
-
-#btn-refused{
-    padding: 1.5vh;
-    border-radius: 15px;
-    border: none;
-    background-color: rgb(255, 210, 210);
-    color: rgb(0, 0, 0);
-        cursor: pointer;
-
+.btn-accept {
+    background: linear-gradient(135deg, #27AE60, #2ECC71);
+    color: white;
 }
 
-#btn-refused:hover{
-    background-color: rgb(255, 161, 161);
-    transition: 0.2s;
+.btn-accept:hover {
+    background: linear-gradient(135deg, #229954, #27AE60);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+}
+
+.btn-reject {
+    background: linear-gradient(135deg, #E74C3C, #EC7063);
+    color: white;
+}
+
+.btn-reject:hover {
+    background: linear-gradient(135deg, #C0392B, #E74C3C);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+.btn-chat {
+    background: linear-gradient(135deg, #3498DB, #5DADE2);
+    color: white;
+}
+
+.btn-chat:hover {
+    background: linear-gradient(135deg, #2E86C1, #3498DB);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.btn-profile {
+    background: linear-gradient(135deg, #9B59B6, #BB8FCE);
+    color: white;
+}
+
+.btn-profile:hover {
+    background: linear-gradient(135deg, #8E44AD, #9B59B6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(155, 89, 182, 0.3);
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #95a5a6, #bdc3c7);
+    color: white;
+}
+
+.btn-delete:hover {
+    background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
+}
+
+#empty-message {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5vh;
+    color: #95a5a6;
+    text-align: center;
+}
+
+#empty-message svg {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 2vh;
+    opacity: 0.5;
+}
+
+#empty-message p {
+    font-size: 2vh;
+    margin: 1vh 0;
+}
+
+#loading-message {
+    text-align: center;
+    padding: 5vh;
+    color: #95a5a6;
+    font-size: 2vh;
+}
+
+/* Badges de sucesso/erro */
+.success-badge,
+.error-badge {
+    position: fixed;
+    top: 14vh;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    padding: 1.5vh 3vh;
+    border-radius: 8px;
+    font-size: 1.8vh;
+    font-weight: 500;
+    color: white;
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.success-badge {
+    background: linear-gradient(135deg, #27AE60, #2ECC71);
+}
+
+.error-badge {
+    background: linear-gradient(135deg, #E74C3C, #EC7063);
+}
+
+.success-badge.show,
+.error-badge.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
 }
 
 #project-logo{

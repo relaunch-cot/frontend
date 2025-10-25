@@ -30,6 +30,7 @@ function parseJwt(token) {
   }
 }
 
+// Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 
@@ -218,7 +219,7 @@ async function fetchProjects() {
   try {
     const res = await fetch(`${BASE_URL}/v1/project/user/${userId}?userType=${userType}`, {
       headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
+        'Authorization': token || '',
       },
     });
 
@@ -273,7 +274,7 @@ form.addEventListener('submit', async (e) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : '',
+        'Authorization': token || '',
       },
       body: JSON.stringify(body),
     });
