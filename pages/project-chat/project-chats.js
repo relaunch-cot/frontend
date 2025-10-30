@@ -93,7 +93,6 @@ async function carregarChats() {
     }
 
     const data = await res.json();
-    console.log('Chats recebidos:', data);
 
     if (!data || !data.chats || data.chats.length === 0) {
       emptyMsg.style.display = 'block';

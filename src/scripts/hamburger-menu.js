@@ -41,7 +41,6 @@ function updateMenuContent() {
       const decoded = JSON.parse(jsonPayload);
       userId = decoded.userId;
       userType = decoded.userType;
-      console.log('Token decodificado - userId:', userId, 'userType:', userType);
     } catch (e) {
       console.error('Erro ao decodificar token:', e);
     }
@@ -58,15 +57,12 @@ function updateMenuContent() {
 }
 
 function renderMenu(userType) {
-  console.log('renderMenu chamada com userType:', userType);
   const menu = document.getElementById('hamburger-menu');
   
   // Link de Projetos Disponíveis só aparece para freelancers
   const projetosDisponiveisLink = userType === 'freelancer' 
     ? `<a href="../../pages/available-projects/available-projects.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19,19H5V8H19M16,1V3H8V1H6V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3H18V1M17,12H12V17H17V12Z"/></svg> Projetos Disponíveis</a>`
     : '';
-  
-  console.log('projetosDisponiveisLink:', projetosDisponiveisLink);
 
   menu.innerHTML = `
     <a href="../../pages/home/index.html" class="home-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Início</a>

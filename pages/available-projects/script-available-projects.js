@@ -286,13 +286,6 @@ async function solicitarParticipacao(projectId, projectName) {
     }
 
     showSuccess(`Solicitação enviada para o projeto "${projectName}"!`);
-    
-    console.log('Solicitação de participação enviada:', {
-      projectId,
-      freelancerId,
-      clientId,
-      projectName
-    });
 
   } catch (error) {
     console.error('Erro ao solicitar participação:', error);

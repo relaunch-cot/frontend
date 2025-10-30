@@ -59,9 +59,6 @@ function createNotificationCard(notification) {
         const match = notification.content.match(/ID do Projeto:\s*([a-zA-Z0-9\-]+)/);
         if (match) {
             projectId = match[1];
-            console.log('ProjectId extraído da notificação:', projectId);
-        } else {
-            console.warn('Não foi possível extrair projectId do conteúdo:', notification.content);
         }
     }
     if (projectId) {
@@ -180,11 +177,8 @@ function renderNotifications(notifications) {
     const sortedNotifications = notifications.sort((a, b) => 
         new Date(b.createdAt) - new Date(a.createdAt)
     );
-
-    console.log('Notificações recebidas:', sortedNotifications);
     
     sortedNotifications.forEach(notification => {
-        console.log('Processando notificação:', notification);
         const card = createNotificationCard(notification);
         container.appendChild(card);
     });
@@ -202,12 +196,6 @@ async function acceptRequest(notificationId, freelancerId) {
         }
         
         const projectId = card.dataset.projectId;
-        console.log('Dados do card:', {
-            notificationId,
-            freelancerId,
-            projectId,
-            allDatasets: card.dataset
-        });
         
         if (!projectId) {
             showErrorBadge('Projeto não encontrado na notificação');
@@ -454,7 +442,6 @@ async function startChat(userId) {
             }, 1000);
         } else {
             const errorText = await response.text();
-            console.log('Resposta do servidor:', errorText);
             
             // 2. Se chat já existe, busca pelo endpoint específico
             if (errorText.includes('already exists') || errorText.includes('AlreadyExists')) {
@@ -470,7 +457,6 @@ async function startChat(userId) {
                 
                 if (chatsResponse.ok) {
                     const chatData = await chatsResponse.json();
-                    console.log('Chat encontrado:', chatData);
                     
                     if (chatData && chatData.chat && chatData.chat.chatId) {
                         chatId = chatData.chat.chatId;

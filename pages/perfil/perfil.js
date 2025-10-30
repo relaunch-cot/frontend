@@ -52,7 +52,6 @@ async function carregarPerfil() {
     }
 
     const data = await response.json();
-    console.log('Dados do perfil:', data);
 
     const userNameElement = document.getElementById('userName');
     const userEmailElement = document.getElementById('userEmail');
