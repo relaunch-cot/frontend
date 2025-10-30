@@ -93,12 +93,34 @@ h1 {
   justify-content: center;
   margin-right: 1rem;
   flex-shrink: 0;
+  position: relative;
 }
 
 .avatar svg {
   width: 24px;
   height: 24px;
   fill: white;
+}
+
+.avatar .status-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid white;
+  background: #95a5a6;
+  transition: background 0.3s ease;
+}
+
+.avatar .status-indicator.online {
+  background: #27ae60;
+  box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+}
+
+.avatar .status-indicator.offline {
+  background: #95a5a6;
 }
 
 .chat-info {

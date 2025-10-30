@@ -56,7 +56,21 @@ loginForm.addEventListener("submit", async (e) => {
 
         if (res.ok && res.headers.get("Authorization")) {
             // Salva o token com Bearer já incluído do backend
-            localStorage.setItem("token", res.headers.get("Authorization"));
+            const authToken = res.headers.get("Authorization");
+            localStorage.setItem("token", authToken);
+            
+            // Conecta ao sistema de presença global
+            if (window.presenceManager) {
+                const token = authToken.replace('Bearer ', '');
+                const decodedToken = parseJwt(token);
+                const userId = decodedToken?.userId;
+                
+                if (userId) {
+                    console.log('🔌 Conectando ao sistema de presença...');
+                    window.presenceManager.connect(userId, authToken);
+                }
+            }
+            
             loginForm.email.value = '';
             
             showSuccess("Login realizado com sucesso!");
@@ -72,3 +86,19 @@ loginForm.addEventListener("submit", async (e) => {
         showError("Erro de conexão. Tente novamente.");
     }
 });
+
+function parseJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return null;
+    }
+}

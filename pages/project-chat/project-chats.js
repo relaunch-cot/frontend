@@ -104,12 +104,15 @@ async function carregarChats() {
 
     for (const chat of data.chats) {
       let nomeOutroUsuario = 'Desconhecido';
+      let outroUserId = null;
 
       if (chat.user1 && chat.user2) {
         if (chat.user1.userId === userId) {
           nomeOutroUsuario = chat.user2.name || `Usuário ${chat.user2.userId}`;
+          outroUserId = chat.user2.userId;
         } else {
           nomeOutroUsuario = chat.user1.name || `Usuário ${chat.user1.userId}`;
+          outroUserId = chat.user1.userId;
         }
       }
 
@@ -120,13 +123,18 @@ async function carregarChats() {
       }
       const tempo = ultimaMsg ? formatarTempo(ultimaMsg.timestamp) : 'agora';
 
+      // Verifica se o outro usuário está online
+      const isOnline = window.presenceManager && window.presenceManager.isUserOnline(outroUserId);
+
       const li = document.createElement('li');
+      li.setAttribute('data-user-id', outroUserId);
       li.innerHTML = `
         <a href="project-chat.html?chatId=${chat.chatId}&contactName=${encodeURIComponent(nomeOutroUsuario)}" class="chat-item">
           <div class="avatar">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
+            <span class="status-indicator ${isOnline ? 'online' : 'offline'}"></span>
           </div>
           <div class="chat-info">
             <div class="chat-name">${nomeOutroUsuario}</div>
@@ -146,6 +154,65 @@ async function carregarChats() {
   }
 }
 
+// Atualiza o status online/offline de um usuário específico
+function atualizarStatusUsuario(userId, isOnline) {
+  const chatItem = document.querySelector(`li[data-user-id="${userId}"]`);
+  if (chatItem) {
+    const statusIndicator = chatItem.querySelector('.status-indicator');
+    if (statusIndicator) {
+      if (isOnline) {
+        statusIndicator.classList.add('online');
+        statusIndicator.classList.remove('offline');
+      } else {
+        statusIndicator.classList.remove('online');
+        statusIndicator.classList.add('offline');
+      }
+    }
+  }
+}
+
+// Conecta ao sistema de presença se não estiver conectado
+if (window.presenceManager && !window.presenceManager.isConnected()) {
+  const token = localStorage.getItem('token');
+  if (token && userId) {
+    console.log('🔌 Conectando ao sistema de presença...');
+    window.presenceManager.connect(userId, token);
+  }
+}
+
+// Listeners para eventos de presença
+window.addEventListener('userOnline', (event) => {
+  const { userId } = event.detail;
+  console.log(`🟢 Usuário ${userId} ficou online`);
+  atualizarStatusUsuario(userId, true);
+});
+
+window.addEventListener('userOffline', (event) => {
+  const { userId } = event.detail;
+  console.log(`⚪ Usuário ${userId} ficou offline`);
+  atualizarStatusUsuario(userId, false);
+});
+
+window.addEventListener('onlineUsersListUpdated', (event) => {
+  const { userIds } = event.detail;
+  console.log('📋 Lista de usuários online atualizada:', userIds);
+  
+  // Atualiza todos os status
+  document.querySelectorAll('li[data-user-id]').forEach(li => {
+    const userId = li.getAttribute('data-user-id');
+    const isOnline = userIds.includes(userId);
+    const statusIndicator = li.querySelector('.status-indicator');
+    if (statusIndicator) {
+      if (isOnline) {
+        statusIndicator.classList.add('online');
+        statusIndicator.classList.remove('offline');
+      } else {
+        statusIndicator.classList.remove('online');
+        statusIndicator.classList.add('offline');
+      }
+    }
+  });
+});
 
 carregarChats();
 setInterval(carregarChats, 30000);
