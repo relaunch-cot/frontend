@@ -209,11 +209,47 @@ async function enviarMensagemParaBackend(texto) {
   }
 }
 
+// Funções para indicador de digitação
+function mostrarIndicadorDigitacao() {
+  // Verifica se indicador já existe, não recria
+  let indicator = document.getElementById('typing-indicator');
+  
+  if (!indicator) {
+    // Cria novo indicador apenas se não existir
+    indicator = document.createElement('div');
+    indicator.id = 'typing-indicator';
+    indicator.className = 'typing-indicator';
+    
+    const text = document.createElement('span');
+    text.className = 'typing-indicator-text';
+    text.textContent = contactName + ' está digitando';
+    
+    const dots = document.createElement('div');
+    dots.className = 'typing-dots';
+    dots.innerHTML = '<span></span><span></span><span></span>';
+    
+    indicator.appendChild(text);
+    indicator.appendChild(dots);
+    
+    mensagensContainer.appendChild(indicator);
+    mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
+  } else {
+    console.log('Indicador de digitação já existe (mantendo)');
+  }
+}
+
+function esconderIndicadorDigitacao() {
+  const indicator = document.getElementById('typing-indicator');
+  if (indicator) {
+    indicator.remove();
+    console.log('Indicador de digitação removido');
+  }
+}
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🚀 Inicializando chat...');
-  console.log(`📋 ChatId: ${chatId}, UserId: ${userId}, Contato: ${contactName}`);
+  console.log('Inicializando chat...');
+  console.log(`ChatId: ${chatId}, UserId: ${userId}, Contato: ${contactName}`);
   
   // Carrega mensagens iniciais
   carregarMensagens();
@@ -224,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Função para atualizar status do contato
   function updateContactStatus(isOnline) {
-    console.log(`📊 Atualizando status: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+    console.log(`Atualizando status: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
     
     if (isOnline) {
       statusIndicator.classList.add('online');
@@ -243,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Inicializa WebSocket do chat
   if (typeof ChatWebSocket !== 'undefined') {
-    console.log('✅ ChatWebSocket disponível, conectando...');
+    console.log('ChatWebSocket disponível, conectando...');
     window.chatWS = new ChatWebSocket();
     window.chatWS.connect(chatId, userId, token);
     
@@ -262,19 +298,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Quando desconectar, marca como offline
     window.addEventListener('chatDisconnected', () => {
-      console.log('❌ WebSocket desconectado');
+      console.log('WebSocket desconectado');
       updateContactStatus(false);
     });
     
     // Listener para novas mensagens via WebSocket
     window.addEventListener('chatNewMessage', (event) => {
       const { message } = event.detail;
-      console.log('💬 Nova mensagem recebida via WebSocket:', message);
+      console.log('Nova mensagem recebida via WebSocket:', message);
       
       // Verifica se a mensagem é do chat atual
       if (message.chatId == chatId) {
         // Se não for mensagem própria, adiciona na tela
         if (message.senderId != userId) {
+          // Remove indicador de digitação quando mensagem chegar
+          esconderIndicadorDigitacao();
+          
           const tipo = 'outra-pessoa';
           
           // Verifica se precisa adicionar separador de data
@@ -295,42 +334,48 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Listener para indicador de digitação
     let typingTimeout;
+    
     window.addEventListener('chatUserTyping', (event) => {
       const { userId: typingUserId, isTyping } = event.detail;
       console.log(`⌨️ Evento chatUserTyping recebido:`, event.detail);
       
-      // Atualiza o status no header
       if (isTyping) {
+        // Atualiza o status no header
         contactStatus.textContent = 'Digitando...';
         contactStatus.classList.add('typing');
         contactStatus.classList.remove('online', 'offline');
         
-        // Limpa timeout anterior
+        // Mostra indicador visual embaixo das mensagens (só cria se não existir)
+        mostrarIndicadorDigitacao();
+        
+        // Limpa timeout anterior para resetar contagem
         clearTimeout(typingTimeout);
         
-        // Volta ao status normal após 3 segundos sem receber evento de typing
-        typingTimeout = setTimeout(() => {
-          console.log('⏱️ Timeout de digitação atingido, voltando ao status normal');
-          const isOnline = statusIndicator.classList.contains('online');
-          updateContactStatus(isOnline);
-        }, 3000);
       } else {
-        // Volta ao status normal
+        // Quando receber isTyping: false, não remove imediatamente
+        // Aguarda 10 segundos antes de remover
         clearTimeout(typingTimeout);
+      }
+      
+      // Sempre configura timeout de 10 segundos (tanto para true quanto false)
+      // Se não receber novo evento em 10s, remove o indicador
+      typingTimeout = setTimeout(() => {
+        console.log('⏱️ Timeout de 10 segundos atingido, removendo indicador');
+        esconderIndicadorDigitacao();
         const isOnline = statusIndicator.classList.contains('online');
         updateContactStatus(isOnline);
-      }
+      },1500);
     });
     
     // Desconecta WebSocket ao sair da página
     window.addEventListener('beforeunload', () => {
-      console.log('👋 Saindo da página, desconectando WebSocket...');
+      console.log('Saindo da página, desconectando WebSocket...');
       if (window.chatWS) {
         window.chatWS.disconnect();
       }
     });
   } else {
-    console.warn('⚠️ ChatWebSocket não está disponível');
+    console.warn('ChatWebSocket não está disponível');
   }
   
   // Adiciona listener para enviar status de digitação
