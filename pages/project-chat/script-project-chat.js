@@ -180,16 +180,7 @@ async function carregarMensagens() {
 
 async function enviarMensagemParaBackend(texto) {
   try {
-    // Tenta enviar via WebSocket primeiro
-    if (window.chatWS && window.chatWS.isConnected()) {
-      const sent = window.chatWS.sendMessage(texto);
-      if (sent) {
-        console.log('Mensagem enviada via WebSocket');
-        return; // Mensagem será recebida via WebSocket
-      }
-    }
-    
-    // Fallback para HTTP se WebSocket não disponível
+    // Sempre envia via HTTP POST para o backend
     const body = {
       chatId: chatId,
       messageContent: texto
@@ -209,7 +200,9 @@ async function enviarMensagemParaBackend(texto) {
       return;
     }
 
-    await carregarMensagens();
+    if (!window.chatWS || !window.chatWS.isConnected()) {
+      await carregarMensagens();
+    }
 
   } catch (err) {
     showError('Erro ao enviar mensagem. Tente novamente.');
