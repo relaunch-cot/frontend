@@ -413,6 +413,20 @@ async function startChat(userId) {
     try {
         const currentUserId = getUserIdFromToken();
         
+        // Busca informações do usuário para obter o nome
+        let contactName = 'Contato';
+        try {
+            const userResponse = await fetch(`${BASE_URL}/v1/user/${userId}`, {
+                headers: { 'Authorization': token }
+            });
+            if (userResponse.ok) {
+                const userData = await userResponse.json();
+                contactName = userData.name || 'Contato';
+            }
+        } catch (error) {
+            console.error('Erro ao buscar informações do usuário:', error);
+        }
+        
         // 1. Tenta criar o chat
         const response = await fetch(`${BASE_URL}/v1/chat`, {
             method: 'POST',
@@ -436,7 +450,7 @@ async function startChat(userId) {
             
             // Redireciona para o chat específico
             setTimeout(() => {
-                window.location.href = `../project-chat/project-chat.html?chatId=${chatId}`;
+                window.location.href = `../project-chat/project-chat.html?chatId=${chatId}&contactName=${encodeURIComponent(contactName)}`;
             }, 1000);
         } else {
             const errorText = await response.text();
@@ -458,23 +472,32 @@ async function startChat(userId) {
                     const chatData = await chatsResponse.json();
                     console.log('Chat encontrado:', chatData);
                     
-                    if (chatData && chatData.chatId) {
-                        chatId = chatData.chatId;
+                    if (chatData && chatData.chat && chatData.chat.chatId) {
+                        chatId = chatData.chat.chatId;
+                        
+                        // Identifica o nome do outro usuário do chat
+                        const otherUser = chatData.chat.user1.userId === currentUserId 
+                            ? chatData.chat.user2 
+                            : chatData.chat.user1;
+                        const otherUserName = otherUser.name || 'Contato';
                         
                         // Redireciona para o chat específico
                         setTimeout(() => {
-                            window.location.href = `../project-chat/project-chat.html?chatId=${chatId}`;
+                            window.location.href = `../project-chat/project-chat.html?chatId=${chatId}&contactName=${encodeURIComponent(otherUserName)}`;
                         }, 1000);
                     } else {
                         console.error('Chat não encontrado na resposta');
-                        showErrorBadge('Chat não encontrado');
+                        setTimeout(() => {
+                            showErrorBadge('Chat não encontrado');
+                        }, 3300);
                     }
                 } else {
                     console.error('Erro ao buscar chat pelos userIds');
-                    showErrorBadge('Erro ao buscar chat');
+                    setTimeout(() => {
+                        showErrorBadge('Erro ao buscar chat');
+                    }, 3300);
                 }
             } else {
-                // Erro diferente de chat já existente
                 showErrorBadge('Erro ao criar chat');
             }
         }
