@@ -49,10 +49,21 @@ class ChatWebSocket {
 
     this.ws.onmessage = (event) => {
       try {
+        // Verifica se é string vazia
+        if (!event.data || event.data.trim() === '') {
+          console.warn('⚠️ Mensagem vazia recebida no chat');
+          return;
+        }
+        
         const data = JSON.parse(event.data);
         this.handleMessage(data);
       } catch (error) {
-        console.error('Erro ao processar mensagem WebSocket do chat:', error);
+        console.error('❌ Erro ao processar mensagem WebSocket do chat:', error);
+        console.error('📄 Conteúdo recebido:', event.data);
+        
+        if (event.data && typeof event.data === 'string' && event.data.includes('}{')) {
+          console.error('⚠️ Múltiplas mensagens JSON concatenadas no chat!');
+        }
       }
     };
 

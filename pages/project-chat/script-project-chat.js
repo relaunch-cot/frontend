@@ -39,6 +39,7 @@ const mensagensContainer = document.getElementById('mensagens');
 const urlParams = new URLSearchParams(window.location.search);
 const chatId = urlParams.get('chatId') || 1;
 const contactName = urlParams.get('contactName') || 'Contato';
+const contactUserId = urlParams.get('contactUserId'); // ID do outro usuário
 
 if (!chatId) {
   showError('Nenhum chat selecionado.');
@@ -277,30 +278,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
+  // ========================================
+  // SISTEMA DE PRESENÇA GLOBAL
+  // ========================================
+  // Usa WebSocket de presença para status online/offline (logado na plataforma)
+  
+  // Conecta ao sistema de presença se não estiver conectado
+  if (window.presenceManager && !window.presenceManager.isConnected()) {
+    console.log('🔌 Conectando ao sistema de presença...');
+    window.presenceManager.connect(userId, token);
+  }
+  
+  // Verifica status inicial do contato
+  if (contactUserId && window.presenceManager) {
+    const isOnline = window.presenceManager.isUserOnline(contactUserId);
+    console.log(`📊 Status inicial de ${contactName} (${contactUserId}): ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+    updateContactStatus(isOnline);
+  }
+  
+  // Listener para quando contato fica online
+  window.addEventListener('userOnline', (event) => {
+    const { userId: onlineUserId } = event.detail;
+    if (contactUserId && onlineUserId == contactUserId) {
+      console.log(`� ${contactName} ficou ONLINE (presença global)`);
+      updateContactStatus(true);
+    }
+  });
+  
+  // Listener para quando contato fica offline
+  window.addEventListener('userOffline', (event) => {
+    const { userId: offlineUserId } = event.detail;
+    if (contactUserId && offlineUserId == contactUserId) {
+      console.log(`⚪ ${contactName} ficou OFFLINE (presença global)`);
+      updateContactStatus(false);
+    }
+  });
+  
+  // Listener para lista inicial de usuários online
+  window.addEventListener('onlineUsersListUpdated', (event) => {
+    const { userIds } = event.detail;
+    if (contactUserId) {
+      const isOnline = userIds.includes(contactUserId);
+      console.log(`📋 Lista atualizada - ${contactName} está ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+      updateContactStatus(isOnline);
+    }
+  });
+  
+  // ========================================
+  // WEBSOCKET DO CHAT
+  // ========================================
+  // Usa WebSocket de chat para mensagens + digitação (apenas quando está no chat)
+  
   // Inicializa WebSocket do chat
   if (typeof ChatWebSocket !== 'undefined') {
-    console.log('ChatWebSocket disponível, conectando...');
+    console.log('💬 ChatWebSocket disponível, conectando...');
     window.chatWS = new ChatWebSocket();
     window.chatWS.connect(chatId, userId, token);
-    
-    // Listener para status de conexão do outro usuário
-    window.addEventListener('chatUserStatus', (event) => {
-      const { userId: statusUserId, isOnline } = event.detail;
-      console.log(`🔔 Evento chatUserStatus recebido:`, event.detail);
-      updateContactStatus(isOnline);
-    });
-    
-    // Quando conectar ao WebSocket, marca o outro usuário como online inicialmente
-    window.addEventListener('chatConnected', () => {
-      console.log('✅ WebSocket conectado com sucesso');
-      // Aguarda notificação USER_STATUS do backend sobre o outro usuário
-    });
-    
-    // Quando desconectar, marca como offline
-    window.addEventListener('chatDisconnected', () => {
-      console.log('WebSocket desconectado');
-      updateContactStatus(false);
-    });
     
     // Listener para novas mensagens via WebSocket
     window.addEventListener('chatNewMessage', (event) => {

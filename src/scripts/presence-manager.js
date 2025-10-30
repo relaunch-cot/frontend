@@ -50,10 +50,51 @@ class PresenceManager {
 
     this.ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        this.handleMessage(data);
+        // Log da mensagem bruta para debug
+        console.log('📨 Presença (raw):', event.data);
+        
+        // Verifica se é string vazia ou inválida
+        if (!event.data || event.data.trim() === '') {
+          console.warn('⚠️ Mensagem vazia recebida');
+          return;
+        }
+        
+        // Se tiver múltiplas mensagens JSON concatenadas, processa cada uma
+        const messages = event.data.trim().split('\n').filter(line => line.trim());
+        
+        if (messages.length > 1) {
+          console.warn('⚠️ Múltiplas mensagens concatenadas detectadas! Processando separadamente...');
+        }
+        
+        // Processa cada mensagem
+        messages.forEach((msg, index) => {
+          try {
+            const data = JSON.parse(msg);
+            console.log(`📨 Presença [${index + 1}/${messages.length}]:`, data);
+            this.handleMessage(data);
+          } catch (err) {
+            console.error(`❌ Erro ao processar mensagem ${index + 1}:`, err);
+            console.error('📄 Conteúdo:', msg);
+          }
+        });
+        
       } catch (error) {
-        console.error('Erro ao processar mensagem de presença:', error);
+        console.error('❌ Erro ao processar mensagem de presença:', error);
+        console.error('📄 Conteúdo recebido:', event.data);
+        console.error('📄 Tipo:', typeof event.data);
+        console.error('📄 Comprimento:', event.data?.length);
+        
+        // Tenta identificar o problema
+        if (event.data && typeof event.data === 'string') {
+          // Verifica se há múltiplas mensagens JSON concatenadas
+          if (event.data.includes('}{')) {
+            console.error('⚠️ Múltiplas mensagens JSON concatenadas (sem quebra de linha)!');
+            console.error('💡 Backend deve enviar uma mensagem por vez OU separar com \\n');
+          }
+          
+          // Mostra primeiros caracteres para debug
+          console.error('🔍 Primeiros 200 chars:', event.data.substring(0, 200));
+        }
       }
     };
 
@@ -80,6 +121,11 @@ class PresenceManager {
     console.log('📨 Presença:', data);
     
     switch (data.type) {
+      case 'CONNECTED':
+        // Mensagem de confirmação de conexão
+        console.log('✅ Conectado ao serviço de presença:', data.message);
+        break;
+      
       case 'USER_ONLINE':
         // Usuário ficou online
         this.onUserOnline(data.userId);
@@ -92,7 +138,7 @@ class PresenceManager {
       
       case 'ONLINE_USERS':
         // Lista inicial de usuários online
-        this.onOnlineUsersList(data.userIds || []);
+        this.onOnlineUsersList(data.onlineUsers || data.userIds || []);
         break;
       
       case 'PONG':

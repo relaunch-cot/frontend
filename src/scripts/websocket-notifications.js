@@ -39,10 +39,21 @@ class NotificationWebSocket {
 
     this.ws.onmessage = (event) => {
       try {
+        // Verifica se é string vazia
+        if (!event.data || event.data.trim() === '') {
+          console.warn('⚠️ Mensagem vazia recebida nas notificações');
+          return;
+        }
+        
         const data = JSON.parse(event.data);
         this.handleMessage(data);
       } catch (error) {
-        console.error('Erro ao processar mensagem WebSocket:', error);
+        console.error('❌ Erro ao processar mensagem WebSocket de notificações:', error);
+        console.error('📄 Conteúdo recebido:', event.data);
+        
+        if (event.data && typeof event.data === 'string' && event.data.includes('}{')) {
+          console.error('⚠️ Múltiplas mensagens JSON concatenadas nas notificações!');
+        }
       }
     };
 
@@ -64,6 +75,11 @@ class NotificationWebSocket {
   // Processa mensagens recebidas do WebSocket
   handleMessage(data) {
     switch (data.type) {
+      case 'CONNECTED':
+        // Mensagem de confirmação de conexão
+        console.log('✅ Conectado ao serviço de notificações:', data.message);
+        break;
+      
       case 'NEW_NOTIFICATION':
         // Nova notificação recebida
         this.onNewNotification(data.notification);
