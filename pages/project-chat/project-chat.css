@@ -394,3 +394,24 @@ nav{
 #btnEnviar:active {
     transform: scale(0.95);
 }
+
+/* Indicador de digitação */
+.typing-indicator {
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

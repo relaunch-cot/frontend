@@ -90,11 +90,14 @@ function adicionarMensagem(texto, tipo, timestamp) {
       hour: '2-digit', 
       minute: '2-digit' 
     });
+    // Armazena a data para comparação
+    novaMensagem.dataset.date = dataCorrigida.toDateString();
   } else {
     mensagemHora.textContent = new Date().toLocaleTimeString('pt-BR', { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
+    novaMensagem.dataset.date = new Date().toDateString();
   }
   
   novaMensagem.appendChild(mensagemTexto);
@@ -177,6 +180,16 @@ async function carregarMensagens() {
 
 async function enviarMensagemParaBackend(texto) {
   try {
+    // Tenta enviar via WebSocket primeiro
+    if (window.chatWS && window.chatWS.isConnected()) {
+      const sent = window.chatWS.sendMessage(texto);
+      if (sent) {
+        console.log('Mensagem enviada via WebSocket');
+        return; // Mensagem será recebida via WebSocket
+      }
+    }
+    
+    // Fallback para HTTP se WebSocket não disponível
     const body = {
       chatId: chatId,
       messageContent: texto
@@ -205,4 +218,82 @@ async function enviarMensagemParaBackend(texto) {
 
 
 
-document.addEventListener('DOMContentLoaded', carregarMensagens);
+document.addEventListener('DOMContentLoaded', () => {
+  // Carrega mensagens iniciais
+  carregarMensagens();
+  
+  // Inicializa WebSocket do chat
+  if (typeof ChatWebSocket !== 'undefined') {
+    window.chatWS = new ChatWebSocket();
+    window.chatWS.connect(chatId, userId, token);
+    
+    // Listener para novas mensagens via WebSocket
+    window.addEventListener('chatNewMessage', (event) => {
+      const { message } = event.detail;
+      
+      // Verifica se a mensagem é do chat atual
+      if (message.chatId == chatId) {
+        // Se não for mensagem própria, adiciona na tela
+        if (message.senderId != userId) {
+          const tipo = 'outra-pessoa';
+          
+          // Verifica se precisa adicionar separador de data
+          const dataMsg = new Date(message.createdAt || Date.now());
+          const ultimaMensagem = mensagensContainer.lastElementChild;
+          
+          if (ultimaMensagem && !ultimaMensagem.classList.contains('separador-data')) {
+            const ultimaData = ultimaMensagem.dataset.date;
+            if (ultimaData !== dataMsg.toDateString()) {
+              adicionarSeparadorData(dataMsg);
+            }
+          }
+          
+          adicionarMensagem(message.messageContent, tipo, message.createdAt);
+        }
+      }
+    });
+    
+    // Listener para indicador de digitação
+    window.addEventListener('chatUserTyping', (event) => {
+      const { userId: typingUserId, isTyping } = event.detail;
+      
+      // Mostra/esconde indicador de "está digitando..."
+      let typingIndicator = document.getElementById('typing-indicator');
+      
+      if (isTyping) {
+        if (!typingIndicator) {
+          typingIndicator = document.createElement('div');
+          typingIndicator.id = 'typing-indicator';
+          typingIndicator.className = 'typing-indicator';
+          typingIndicator.textContent = 'Digitando...';
+          mensagensContainer.appendChild(typingIndicator);
+          mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
+        }
+      } else {
+        if (typingIndicator) {
+          typingIndicator.remove();
+        }
+      }
+    });
+    
+    // Desconecta WebSocket ao sair da página
+    window.addEventListener('beforeunload', () => {
+      if (window.chatWS) {
+        window.chatWS.disconnect();
+      }
+    });
+  }
+  
+  // Adiciona listener para enviar status de digitação
+  let typingTimeout;
+  entrada.addEventListener('input', () => {
+    if (window.chatWS && window.chatWS.isConnected()) {
+      window.chatWS.sendTypingStatus(true);
+      
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        window.chatWS.sendTypingStatus(false);
+      }, 1000);
+    }
+  });
+});
