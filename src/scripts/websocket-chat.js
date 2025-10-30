@@ -78,6 +78,8 @@ class ChatWebSocket {
 
   // Processa mensagens recebidas
   handleMessage(data) {
+    console.log('📨 Mensagem WebSocket recebida:', data);
+    
     switch (data.type) {
       case 'NEW_MESSAGE':
         // Nova mensagem recebida no chat
@@ -86,12 +88,14 @@ class ChatWebSocket {
       
       case 'USER_TYPING':
         // Usuário está digitando
-        this.onUserTyping(data.userId, data.isTyping);
+        // Backend envia: { type: "USER_TYPING", userId, isTyping, chatId }
+        this.onUserTyping(data.userId, data.isTyping, data.chatId);
         break;
       
       case 'USER_STATUS':
         // Status do usuário (online/offline)
-        this.onUserStatus(data.userId, data.isOnline);
+        // Backend envia: { type: "USER_STATUS", userId, isOnline, chatId }
+        this.onUserStatus(data.userId, data.isOnline, data.chatId);
         break;
       
       case 'MESSAGE_READ':
@@ -104,7 +108,7 @@ class ChatWebSocket {
         break;
       
       default:
-        console.log('Mensagem WebSocket do chat não tratada:', data);
+        console.log('⚠️ Mensagem WebSocket do chat não tratada:', data);
     }
   }
 
@@ -119,20 +123,26 @@ class ChatWebSocket {
   }
 
   // Callback quando usuário está digitando
-  onUserTyping(userId, isTyping) {
-    if (userId === this.userId) return; // Ignora se for o próprio usuário
+  onUserTyping(userId, isTyping, chatId) {
+    // Backend já não envia para o próprio usuário, mas vamos filtrar por segurança
+    if (userId == this.userId) return;
+    
+    console.log(`💬 ${userId} está ${isTyping ? 'digitando' : 'parou de digitar'}`);
     
     window.dispatchEvent(new CustomEvent('chatUserTyping', { 
-      detail: { userId, isTyping, chatId: this.chatId } 
+      detail: { userId, isTyping, chatId: chatId || this.chatId } 
     }));
   }
 
   // Callback quando status do usuário muda (online/offline)
-  onUserStatus(userId, isOnline) {
-    if (userId === this.userId) return; // Ignora se for o próprio usuário
+  onUserStatus(userId, isOnline, chatId) {
+    // Backend já não envia para o próprio usuário, mas vamos filtrar por segurança
+    if (userId == this.userId) return;
+    
+    console.log(`${isOnline ? '🟢' : '⚪'} Usuário ${userId} está ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
     
     window.dispatchEvent(new CustomEvent('chatUserStatus', { 
-      detail: { userId, isOnline, chatId: this.chatId } 
+      detail: { userId, isOnline, chatId: chatId || this.chatId } 
     }));
   }
 
@@ -159,11 +169,16 @@ class ChatWebSocket {
   // Notifica que usuário está digitando
   sendTypingStatus(isTyping) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({
+      // Backend espera: { type: "TYPING", data: { isTyping: true/false } }
+      const message = {
         type: 'TYPING',
-        chatId: this.chatId,
-        isTyping: isTyping
-      }));
+        data: {
+          isTyping: isTyping
+        }
+      };
+      
+      console.log(`⌨️ Enviando status digitação: ${isTyping ? 'DIGITANDO' : 'PAROU'}`);
+      this.ws.send(JSON.stringify(message));
     }
   }
 

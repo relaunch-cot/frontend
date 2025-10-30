@@ -212,6 +212,9 @@ async function enviarMensagemParaBackend(texto) {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('🚀 Inicializando chat...');
+  console.log(`📋 ChatId: ${chatId}, UserId: ${userId}, Contato: ${contactName}`);
+  
   // Carrega mensagens iniciais
   carregarMensagens();
   
@@ -221,6 +224,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Função para atualizar status do contato
   function updateContactStatus(isOnline) {
+    console.log(`📊 Atualizando status: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+    
     if (isOnline) {
       statusIndicator.classList.add('online');
       statusIndicator.classList.remove('offline');
@@ -238,28 +243,33 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Inicializa WebSocket do chat
   if (typeof ChatWebSocket !== 'undefined') {
+    console.log('✅ ChatWebSocket disponível, conectando...');
     window.chatWS = new ChatWebSocket();
     window.chatWS.connect(chatId, userId, token);
     
     // Listener para status de conexão do outro usuário
     window.addEventListener('chatUserStatus', (event) => {
       const { userId: statusUserId, isOnline } = event.detail;
+      console.log(`🔔 Evento chatUserStatus recebido:`, event.detail);
       updateContactStatus(isOnline);
     });
     
-    // Quando conectar ao WebSocket, marca o outro usuário como online
+    // Quando conectar ao WebSocket, marca o outro usuário como online inicialmente
     window.addEventListener('chatConnected', () => {
-      updateContactStatus(true);
+      console.log('✅ WebSocket conectado com sucesso');
+      // Aguarda notificação USER_STATUS do backend sobre o outro usuário
     });
     
     // Quando desconectar, marca como offline
     window.addEventListener('chatDisconnected', () => {
+      console.log('❌ WebSocket desconectado');
       updateContactStatus(false);
     });
     
     // Listener para novas mensagens via WebSocket
     window.addEventListener('chatNewMessage', (event) => {
       const { message } = event.detail;
+      console.log('💬 Nova mensagem recebida via WebSocket:', message);
       
       // Verifica se a mensagem é do chat atual
       if (message.chatId == chatId) {
@@ -287,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let typingTimeout;
     window.addEventListener('chatUserTyping', (event) => {
       const { userId: typingUserId, isTyping } = event.detail;
+      console.log(`⌨️ Evento chatUserTyping recebido:`, event.detail);
       
       // Atualiza o status no header
       if (isTyping) {
@@ -299,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Volta ao status normal após 3 segundos sem receber evento de typing
         typingTimeout = setTimeout(() => {
+          console.log('⏱️ Timeout de digitação atingido, voltando ao status normal');
           const isOnline = statusIndicator.classList.contains('online');
           updateContactStatus(isOnline);
         }, 3000);
@@ -312,19 +324,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Desconecta WebSocket ao sair da página
     window.addEventListener('beforeunload', () => {
+      console.log('👋 Saindo da página, desconectando WebSocket...');
       if (window.chatWS) {
         window.chatWS.disconnect();
       }
     });
+  } else {
+    console.warn('⚠️ ChatWebSocket não está disponível');
   }
   
   // Adiciona listener para enviar status de digitação
   let typingTimeout;
   entrada.addEventListener('input', () => {
     if (window.chatWS && window.chatWS.isConnected()) {
+      // Envia status "digitando"
       window.chatWS.sendTypingStatus(true);
       
+      // Cancela timeout anterior
       clearTimeout(typingTimeout);
+      
+      // Após 1 segundo sem digitar, envia status "parou de digitar"
       typingTimeout = setTimeout(() => {
         window.chatWS.sendTypingStatus(false);
       }, 1000);
