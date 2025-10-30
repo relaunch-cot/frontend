@@ -18,7 +18,7 @@ class NotificationWebSocket {
 
     // URL do WebSocket (ajuste conforme seu backend)
     const WS_BASE_URL = window.ENV_CONFIG?.WS_BACKEND || 'ws://localhost:8080';
-    const wsUrl = `${WS_BASE_URL}/ws/notifications?userId=${userId}&token=${encodeURIComponent(token)}`;
+    const wsUrl = `${WS_BASE_URL}/v1/ws/notifications?userId=${userId}&token=${encodeURIComponent(token)}`;
 
     try {
       this.ws = new WebSocket(wsUrl);
