@@ -40,6 +40,14 @@ if (!userId) {
   window.location.href = '../login/login.html';
 }
 
+// Mostra botão de criar projeto apenas para clientes
+if (userType !== 'client') {
+  const createButton = document.getElementById('openModal');
+  if (createButton) {
+    createButton.style.display = 'none';
+  }
+}
+
 // ==========================
 // Modal
 // ==========================
@@ -61,7 +69,7 @@ function closeModal() {
   }, 300);
 }
 
-btn.onclick = openModal;
+if (btn) btn.onclick = openModal;
 close.onclick = closeModal;
 cancelBtn.onclick = closeModal;
 

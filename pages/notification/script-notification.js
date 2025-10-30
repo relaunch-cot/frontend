@@ -165,6 +165,11 @@ function renderNotifications(notifications) {
         emptyMessage.style.display = 'flex';
         container.style.display = 'none';
         if (clearAllBtn) clearAllBtn.style.display = 'none';
+        
+        // Atualiza badge com contagem 0
+        if (typeof updateBadgeCount === 'function') {
+            updateBadgeCount(0);
+        }
         return;
     }
 
@@ -182,6 +187,11 @@ function renderNotifications(notifications) {
         const card = createNotificationCard(notification);
         container.appendChild(card);
     });
+    
+    // Atualiza badge com a contagem atual
+    if (typeof updateBadgeCount === 'function') {
+        updateBadgeCount(notifications.length);
+    }
 }
 
 // Aceita solicitação de projeto
@@ -252,6 +262,11 @@ async function acceptRequest(notificationId, freelancerId) {
                 document.getElementById('empty-message').style.display = 'flex';
                 document.getElementById('notifications-container').style.display = 'none';
             }
+            
+            // Atualiza badge no header
+            if (typeof updateBadgeCount === 'function') {
+                updateBadgeCount(remaining.length);
+            }
         }, 300);
 
         showSuccessBadge('Solicitação aceita com sucesso!');
@@ -314,6 +329,11 @@ async function rejectRequest(notificationId, freelancerId) {
                 document.getElementById('empty-message').style.display = 'flex';
                 document.getElementById('notifications-container').style.display = 'none';
             }
+            
+            // Atualiza badge no header
+            if (typeof updateBadgeCount === 'function') {
+                updateBadgeCount(remaining.length);
+            }
         }, 300);
 
         showSuccessBadge('Solicitação recusada');
@@ -349,6 +369,11 @@ async function deleteNotification(notificationId) {
                 if (remaining.length === 0) {
                     document.getElementById('empty-message').style.display = 'flex';
                     document.getElementById('notifications-container').style.display = 'none';
+                }
+                
+                // Atualiza badge no header
+                if (typeof updateBadgeCount === 'function') {
+                    updateBadgeCount(remaining.length);
                 }
             }, 300);
         }
@@ -388,6 +413,11 @@ async function deleteAllNotifications() {
         // Mostra mensagem de vazio
         document.getElementById('empty-message').style.display = 'flex';
         document.getElementById('notifications-container').style.display = 'none';
+        
+        // Atualiza badge no header
+        if (typeof updateBadgeCount === 'function') {
+            updateBadgeCount(0);
+        }
 
         showSuccessBadge('Todas as notificações foram removidas');
     } catch (error) {
