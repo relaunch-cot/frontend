@@ -110,12 +110,23 @@ function updateBadgeCount(count) {
 const isNotificationPage = window.location.pathname.includes('/notification/notification.html');
 
 if (!isNotificationPage) {
+  // Faz busca inicial
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', updateNotificationBadge);
   } else {
     updateNotificationBadge();
   }
   
-  // Atualiza badge a cada 30 segundos
-  setInterval(updateNotificationBadge, 30000);
+  // Inicializa WebSocket para atualizações em tempo real
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof initializeNotificationWebSocket === 'function') {
+        initializeNotificationWebSocket();
+      }
+    });
+  } else {
+    if (typeof initializeNotificationWebSocket === 'function') {
+      initializeNotificationWebSocket();
+    }
+  }
 }

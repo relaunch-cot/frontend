@@ -568,4 +568,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Carrega notificações
     const notifications = await fetchNotifications();
     renderNotifications(notifications);
+    
+    // Listener para novas notificações via WebSocket
+    window.addEventListener('newNotification', async () => {
+        // Recarrega a lista de notificações
+        const updatedNotifications = await fetchNotifications();
+        renderNotifications(updatedNotifications);
+    });
+    
+    // Listener para notificações deletadas via WebSocket
+    window.addEventListener('notificationDeleted', async (event) => {
+        const { notificationId } = event.detail;
+        
+        // Remove o card da página se existir
+        const card = document.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (card) {
+            card.style.animation = 'fadeOut 0.3s ease';
+            setTimeout(() => {
+                card.remove();
+                
+                // Verifica se ainda há notificações
+                const remaining = document.querySelectorAll('.notification-card');
+                if (remaining.length === 0) {
+                    document.getElementById('empty-message').style.display = 'flex';
+                    document.getElementById('notifications-container').style.display = 'none';
+                }
+                
+                // Atualiza badge
+                if (typeof updateBadgeCount === 'function') {
+                    updateBadgeCount(remaining.length);
+                }
+            }, 300);
+        }
+    });
 });
