@@ -40,6 +40,11 @@ class ChatWebSocket {
       console.log(`✅ WebSocket do Chat ${this.chatId} conectado`);
       this.reconnectAttempts = 0;
       this.startHeartbeat();
+      
+      // Dispara evento de conexão
+      window.dispatchEvent(new CustomEvent('chatConnected', { 
+        detail: { chatId: this.chatId } 
+      }));
     };
 
     this.ws.onmessage = (event) => {
@@ -59,6 +64,11 @@ class ChatWebSocket {
       console.log('WebSocket do chat desconectado:', event.code, event.reason);
       this.stopHeartbeat();
       
+      // Dispara evento de desconexão
+      window.dispatchEvent(new CustomEvent('chatDisconnected', { 
+        detail: { chatId: this.chatId } 
+      }));
+      
       if (!this.isIntentionallyClosed && this.reconnectAttempts < this.maxReconnectAttempts) {
         console.log(`Tentando reconectar chat... (${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})`);
         this.scheduleReconnect();
@@ -77,6 +87,11 @@ class ChatWebSocket {
       case 'USER_TYPING':
         // Usuário está digitando
         this.onUserTyping(data.userId, data.isTyping);
+        break;
+      
+      case 'USER_STATUS':
+        // Status do usuário (online/offline)
+        this.onUserStatus(data.userId, data.isOnline);
         break;
       
       case 'MESSAGE_READ':
@@ -109,6 +124,15 @@ class ChatWebSocket {
     
     window.dispatchEvent(new CustomEvent('chatUserTyping', { 
       detail: { userId, isTyping, chatId: this.chatId } 
+    }));
+  }
+
+  // Callback quando status do usuário muda (online/offline)
+  onUserStatus(userId, isOnline) {
+    if (userId === this.userId) return; // Ignora se for o próprio usuário
+    
+    window.dispatchEvent(new CustomEvent('chatUserStatus', { 
+      detail: { userId, isOnline, chatId: this.chatId } 
     }));
   }
 

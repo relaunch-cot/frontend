@@ -215,10 +215,47 @@ document.addEventListener('DOMContentLoaded', () => {
   // Carrega mensagens iniciais
   carregarMensagens();
   
+  // Referências para elementos de status
+  const statusIndicator = document.getElementById('statusIndicator');
+  const contactStatus = document.getElementById('contactStatus');
+  
+  // Função para atualizar status do contato
+  function updateContactStatus(isOnline) {
+    if (isOnline) {
+      statusIndicator.classList.add('online');
+      statusIndicator.classList.remove('offline');
+      contactStatus.textContent = 'Online';
+      contactStatus.classList.add('online');
+      contactStatus.classList.remove('offline');
+    } else {
+      statusIndicator.classList.remove('online');
+      statusIndicator.classList.add('offline');
+      contactStatus.textContent = 'Offline';
+      contactStatus.classList.remove('online');
+      contactStatus.classList.add('offline');
+    }
+  }
+  
   // Inicializa WebSocket do chat
   if (typeof ChatWebSocket !== 'undefined') {
     window.chatWS = new ChatWebSocket();
     window.chatWS.connect(chatId, userId, token);
+    
+    // Listener para status de conexão do outro usuário
+    window.addEventListener('chatUserStatus', (event) => {
+      const { userId: statusUserId, isOnline } = event.detail;
+      updateContactStatus(isOnline);
+    });
+    
+    // Quando conectar ao WebSocket, marca o outro usuário como online
+    window.addEventListener('chatConnected', () => {
+      updateContactStatus(true);
+    });
+    
+    // Quando desconectar, marca como offline
+    window.addEventListener('chatDisconnected', () => {
+      updateContactStatus(false);
+    });
     
     // Listener para novas mensagens via WebSocket
     window.addEventListener('chatNewMessage', (event) => {
@@ -247,25 +284,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Listener para indicador de digitação
+    let typingTimeout;
     window.addEventListener('chatUserTyping', (event) => {
       const { userId: typingUserId, isTyping } = event.detail;
       
-      // Mostra/esconde indicador de "está digitando..."
-      let typingIndicator = document.getElementById('typing-indicator');
-      
+      // Atualiza o status no header
       if (isTyping) {
-        if (!typingIndicator) {
-          typingIndicator = document.createElement('div');
-          typingIndicator.id = 'typing-indicator';
-          typingIndicator.className = 'typing-indicator';
-          typingIndicator.textContent = 'Digitando...';
-          mensagensContainer.appendChild(typingIndicator);
-          mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
-        }
+        contactStatus.textContent = 'Digitando...';
+        contactStatus.classList.add('typing');
+        contactStatus.classList.remove('online', 'offline');
+        
+        // Limpa timeout anterior
+        clearTimeout(typingTimeout);
+        
+        // Volta ao status normal após 3 segundos sem receber evento de typing
+        typingTimeout = setTimeout(() => {
+          const isOnline = statusIndicator.classList.contains('online');
+          updateContactStatus(isOnline);
+        }, 3000);
       } else {
-        if (typingIndicator) {
-          typingIndicator.remove();
-        }
+        // Volta ao status normal
+        clearTimeout(typingTimeout);
+        const isOnline = statusIndicator.classList.contains('online');
+        updateContactStatus(isOnline);
       }
     });
     
