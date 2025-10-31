@@ -1,0 +1,143 @@
+# Configuração Netlify para URLs limpas
+
+[[redirects]]
+  from = "/home"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/inicio"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/projects-gallery"
+  to = "/pages/projects-gallery/projects-gallery.html"
+  status = 200
+
+[[redirects]]
+  from = "/projetos"
+  to = "/pages/projects-gallery/projects-gallery.html"
+  status = 200
+
+[[redirects]]
+  from = "/available-projects"
+  to = "/pages/available-projects/available-projects.html"
+  status = 200
+
+[[redirects]]
+  from = "/projetos-disponiveis"
+  to = "/pages/available-projects/available-projects.html"
+  status = 200
+
+[[redirects]]
+  from = "/project"
+  to = "/pages/project/project.html"
+  status = 200
+
+[[redirects]]
+  from = "/projeto"
+  to = "/pages/project/project.html"
+  status = 200
+
+[[redirects]]
+  from = "/chats"
+  to = "/pages/project-chat/project-chats.html"
+  status = 200
+
+[[redirects]]
+  from = "/chat"
+  to = "/pages/project-chat/project-chat.html"
+  status = 200
+
+[[redirects]]
+  from = "/perfil"
+  to = "/pages/perfil/perfil.html"
+  status = 200
+
+[[redirects]]
+  from = "/profile"
+  to = "/pages/perfil/perfil.html"
+  status = 200
+
+[[redirects]]
+  from = "/editar-perfil"
+  to = "/pages/perfil/edit-perfil.html"
+  status = 200
+
+[[redirects]]
+  from = "/edit-profile"
+  to = "/pages/perfil/edit-perfil.html"
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/pages/login/login.html"
+  status = 200
+
+[[redirects]]
+  from = "/cadastro"
+  to = "/pages/cadastro/cadastro.html"
+  status = 200
+
+[[redirects]]
+  from = "/register"
+  to = "/pages/cadastro/cadastro.html"
+  status = 200
+
+[[redirects]]
+  from = "/recuperar-senha"
+  to = "/pages/recuppassword/recuppassword.html"
+  status = 200
+
+[[redirects]]
+  from = "/reset-password"
+  to = "/pages/recuppassword/recuppassword.html"
+  status = 200
+
+[[redirects]]
+  from = "/recuperar-notificacao"
+  to = "/pages/recnoti/recnoti.html"
+  status = 200
+
+[[redirects]]
+  from = "/notificacoes"
+  to = "/pages/notification/notification.html"
+  status = 200
+
+[[redirects]]
+  from = "/notifications"
+  to = "/pages/notification/notification.html"
+  status = 200
+
+[[redirects]]
+  from = "/project-file"
+  to = "/pages/project-file/project-file-0.html"
+  status = 200
+
+[[redirects]]
+  from = "/arquivos-projeto"
+  to = "/pages/project-file/project-file-0.html"
+  status = 200
+
+[[redirects]]
+  from = "/project-payment"
+  to = "/pages/project-payment/project-payment-0.html"
+  status = 200
+
+[[redirects]]
+  from = "/pagamento-projeto"
+  to = "/pages/project-payment/project-payment-0.html"
+  status = 200
+
+# Mantém URLs antigas funcionando
+[[redirects]]
+  from = "/pages/*"
+  to = "/pages/:splat"
+  status = 200
+
+# 404 fallback para home
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 404
