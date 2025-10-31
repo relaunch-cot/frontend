@@ -130,3 +130,57 @@ if (!isNotificationPage) {
     }
   }
 }
+
+// ========================================
+// INICIALIZA PRESENCE MANAGER EM TODAS AS PÁGINAS
+// ========================================
+// Conecta ao sistema de presença global (exceto login/cadastro)
+const isAuthPage = window.location.pathname.includes('/login/') || 
+                   window.location.pathname.includes('/cadastro/');
+
+if (!isAuthPage) {
+  function initializePresenceManager() {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      console.log('⚠️ Token não encontrado - Presence Manager não inicializado');
+      return;
+    }
+    
+    // Verifica se presenceManager existe
+    if (typeof window.presenceManager === 'undefined') {
+      console.warn('⚠️ presenceManager não está disponível');
+      return;
+    }
+    
+    // Verifica se já está conectado
+    if (window.presenceManager.isConnected()) {
+      console.log('✅ Presence Manager já está conectado');
+      return;
+    }
+    
+    try {
+      // Extrai userId do token
+      const tokenWithoutBearer = token.replace('Bearer ', '');
+      const payload = JSON.parse(atob(tokenWithoutBearer.split('.')[1]));
+      const userId = payload.userId;
+      
+      if (!userId) {
+        console.error('❌ UserId não encontrado no token');
+        return;
+      }
+      
+      console.log('🔌 Inicializando Presence Manager globalmente...');
+      window.presenceManager.connect(userId, token);
+    } catch (error) {
+      console.error('❌ Erro ao inicializar Presence Manager:', error);
+    }
+  }
+  
+  // Inicializa quando a página carregar
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePresenceManager);
+  } else {
+    initializePresenceManager();
+  }
+}
