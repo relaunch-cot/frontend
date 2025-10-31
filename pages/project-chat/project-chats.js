@@ -6,7 +6,7 @@ const emptyMsg = document.getElementById('emptyMsg');
 const token = localStorage.getItem('token');
 if (!token) {
   showError('Você precisa estar logado para acessar o chat.');
-  setTimeout(() => window.location.href = '../home/index.html', 2000);
+  setTimeout(() => window.location.href = '../../index.html', 2000);
 }
 
 function parseJwt(token) {

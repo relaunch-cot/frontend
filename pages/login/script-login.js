@@ -76,7 +76,7 @@ loginForm.addEventListener("submit", async (e) => {
             showSuccess("Login realizado com sucesso!");
 
             setTimeout(() => {
-                window.location.href = "../home/index.html"; 
+                window.location.href = "../../index.html"; 
             }, 2000);
         } else {
             showError("Email ou senha incorretos. Tente novamente.");

@@ -43,7 +43,7 @@ const contactUserId = urlParams.get('contactUserId'); // ID do outro usuário
 
 if (!chatId) {
   showError('Nenhum chat selecionado.');
-  setTimeout(() => window.location.href = '../home/index.html', 2000);
+  setTimeout(() => window.location.href = '../../index.html', 2000);
 }
 
 document.getElementById('contactName').textContent = contactName;
