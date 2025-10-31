@@ -1,0 +1,50 @@
+# Redirecionamentos para URLs limpas
+# Sintaxe: origem destino código
+
+# Página inicial
+/home /index.html 200
+/inicio /index.html 200
+
+# Projetos
+/projects-gallery /pages/projects-gallery/projects-gallery.html 200
+/projetos /pages/projects-gallery/projects-gallery.html 200
+/available-projects /pages/available-projects/available-projects.html 200
+/projetos-disponiveis /pages/available-projects/available-projects.html 200
+/project /pages/project/project.html 200
+/projeto /pages/project/project.html 200
+
+# Chat
+/chats /pages/project-chat/project-chats.html 200
+/chat /pages/project-chat/project-chat.html 200
+
+# Perfil
+/perfil /pages/perfil/perfil.html 200
+/profile /pages/perfil/perfil.html 200
+/editar-perfil /pages/perfil/edit-perfil.html 200
+/edit-profile /pages/perfil/edit-perfil.html 200
+
+# Autenticação
+/login /pages/login/login.html 200
+/cadastro /pages/cadastro/cadastro.html 200
+/register /pages/cadastro/cadastro.html 200
+/recuperar-senha /pages/recuppassword/recuppassword.html 200
+/reset-password /pages/recuppassword/recuppassword.html 200
+/recuperar-notificacao /pages/recnoti/recnoti.html 200
+
+# Notificações
+/notificacoes /pages/notification/notification.html 200
+/notifications /pages/notification/notification.html 200
+
+# Arquivos de Projeto
+/project-file /pages/project-file/project-file-0.html 200
+/arquivos-projeto /pages/project-file/project-file-0.html 200
+
+# Pagamento de Projeto
+/project-payment /pages/project-payment/project-payment-0.html 200
+/pagamento-projeto /pages/project-payment/project-payment-0.html 200
+
+# Fallback para SPA (Single Page Application) - mantém URLs antigas funcionando
+/pages/* /pages/:splat 200
+
+# Redireciona 404 para home
+/* /index.html 404

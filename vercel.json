@@ -1,0 +1,46 @@
+{
+  "rewrites": [
+    { "source": "/home", "destination": "/index.html" },
+    { "source": "/inicio", "destination": "/index.html" },
+    
+    { "source": "/projects-gallery", "destination": "/pages/projects-gallery/projects-gallery.html" },
+    { "source": "/projetos", "destination": "/pages/projects-gallery/projects-gallery.html" },
+    { "source": "/available-projects", "destination": "/pages/available-projects/available-projects.html" },
+    { "source": "/projetos-disponiveis", "destination": "/pages/available-projects/available-projects.html" },
+    { "source": "/project", "destination": "/pages/project/project.html" },
+    { "source": "/projeto", "destination": "/pages/project/project.html" },
+    
+    { "source": "/chats", "destination": "/pages/project-chat/project-chats.html" },
+    { "source": "/chat", "destination": "/pages/project-chat/project-chat.html" },
+    
+    { "source": "/perfil", "destination": "/pages/perfil/perfil.html" },
+    { "source": "/profile", "destination": "/pages/perfil/perfil.html" },
+    { "source": "/editar-perfil", "destination": "/pages/perfil/edit-perfil.html" },
+    { "source": "/edit-profile", "destination": "/pages/perfil/edit-perfil.html" },
+    
+    { "source": "/login", "destination": "/pages/login/login.html" },
+    { "source": "/cadastro", "destination": "/pages/cadastro/cadastro.html" },
+    { "source": "/register", "destination": "/pages/cadastro/cadastro.html" },
+    { "source": "/recuperar-senha", "destination": "/pages/recuppassword/recuppassword.html" },
+    { "source": "/reset-password", "destination": "/pages/recuppassword/recuppassword.html" },
+    { "source": "/recuperar-notificacao", "destination": "/pages/recnoti/recnoti.html" },
+    
+    { "source": "/notificacoes", "destination": "/pages/notification/notification.html" },
+    { "source": "/notifications", "destination": "/pages/notification/notification.html" },
+    
+    { "source": "/project-file", "destination": "/pages/project-file/project-file-0.html" },
+    { "source": "/arquivos-projeto", "destination": "/pages/project-file/project-file-0.html" },
+    
+    { "source": "/project-payment", "destination": "/pages/project-payment/project-payment-0.html" },
+    { "source": "/pagamento-projeto", "destination": "/pages/project-payment/project-payment-0.html" }
+  ],
+  "redirects": [
+    {
+      "source": "/pages/(.*)",
+      "destination": "/pages/$1",
+      "permanent": false
+    }
+  ],
+  "trailingSlash": false,
+  "cleanUrls": true
+}
