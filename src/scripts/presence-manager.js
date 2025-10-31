@@ -10,6 +10,8 @@ class PresenceManager {
     this.userId = null;
     this.token = null;
     this.onlineUsers = new Set(); // IDs dos usuários online
+    this.offlineTimeouts = new Map(); // Timeouts pendentes para marcar como offline
+    this.OFFLINE_DELAY = 5000; // 5 segundos de delay antes de marcar offline
   }
 
   // Conecta ao WebSocket de presença global
@@ -106,6 +108,9 @@ class PresenceManager {
       console.log('WebSocket de presença desconectado:', event.code);
       this.stopHeartbeat();
       
+      // Limpa todos os timeouts pendentes de offline
+      this.clearAllOfflineTimeouts();
+      
       // Dispara evento de desconexão
       window.dispatchEvent(new CustomEvent('presenceDisconnected'));
       
@@ -169,24 +174,58 @@ class PresenceManager {
   onUserOnline(userId) {
     if (userId == this.userId) return; // Ignora próprio usuário
     
-    this.onlineUsers.add(userId);
-    console.log(`🟢 Usuário ${userId} está ONLINE`);
+    // Cancela timeout de offline pendente (se houver)
+    if (this.offlineTimeouts.has(userId)) {
+      console.log(`⏸️ Cancelando timeout de offline para ${userId} (reconectou)`);
+      clearTimeout(this.offlineTimeouts.get(userId));
+      this.offlineTimeouts.delete(userId);
+    }
     
-    window.dispatchEvent(new CustomEvent('userOnline', { 
-      detail: { userId } 
-    }));
+    // Se já não estava online, adiciona e dispara evento
+    const wasOffline = !this.onlineUsers.has(userId);
+    this.onlineUsers.add(userId);
+    
+    if (wasOffline) {
+      console.log(`🟢 Usuário ${userId} está ONLINE`);
+      
+      window.dispatchEvent(new CustomEvent('userOnline', { 
+        detail: { userId } 
+      }));
+    } else {
+      console.log(`✅ Usuário ${userId} reconectou (permanece ONLINE)`);
+    }
   }
 
   // Callback quando usuário fica offline
   onUserOffline(userId) {
     if (userId == this.userId) return; // Ignora próprio usuário
     
-    this.onlineUsers.delete(userId);
-    console.log(`⚪ Usuário ${userId} está OFFLINE`);
+    // Verifica se já existe um timeout pendente
+    if (this.offlineTimeouts.has(userId)) {
+      console.log(`⏱️ Timeout de offline já existe para ${userId}, ignorando...`);
+      return;
+    }
     
-    window.dispatchEvent(new CustomEvent('userOffline', { 
-      detail: { userId } 
-    }));
+    console.log(`⏳ Usuário ${userId} desconectou - aguardando ${this.OFFLINE_DELAY/1000}s antes de marcar como OFFLINE`);
+    
+    // Cria timeout de 5 segundos
+    const timeoutId = setTimeout(() => {
+      // Após 5 segundos sem receber USER_ONLINE, marca como offline
+      if (this.onlineUsers.has(userId)) {
+        this.onlineUsers.delete(userId);
+        console.log(`⚪ Usuário ${userId} está OFFLINE (confirmado após ${this.OFFLINE_DELAY/1000}s)`);
+        
+        window.dispatchEvent(new CustomEvent('userOffline', { 
+          detail: { userId } 
+        }));
+      }
+      
+      // Remove timeout da lista
+      this.offlineTimeouts.delete(userId);
+    }, this.OFFLINE_DELAY);
+    
+    // Armazena o timeout
+    this.offlineTimeouts.set(userId, timeoutId);
   }
 
   // Callback quando recebe lista de usuários online
@@ -249,6 +288,7 @@ class PresenceManager {
   disconnect() {
     this.isIntentionallyClosed = true;
     this.stopHeartbeat();
+    this.clearAllOfflineTimeouts();
     
     if (this.ws) {
       this.ws.close(1000, 'Desconexão intencional');
@@ -256,6 +296,17 @@ class PresenceManager {
     }
     
     this.onlineUsers.clear();
+  }
+
+  // Limpa todos os timeouts pendentes de offline
+  clearAllOfflineTimeouts() {
+    if (this.offlineTimeouts.size > 0) {
+      console.log(`🧹 Limpando ${this.offlineTimeouts.size} timeouts de offline pendentes`);
+      this.offlineTimeouts.forEach((timeoutId) => {
+        clearTimeout(timeoutId);
+      });
+      this.offlineTimeouts.clear();
+    }
   }
 
   // Verifica se está conectado
