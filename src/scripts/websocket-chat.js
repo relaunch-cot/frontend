@@ -55,14 +55,31 @@ class ChatWebSocket {
           return;
         }
         
-        const data = JSON.parse(event.data);
-        this.handleMessage(data);
+        // Backend pode enviar múltiplas mensagens JSON concatenadas
+        // Exemplo: {"type":"CONNECTED"...}\n{"type":"USER_STATUS"...}
+        // Dividimos por quebra de linha e processamos cada uma
+        const messages = event.data.trim().split('\n').filter(msg => msg.trim());
+        
+        if (messages.length > 1) {
+          console.log(`📦 Recebidas ${messages.length} mensagens concatenadas no chat`);
+        }
+        
+        messages.forEach(msgStr => {
+          try {
+            const data = JSON.parse(msgStr);
+            this.handleMessage(data);
+          } catch (parseError) {
+            console.error('❌ Erro ao parsear mensagem individual do chat:', parseError);
+            console.error('📄 Mensagem problemática:', msgStr);
+          }
+        });
       } catch (error) {
         console.error('❌ Erro ao processar mensagem WebSocket do chat:', error);
         console.error('📄 Conteúdo recebido:', event.data);
         
         if (event.data && typeof event.data === 'string' && event.data.includes('}{')) {
-          console.error('⚠️ Múltiplas mensagens JSON concatenadas no chat!');
+          console.error('⚠️ Múltiplas mensagens JSON concatenadas SEM quebra de linha no chat!');
+          console.error('💡 Backend deveria enviar mensagens separadas por \\n');
         }
       }
     };
@@ -112,6 +129,11 @@ class ChatWebSocket {
       case 'MESSAGE_READ':
         // Mensagem foi lida
         this.onMessageRead(data.messageId);
+        break;
+      
+      case 'CONNECTED':
+        // Confirmação de conexão do backend
+        console.log('✅ Chat WebSocket confirmado:', data.message || 'Conectado');
         break;
       
       case 'PONG':

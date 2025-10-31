@@ -141,6 +141,21 @@ class PresenceManager {
         this.onOnlineUsersList(data.onlineUsers || data.userIds || []);
         break;
       
+      case 'USER_STATUS':
+        // Status de chat específico (isOnline do backend antigo)
+        // Este evento deveria vir do WebSocket de chat, não de presença
+        // Vamos tratá-lo como USER_ONLINE/USER_OFFLINE para compatibilidade
+        if (data.isOnline !== undefined) {
+          if (data.isOnline) {
+            this.onUserOnline(data.userId);
+          } else {
+            this.onUserOffline(data.userId);
+          }
+        } else {
+          console.log('⚠️ USER_STATUS sem campo isOnline:', data);
+        }
+        break;
+      
       case 'PONG':
         // Resposta ao heartbeat
         break;
