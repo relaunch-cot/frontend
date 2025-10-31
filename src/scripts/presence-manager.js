@@ -14,6 +14,45 @@ class PresenceManager {
     this.OFFLINE_DELAY = 5000; // 5 segundos de delay antes de marcar offline
     this.subscribedUsers = new Set(); // IDs dos usuários que estamos monitorando
     this.MAX_SUBSCRIPTIONS = 50; // Limite de subscrições simultâneas
+    this.CACHE_KEY = 'presence_online_users'; // Chave para cache no localStorage
+    
+    // Carrega estado do cache ao inicializar
+    this.loadFromCache();
+  }
+
+  // Carrega estado de presença do localStorage
+  loadFromCache() {
+    try {
+      const cached = localStorage.getItem(this.CACHE_KEY);
+      if (cached) {
+        const data = JSON.parse(cached);
+        const now = Date.now();
+        
+        // Cache válido por 10 segundos
+        if (data.timestamp && (now - data.timestamp) < 10000) {
+          data.onlineUsers.forEach(userId => this.onlineUsers.add(userId));
+          console.log(`📦 Cache carregado: ${this.onlineUsers.size} usuários online`);
+        } else {
+          console.log('⏰ Cache expirado, será atualizado');
+          localStorage.removeItem(this.CACHE_KEY);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar cache de presença:', error);
+    }
+  }
+
+  // Salva estado de presença no localStorage
+  saveToCache() {
+    try {
+      const data = {
+        onlineUsers: Array.from(this.onlineUsers),
+        timestamp: Date.now()
+      };
+      localStorage.setItem(this.CACHE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.error('❌ Erro ao salvar cache de presença:', error);
+    }
   }
 
   // Conecta ao WebSocket de presença global
@@ -204,6 +243,9 @@ class PresenceManager {
     const wasOffline = !this.onlineUsers.has(userId);
     this.onlineUsers.add(userId);
     
+    // Salva no cache
+    this.saveToCache();
+    
     if (wasOffline) {
       console.log(`🟢 Usuário ${userId} está ONLINE`);
       
@@ -234,6 +276,9 @@ class PresenceManager {
         this.onlineUsers.delete(userId);
         console.log(`⚪ Usuário ${userId} está OFFLINE (confirmado após ${this.OFFLINE_DELAY/1000}s)`);
         
+        // Salva no cache
+        this.saveToCache();
+        
         window.dispatchEvent(new CustomEvent('userOffline', { 
           detail: { userId } 
         }));
@@ -257,6 +302,9 @@ class PresenceManager {
     });
     
     console.log(`📋 Usuários online:`, Array.from(this.onlineUsers));
+    
+    // Salva no cache
+    this.saveToCache();
     
     window.dispatchEvent(new CustomEvent('onlineUsersListUpdated', { 
       detail: { userIds: Array.from(this.onlineUsers) } 
@@ -415,6 +463,14 @@ class PresenceManager {
     }
     
     this.onlineUsers.clear();
+    
+    // Limpa o cache ao desconectar
+    try {
+      localStorage.removeItem(this.CACHE_KEY);
+      console.log('🗑️ Cache de presença limpo');
+    } catch (error) {
+      console.warn('Erro ao limpar cache:', error);
+    }
   }
 
   // Limpa todos os timeouts pendentes de offline
