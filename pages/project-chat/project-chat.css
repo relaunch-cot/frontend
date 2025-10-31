@@ -534,10 +534,11 @@ nav{
     position: fixed;
     top: 20px;
     right: 20px;
-    width: 60px;
-    height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+    padding: 10px 15px;
     background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
-    border-radius: 50%;
+    border-radius: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -547,11 +548,29 @@ nav{
     animation: slideInFromTop 0.3s ease-out, floatIcon 3s ease-in-out infinite;
 }
 
+.new-message-notification .notification-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1;
+    position: relative;
+}
+
 .new-message-notification svg {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
     color: white;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.new-message-notification .notification-text {
+    color: white;
+    font-family: "Gudea", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .new-message-notification .pulse-ring {
@@ -559,7 +578,7 @@ nav{
     width: 100%;
     height: 100%;
     border: 3px solid #3498DB;
-    border-radius: 50%;
+    border-radius: 30px;
     animation: pulseRing 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
