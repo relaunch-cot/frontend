@@ -1,0 +1,17 @@
+{
+  "name": "relaunch-frontend",
+  "version": "1.0.0",
+  "description": "ReLaunch - Frontend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "relaunch",
+    "frontend",
+    "static-server"
+  ],
+  "author": "ReLaunch Team",
+  "license": "ISC"
+}
