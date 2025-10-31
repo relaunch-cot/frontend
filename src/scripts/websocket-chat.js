@@ -104,9 +104,9 @@ class ChatWebSocket {
         break;
       
       case 'USER_STATUS':
-        // Status do usuário (online/offline)
-        // Backend envia: { type: "USER_STATUS", userId, isOnline, chatId }
-        this.onUserStatus(data.userId, data.isOnline, data.chatId);
+        // Status do usuário (in chat / not in chat)
+        // Backend envia: { type: "USER_STATUS", userId, isInChat, chatId }
+        this.onUserStatus(data.userId, data.isInChat, data.chatId);
         break;
       
       case 'MESSAGE_READ':
@@ -145,15 +145,15 @@ class ChatWebSocket {
     }));
   }
 
-  // Callback quando status do usuário muda (online/offline)
-  onUserStatus(userId, isOnline, chatId) {
+  // Callback quando status do usuário muda (in chat / not in chat)
+  onUserStatus(userId, isInChat, chatId) {
     // Backend já não envia para o próprio usuário, mas vamos filtrar por segurança
     if (userId == this.userId) return;
     
-    console.log(`${isOnline ? '🟢' : '⚪'} Usuário ${userId} está ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+    console.log(`${isInChat ? '�' : '👁️'} Usuário ${userId} está ${isInChat ? 'NO CHAT' : 'FORA DO CHAT'}`);
     
     window.dispatchEvent(new CustomEvent('chatUserStatus', { 
-      detail: { userId, isOnline, chatId: chatId || this.chatId } 
+      detail: { userId, isInChat, chatId: chatId || this.chatId } 
     }));
   }
 

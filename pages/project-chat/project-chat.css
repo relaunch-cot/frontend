@@ -289,6 +289,21 @@ nav{
     background: #27ae60;
 }
 
+.status-indicator.online.in-chat {
+    background: #2ecc71;
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);
+    animation: pulse-in-chat 2s infinite;
+}
+
+@keyframes pulse-in-chat {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);
+    }
+    50% {
+        box-shadow: 0 0 12px rgba(46, 204, 113, 0.9);
+    }
+}
+
 .status-indicator.offline {
     background: #95a5a6;
 }
@@ -314,6 +329,11 @@ nav{
 
 .contact-status.online {
     color: #27ae60;
+}
+
+.contact-status.online.in-chat {
+    color: #2ecc71;
+    font-weight: 600;
 }
 
 .contact-status.typing {

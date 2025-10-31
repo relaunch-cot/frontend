@@ -259,21 +259,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const statusIndicator = document.getElementById('statusIndicator');
   const contactStatus = document.getElementById('contactStatus');
   
+  // Variável para rastrear se o contato está no chat (não apenas online)
+  let isContactInChat = false;
+  
   // Função para atualizar status do contato
-  function updateContactStatus(isOnline) {
-    console.log(`Atualizando status: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+  function updateContactStatus(isOnline, inChat = false) {
+    console.log(`Atualizando status: Online=${isOnline}, InChat=${inChat}`);
     
-    if (isOnline) {
-      statusIndicator.classList.add('online');
+    if (inChat) {
+      // Usuário está ATIVAMENTE no chat
+      statusIndicator.classList.add('online', 'in-chat');
       statusIndicator.classList.remove('offline');
+      contactStatus.textContent = 'No chat';
+      contactStatus.classList.add('online', 'in-chat');
+      contactStatus.classList.remove('offline');
+    } else if (isOnline) {
+      // Usuário está online na plataforma, mas não neste chat
+      statusIndicator.classList.add('online');
+      statusIndicator.classList.remove('offline', 'in-chat');
       contactStatus.textContent = 'Online';
       contactStatus.classList.add('online');
-      contactStatus.classList.remove('offline');
+      contactStatus.classList.remove('offline', 'in-chat');
     } else {
-      statusIndicator.classList.remove('online');
+      // Usuário está offline
+      statusIndicator.classList.remove('online', 'in-chat');
       statusIndicator.classList.add('offline');
       contactStatus.textContent = 'Offline';
-      contactStatus.classList.remove('online');
+      contactStatus.classList.remove('online', 'in-chat');
       contactStatus.classList.add('offline');
     }
   }
@@ -293,15 +305,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (contactUserId && window.presenceManager) {
     const isOnline = window.presenceManager.isUserOnline(contactUserId);
     console.log(`📊 Status inicial de ${contactName} (${contactUserId}): ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
-    updateContactStatus(isOnline);
+    updateContactStatus(isOnline, false); // Online na plataforma, mas ainda não sabemos se está no chat
   }
   
   // Listener para quando contato fica online
   window.addEventListener('userOnline', (event) => {
     const { userId: onlineUserId } = event.detail;
     if (contactUserId && onlineUserId == contactUserId) {
-      console.log(`� ${contactName} ficou ONLINE (presença global)`);
-      updateContactStatus(true);
+      console.log(`🟢 ${contactName} ficou ONLINE (presença global)`);
+      updateContactStatus(true, isContactInChat); // Mantém status do chat
     }
   });
   
@@ -310,7 +322,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const { userId: offlineUserId } = event.detail;
     if (contactUserId && offlineUserId == contactUserId) {
       console.log(`⚪ ${contactName} ficou OFFLINE (presença global)`);
-      updateContactStatus(false);
+      isContactInChat = false; // Se ficou offline, não está mais no chat
+      updateContactStatus(false, false);
     }
   });
   
@@ -320,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contactUserId) {
       const isOnline = userIds.includes(contactUserId);
       console.log(`📋 Lista atualizada - ${contactName} está ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
-      updateContactStatus(isOnline);
+      updateContactStatus(isOnline, isContactInChat); // Mantém status do chat
     }
   });
   
@@ -376,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Atualiza o status no header
         contactStatus.textContent = 'Digitando...';
         contactStatus.classList.add('typing');
-        contactStatus.classList.remove('online', 'offline');
+        contactStatus.classList.remove('online', 'offline', 'in-chat');
         
         // Mostra indicador visual embaixo das mensagens (só cria se não existir)
         mostrarIndicadorDigitacao();
@@ -395,9 +408,23 @@ document.addEventListener('DOMContentLoaded', () => {
       typingTimeout = setTimeout(() => {
         console.log('⏱️ Timeout de 10 segundos atingido, removendo indicador');
         esconderIndicadorDigitacao();
-        const isOnline = statusIndicator.classList.contains('online');
-        updateContactStatus(isOnline);
+        const isOnline = window.presenceManager && window.presenceManager.isUserOnline(contactUserId);
+        updateContactStatus(isOnline, isContactInChat);
       },1500);
+    });
+    
+    // Listener para status do usuário no chat (in chat / not in chat)
+    window.addEventListener('chatUserStatus', (event) => {
+      const { userId: statusUserId, isInChat } = event.detail;
+      console.log(`💬 Evento chatUserStatus recebido:`, event.detail);
+      
+      // Verifica se é o contato que estamos conversando
+      if (contactUserId && statusUserId == contactUserId) {
+        isContactInChat = isInChat;
+        const isOnline = window.presenceManager && window.presenceManager.isUserOnline(contactUserId);
+        console.log(`${isInChat ? '💬' : '👁️'} ${contactName} ${isInChat ? 'ENTROU' : 'SAIU'} do chat`);
+        updateContactStatus(isOnline, isInChat);
+      }
     });
     
     // Desconecta WebSocket ao sair da página
