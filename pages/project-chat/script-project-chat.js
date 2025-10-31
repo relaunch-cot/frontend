@@ -4,7 +4,7 @@ const API_BASE = `${BASE_URL}/v1/chat`;
 const token = localStorage.getItem('token');
 if (!token) {
   showError('Você precisa estar logado para acessar o chat.');
-  setTimeout(() => window.location.href = '../login/index.html', 2000);
+  setTimeout(() => window.location.href = '/login', 2000);
 }
 
 function parseJwt(token) {
@@ -30,7 +30,7 @@ const userId = decodedToken?.userId;
 if (!userId) {
   showError('Sessão expirada. Faça login novamente.');
   localStorage.removeItem('token');
-  setTimeout(() => window.location.href = '../login/index.html', 2000);
+  setTimeout(() => window.location.href = '/login', 2000);
 }
 
 const entrada = document.getElementById('entradaMensagem');
@@ -43,7 +43,7 @@ const contactUserId = urlParams.get('contactUserId'); // ID do outro usuário
 
 if (!chatId) {
   showError('Nenhum chat selecionado.');
-  setTimeout(() => window.location.href = '../../index.html', 2000);
+  setTimeout(() => window.location.href = '/home', 2000);
 }
 
 document.getElementById('contactName').textContent = contactName;

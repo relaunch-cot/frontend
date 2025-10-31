@@ -25,6 +25,6 @@ if (btnLogout) {
 
 if (btnLogin) {
     btnLogin.addEventListener("click", () => {
-        window.location.href = "pages/login/login.html";
+        window.location.href = "/login";
     });
 }

@@ -6,7 +6,7 @@ const emptyMsg = document.getElementById('emptyMsg');
 const token = localStorage.getItem('token');
 if (!token) {
   showError('Você precisa estar logado para acessar o chat.');
-  setTimeout(() => window.location.href = '../../index.html', 2000);
+  setTimeout(() => window.location.href = '/home', 2000);
 }
 
 function parseJwt(token) {
@@ -32,7 +32,7 @@ const userId = decodedToken?.userId;
 if (!userId) {
   showError('Sessão expirada. Faça login novamente.');
   localStorage.removeItem('token');
-  setTimeout(() => window.location.href = '../login/index.html', 2000);
+  setTimeout(() => window.location.href = '/login', 2000);
 }
 
 function formatarTempo(timestamp) {
