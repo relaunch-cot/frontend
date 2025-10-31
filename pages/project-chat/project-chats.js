@@ -102,6 +102,9 @@ async function carregarChats() {
     chatList.innerHTML = '';
     emptyMsg.style.display = 'none';
 
+    // Array para coletar IDs dos outros usuários para subscrever
+    const userIdsToSubscribe = [];
+
     for (const chat of data.chats) {
       let nomeOutroUsuario = 'Desconhecido';
       let outroUserId = null;
@@ -114,6 +117,11 @@ async function carregarChats() {
           nomeOutroUsuario = chat.user1.name || `Usuário ${chat.user1.userId}`;
           outroUserId = chat.user1.userId;
         }
+      }
+
+      // Adiciona à lista de subscrições
+      if (outroUserId) {
+        userIdsToSubscribe.push(outroUserId);
       }
 
       const ultimaMsg = await buscarUltimaMensagem(chat.chatId);
@@ -146,6 +154,12 @@ async function carregarChats() {
         </a>
       `;
       chatList.appendChild(li);
+    }
+
+    // Inscreve para monitorar todos os usuários da lista
+    if (userIdsToSubscribe.length > 0 && window.presenceManager) {
+      console.log(`📡 [Chats] Inscrevendo para monitorar ${userIdsToSubscribe.length} usuários`);
+      window.presenceManager.subscribe(userIdsToSubscribe);
     }
 
   } catch (err) {
@@ -183,19 +197,19 @@ if (window.presenceManager && !window.presenceManager.isConnected()) {
 // Listeners para eventos de presença
 window.addEventListener('userOnline', (event) => {
   const { userId } = event.detail;
-  console.log(`🟢 Usuário ${userId} ficou online`);
+  console.log(`🟢 [Chats] Usuário ${userId} ficou online`);
   atualizarStatusUsuario(userId, true);
 });
 
 window.addEventListener('userOffline', (event) => {
   const { userId } = event.detail;
-  console.log(`⚪ Usuário ${userId} ficou offline`);
+  console.log(`⚪ [Chats] Usuário ${userId} ficou offline (após delay de 5s)`);
   atualizarStatusUsuario(userId, false);
 });
 
 window.addEventListener('onlineUsersListUpdated', (event) => {
   const { userIds } = event.detail;
-  console.log('📋 Lista de usuários online atualizada:', userIds);
+  console.log('📋 [Chats] Lista de usuários online atualizada:', userIds);
   
   // Atualiza todos os status
   document.querySelectorAll('li[data-user-id]').forEach(li => {

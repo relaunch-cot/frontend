@@ -293,6 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================
   // SISTEMA DE PRESENÇA GLOBAL
   // ========================================
+  // SISTEMA DE PRESENÇA GLOBAL
+  // ========================================
   // Usa WebSocket de presença para status online/offline (logado na plataforma)
   
   // Conecta ao sistema de presença se não estiver conectado
@@ -301,10 +303,14 @@ document.addEventListener('DOMContentLoaded', () => {
     window.presenceManager.connect(userId, token);
   }
   
-  // Verifica status inicial do contato
+  // Inscreve para monitorar o contato específico
   if (contactUserId && window.presenceManager) {
+    console.log(`📡 Inscrevendo para monitorar ${contactName} (${contactUserId})`);
+    window.presenceManager.subscribe([contactUserId]);
+    
+    // Verifica status inicial do contato
     const isOnline = window.presenceManager.isUserOnline(contactUserId);
-    console.log(`📊 Status inicial de ${contactName} (${contactUserId}): ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+    console.log(`📊 Status inicial de ${contactName}: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
     updateContactStatus(isOnline, false); // Online na plataforma, mas ainda não sabemos se está no chat
   }
   

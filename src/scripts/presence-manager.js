@@ -1,4 +1,4 @@
-// Gerenciador de Presença Global de Usuários
+// Gerenciador de Presença Global de Usuários com Sistema de Subscrições
 class PresenceManager {
   constructor() {
     this.ws = null;
@@ -12,21 +12,26 @@ class PresenceManager {
     this.onlineUsers = new Set(); // IDs dos usuários online
     this.offlineTimeouts = new Map(); // Timeouts pendentes para marcar como offline
     this.OFFLINE_DELAY = 5000; // 5 segundos de delay antes de marcar offline
+    this.subscribedUsers = new Set(); // IDs dos usuários que estamos monitorando
+    this.MAX_SUBSCRIPTIONS = 50; // Limite de subscrições simultâneas
   }
 
   // Conecta ao WebSocket de presença global
   connect(userId, token) {
-    if (!userId || !token) {
-      console.error('UserId e token são necessários para conectar ao sistema de presença');
+    if (!token) {
+      console.error('Token é necessário para conectar ao sistema de presença');
       return;
     }
 
     this.userId = userId;
     this.token = token;
 
-    // URL do WebSocket para presença global
+    // Remove "Bearer " se presente
+    const cleanToken = token.replace('Bearer ', '');
+
+    // URL do WebSocket para presença global (novo formato: só token)
     const WS_BASE_URL = window.ENV_CONFIG?.WS_BACKEND || 'ws://localhost:8080';
-    const wsUrl = `${WS_BASE_URL}/v1/ws/presence?userId=${userId}&token=${encodeURIComponent(token)}`;
+    const wsUrl = `${WS_BASE_URL}/v1/ws/presence?token=${encodeURIComponent(cleanToken)}`;
 
     try {
       this.ws = new WebSocket(wsUrl);
@@ -43,6 +48,12 @@ class PresenceManager {
       console.log('🟢 Sistema de presença conectado');
       this.reconnectAttempts = 0;
       this.startHeartbeat();
+      
+      // Re-inscreve usuários se reconectou
+      if (this.subscribedUsers.size > 0) {
+        console.log(`🔄 Re-inscrevendo ${this.subscribedUsers.size} usuários após reconexão`);
+        this.subscribe([...this.subscribedUsers]);
+      }
       
       // Dispara evento de conexão
       window.dispatchEvent(new CustomEvent('presenceConnected', { 
@@ -132,24 +143,32 @@ class PresenceManager {
         break;
       
       case 'USER_ONLINE':
-        // Usuário ficou online
-        this.onUserOnline(data.userId);
+        // Novo formato: status individual com campo isOnline
+        // Backend envia: { type: "USER_ONLINE", userId: "...", isOnline: true/false }
+        if (data.isOnline !== undefined) {
+          if (data.isOnline) {
+            this.onUserOnline(data.userId);
+          } else {
+            this.onUserOffline(data.userId);
+          }
+        } else {
+          // Formato antigo: apenas USER_ONLINE (sempre online)
+          this.onUserOnline(data.userId);
+        }
         break;
       
       case 'USER_OFFLINE':
-        // Usuário ficou offline
+        // Formato antigo: evento separado para offline
         this.onUserOffline(data.userId);
         break;
       
       case 'ONLINE_USERS':
-        // Lista inicial de usuários online
+        // Lista inicial de usuários online (formato antigo)
         this.onOnlineUsersList(data.onlineUsers || data.userIds || []);
         break;
       
       case 'USER_STATUS':
-        // Status de chat específico (isOnline do backend antigo)
-        // Este evento deveria vir do WebSocket de chat, não de presença
-        // Vamos tratá-lo como USER_ONLINE/USER_OFFLINE para compatibilidade
+        // Compatibilidade com formato de chat (isOnline)
         if (data.isOnline !== undefined) {
           if (data.isOnline) {
             this.onUserOnline(data.userId);
@@ -253,6 +272,104 @@ class PresenceManager {
   getOnlineUsers() {
     return Array.from(this.onlineUsers);
   }
+
+  // ========================================
+  // SISTEMA DE SUBSCRIÇÕES
+  // ========================================
+  
+  // Inscreve para monitorar usuários específicos
+  subscribe(userIds) {
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      console.warn('⚠️ subscribe() requer array não-vazio de userIds');
+      return;
+    }
+
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      console.warn('⚠️ WebSocket não está conectado, não é possível subscrever');
+      // Armazena para tentar quando reconectar
+      userIds.forEach(id => this.subscribedUsers.add(id));
+      return;
+    }
+
+    // Filtra usuários já inscritos
+    const newUsers = userIds.filter(id => !this.subscribedUsers.has(id));
+    
+    if (newUsers.length === 0) {
+      console.log('ℹ️ Todos os usuários já estão inscritos');
+      return;
+    }
+
+    // Aplica limite de subscrições
+    const availableSlots = this.MAX_SUBSCRIPTIONS - this.subscribedUsers.size;
+    const toSubscribe = newUsers.slice(0, availableSlots);
+    
+    if (toSubscribe.length < newUsers.length) {
+      console.warn(`⚠️ Limite de ${this.MAX_SUBSCRIPTIONS} subscrições atingido. Inscrevendo apenas ${toSubscribe.length} de ${newUsers.length}`);
+    }
+
+    // Adiciona ao Set de inscritos
+    toSubscribe.forEach(id => this.subscribedUsers.add(id));
+
+    console.log(`📡 Inscrevendo para monitorar ${toSubscribe.length} usuários:`, toSubscribe);
+
+    // Envia mensagem de subscrição
+    this.ws.send(JSON.stringify({
+      type: 'SUBSCRIBE_PRESENCE',
+      data: {
+        userIds: toSubscribe
+      }
+    }));
+  }
+
+  // Cancela inscrição de usuários específicos
+  unsubscribe(userIds) {
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      console.warn('⚠️ unsubscribe() requer array não-vazio de userIds');
+      return;
+    }
+
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      console.warn('⚠️ WebSocket não está conectado');
+      return;
+    }
+
+    // Filtra apenas usuários que estão inscritos
+    const toUnsubscribe = userIds.filter(id => this.subscribedUsers.has(id));
+
+    if (toUnsubscribe.length === 0) {
+      console.log('ℹ️ Nenhum usuário para desinscrever');
+      return;
+    }
+
+    // Remove do Set de inscritos
+    toUnsubscribe.forEach(id => {
+      this.subscribedUsers.delete(id);
+      // Também limpa timeout de offline se houver
+      if (this.offlineTimeouts.has(id)) {
+        clearTimeout(this.offlineTimeouts.get(id));
+        this.offlineTimeouts.delete(id);
+      }
+    });
+
+    console.log(`📡 Desinscrevendo ${toUnsubscribe.length} usuários:`, toUnsubscribe);
+
+    // Envia mensagem de desinscrição
+    this.ws.send(JSON.stringify({
+      type: 'UNSUBSCRIBE_PRESENCE',
+      data: {
+        userIds: toUnsubscribe
+      }
+    }));
+  }
+
+  // Retorna lista de usuários inscritos
+  getSubscribedUsers() {
+    return Array.from(this.subscribedUsers);
+  }
+
+  // ========================================
+  // MÉTODOS AUXILIARES
+  // ========================================
 
   // Heartbeat
   startHeartbeat() {
