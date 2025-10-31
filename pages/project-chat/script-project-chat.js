@@ -303,22 +303,36 @@ document.addEventListener('DOMContentLoaded', () => {
     window.presenceManager.connect(userId, token);
   }
   
-  // Inscreve para monitorar o contato específico
-  if (contactUserId && window.presenceManager) {
-    console.log(`📡 Inscrevendo para monitorar ${contactName} (${contactUserId})`);
-    window.presenceManager.subscribe([contactUserId]);
-    
-    // Verifica status inicial do contato
-    const isOnline = window.presenceManager.isUserOnline(contactUserId);
-    console.log(`📊 Status inicial de ${contactName}: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
-    updateContactStatus(isOnline, false); // Online na plataforma, mas ainda não sabemos se está no chat
+  // Função para inscrever e verificar status
+  function subscribeAndCheckStatus() {
+    if (contactUserId && window.presenceManager) {
+      console.log(`📡 [Chat] Inscrevendo para monitorar ${contactName} (${contactUserId})`);
+      window.presenceManager.subscribe([contactUserId]);
+      
+      // Verifica status inicial do contato
+      const isOnline = window.presenceManager.isUserOnline(contactUserId);
+      console.log(`📊 [Chat] Status inicial de ${contactName}: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+      updateContactStatus(isOnline, false); // Online na plataforma, mas ainda não sabemos se está no chat
+    }
+  }
+  
+  // Aguarda conexão de presença antes de subscrever
+  if (window.presenceManager && window.presenceManager.isConnected()) {
+    console.log('✅ [Chat] Presença já conectada');
+    subscribeAndCheckStatus();
+  } else {
+    console.log('⏳ [Chat] Aguardando conexão de presença...');
+    window.addEventListener('presenceConnected', () => {
+      console.log('✅ [Chat] Presença conectada');
+      subscribeAndCheckStatus();
+    }, { once: true });
   }
   
   // Listener para quando contato fica online
   window.addEventListener('userOnline', (event) => {
     const { userId: onlineUserId } = event.detail;
     if (contactUserId && onlineUserId == contactUserId) {
-      console.log(`🟢 ${contactName} ficou ONLINE (presença global)`);
+      console.log(`🟢 [Chat] ${contactName} ficou ONLINE (presença global)`);
       updateContactStatus(true, isContactInChat); // Mantém status do chat
     }
   });

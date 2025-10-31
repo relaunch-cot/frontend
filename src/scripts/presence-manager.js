@@ -284,18 +284,20 @@ class PresenceManager {
       return;
     }
 
+    // Adiciona à lista de inscritos primeiro (para re-inscrever quando conectar)
+    userIds.forEach(id => this.subscribedUsers.add(id));
+
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('⚠️ WebSocket não está conectado, não é possível subscrever');
-      // Armazena para tentar quando reconectar
-      userIds.forEach(id => this.subscribedUsers.add(id));
+      console.warn('⚠️ WebSocket não está conectado, subscrição será feita ao conectar');
+      console.log(`📋 ${userIds.length} usuários agendados para subscrição:`, userIds);
       return;
     }
 
-    // Filtra usuários já inscritos
-    const newUsers = userIds.filter(id => !this.subscribedUsers.has(id));
+    // Filtra usuários que ainda não foram enviados ao backend
+    const newUsers = userIds;
     
     if (newUsers.length === 0) {
-      console.log('ℹ️ Todos os usuários já estão inscritos');
+      console.log('ℹ️ Todos os usuários já foram enviados');
       return;
     }
 
@@ -307,18 +309,18 @@ class PresenceManager {
       console.warn(`⚠️ Limite de ${this.MAX_SUBSCRIPTIONS} subscrições atingido. Inscrevendo apenas ${toSubscribe.length} de ${newUsers.length}`);
     }
 
-    // Adiciona ao Set de inscritos
-    toSubscribe.forEach(id => this.subscribedUsers.add(id));
-
-    console.log(`📡 Inscrevendo para monitorar ${toSubscribe.length} usuários:`, toSubscribe);
+    console.log(`📡 Enviando SUBSCRIBE_PRESENCE para ${toSubscribe.length} usuários:`, toSubscribe);
 
     // Envia mensagem de subscrição
-    this.ws.send(JSON.stringify({
+    const message = {
       type: 'SUBSCRIBE_PRESENCE',
       data: {
         userIds: toSubscribe
       }
-    }));
+    };
+    
+    console.log('📤 Mensagem WebSocket:', JSON.stringify(message));
+    this.ws.send(JSON.stringify(message));
   }
 
   // Cancela inscrição de usuários específicos

@@ -228,5 +228,25 @@ window.addEventListener('onlineUsersListUpdated', (event) => {
   });
 });
 
-carregarChats();
+// Listener para quando presença conectar
+// Garante que subscrição aconteça APÓS conexão estar pronta
+let chatsCarregados = false;
+window.addEventListener('presenceConnected', () => {
+  console.log('✅ [Chats] Presença conectada, carregando chats...');
+  if (!chatsCarregados) {
+    carregarChats();
+    chatsCarregados = true;
+  }
+});
+
+// Se já estiver conectado, carrega imediatamente
+if (window.presenceManager && window.presenceManager.isConnected()) {
+  console.log('✅ [Chats] Presença já conectada, carregando chats...');
+  carregarChats();
+  chatsCarregados = true;
+} else {
+  // Se não conectou ainda, aguarda evento presenceConnected
+  console.log('⏳ [Chats] Aguardando conexão de presença...');
+}
+
 setInterval(carregarChats, 30000);
