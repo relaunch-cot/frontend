@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+const PORT = 3000; // Mudado de 3001 para 3000
 
 // Mapeamento de URLs limpas para arquivos reais
 const routes = {
@@ -99,8 +99,11 @@ const server = http.createServer((req, res) => {
       const ext = path.extname(fullPath);
       const contentType = mimeTypes[ext] || 'application/octet-stream';
 
+      // Para arquivos binários (imagens, fontes), não usa encoding UTF-8
+      const isBinary = ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.otf'].includes(ext);
+      
       res.writeHead(200, { 'Content-Type': contentType });
-      res.end(content, 'utf-8');
+      res.end(content, isBinary ? 'binary' : 'utf-8');
     }
   });
 });

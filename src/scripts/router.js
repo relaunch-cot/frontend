@@ -168,41 +168,24 @@
 
   /**
    * Intercepta window.location.href para usar o sistema de roteamento
+   * NOTA: Não interceptamos assign/replace pois são read-only em alguns navegadores
+   * Use navigateTo() para navegação programática ao invés de window.location.href
    */
   function setupLocationInterception() {
-    // Salva a função original
-    const originalHref = Object.getOwnPropertyDescriptor(window.location, 'href');
+    // Devido a limitações do navegador, não podemos interceptar window.location diretamente
+    // A solução é usar a função global navigateTo() para navegação programática
     
-    // Cria um proxy para interceptar atribuições
-    let locationProxy = new Proxy(window.location, {
-      set: function(target, property, value) {
-        if (property === 'href' && typeof value === 'string' && value.startsWith('/')) {
-          navigate(value);
-          return true;
-        }
-        return Reflect.set(target, property, value);
+    // Cria um listener para detectar mudanças no histórico
+    window.addEventListener('popstate', function(e) {
+      // Quando usuário clica em voltar/avançar, verificamos se precisa redirecionar
+      const currentPath = window.location.pathname;
+      const resolved = resolveRoute(currentPath);
+      
+      if (resolved && !isLocalEnvironment()) {
+        // Em servidor local/produção, deixa o navegador lidar naturalmente
+        return;
       }
     });
-    
-    // Sobrescreve métodos de navegação
-    const originalAssign = window.location.assign;
-    const originalReplace = window.location.replace;
-    
-    window.location.assign = function(url) {
-      if (typeof url === 'string' && url.startsWith('/')) {
-        navigate(url);
-      } else {
-        originalAssign.call(window.location, url);
-      }
-    };
-    
-    window.location.replace = function(url) {
-      if (typeof url === 'string' && url.startsWith('/')) {
-        navigate(url, true);
-      } else {
-        originalReplace.call(window.location, url);
-      }
-    };
   }
 
   /**
