@@ -21,7 +21,6 @@ function parseJwt(token) {
   }
 }
 
-// Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const currentUserId = decodedToken?.userId;
 
@@ -30,7 +29,6 @@ if (!currentUserId) {
   window.location.href = '/login';
 }
 
-// Verifica se há userId na URL (para visualizar perfil de outro usuário)
 const urlParams = new URLSearchParams(window.location.search);
 const userIdFromUrl = urlParams.get('userId');
 const userId = userIdFromUrl || currentUserId;
@@ -88,7 +86,6 @@ async function carregarPerfil() {
     document.getElementById('userName').textContent = 'Erro ao carregar perfil';
     document.getElementById('userEmail').textContent = 'Email não disponível';
   } finally {
-    // Esconde botão de editar perfil se não for o próprio perfil
     const editProfileSection = document.getElementById('edit-profile-section');
     if (editProfileSection && !isOwnProfile) {
       editProfileSection.style.display = 'none';

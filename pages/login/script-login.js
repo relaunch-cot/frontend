@@ -54,11 +54,9 @@ loginForm.addEventListener("submit", async (e) => {
         }
 
         if (res.ok && res.headers.get("Authorization")) {
-            // Salva o token com Bearer já incluído do backend
             const authToken = res.headers.get("Authorization");
             localStorage.setItem("token", authToken);
             
-            // Conecta ao sistema de presença global
             if (window.presenceManager) {
                 const token = authToken.replace('Bearer ', '');
                 const decodedToken = parseJwt(token);

@@ -1,4 +1,4 @@
-*{
+﻿*{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -314,7 +314,6 @@ button > svg{
 
 #input-zip{
   grid-area: 1 / 1 / 2 / 3;
-  /* linha 1 / coluna 1 / linha 2 / coluna 3 */
 }
 
 

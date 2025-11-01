@@ -23,7 +23,6 @@ function parseJwt(token) {
   }
 }
 
-// Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 if (!userId) {
@@ -84,13 +83,11 @@ function adicionarMensagem(texto, tipo, timestamp) {
   
   if (timestamp) {
     const data = new Date(timestamp);
-    // Adicionar 3 horas para corrigir fuso horário
     const dataCorrigida = new Date(data.getTime() + (3 * 60 * 60 * 1000));
     mensagemHora.textContent = dataCorrigida.toLocaleTimeString('pt-BR', { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
-    // Armazena a data para comparação
     novaMensagem.dataset.date = dataCorrigida.toDateString();
   } else {
     mensagemHora.textContent = new Date().toLocaleTimeString('pt-BR', { 
@@ -180,7 +177,6 @@ async function carregarMensagens() {
 
 async function enviarMensagemParaBackend(texto) {
   try {
-    // Sempre envia via HTTP POST para o backend
     const body = {
       chatId: chatId,
       messageContent: texto
@@ -204,7 +200,6 @@ async function enviarMensagemParaBackend(texto) {
       await carregarMensagens();
     }
 
-    // Envia notificação para o outro usuário
     if (contactUserId) {
       await enviarNotificacaoMensagem(contactUserId, texto);
     }
@@ -214,7 +209,6 @@ async function enviarMensagemParaBackend(texto) {
   }
 }
 
-// Busca informações do chat para obter nome do remetente
 async function obterNomeRemetente(chatId) {
   try {
     const response = await fetch(`${BASE_URL}/v1/chat/chatId/${chatId}`, {
@@ -235,12 +229,9 @@ async function obterNomeRemetente(chatId) {
       return null;
     }
     
-    // Retorna o nome do usuário LOGADO (quem está enviando a mensagem)
     if (chat.user1?.userId === userId) {
-      // Se user1 é o usuário logado, retorna nome do user1
       return chat.user1?.name || null;
     } else if (chat.user2?.userId === userId) {
-      // Se user2 é o usuário logado, retorna nome do user2
       return chat.user2?.name || null;
     }
     
@@ -250,13 +241,10 @@ async function obterNomeRemetente(chatId) {
   }
 }
 
-// Envia notificação de nova mensagem para o outro usuário
 async function enviarNotificacaoMensagem(receiverId, messageContent) {
   try {
-    // Busca nome real do remetente através da API do chat
     const senderName = await obterNomeRemetente(chatId) || 'Usuário';
     
-    // Limita preview da mensagem a 50 caracteres
     const preview = messageContent.length > 50 
       ? messageContent.substring(0, 50) + '...' 
       : messageContent;
@@ -281,17 +269,13 @@ async function enviarNotificacaoMensagem(receiverId, messageContent) {
     } else {
     }
   } catch (error) {
-    // Não exibe erro para o usuário, pois notificação é secundária
   }
 }
 
-// Funções para indicador de digitação
 function mostrarIndicadorDigitacao() {
-  // Verifica se indicador já existe, não recria
   let indicator = document.getElementById('typing-indicator');
   
   if (!indicator) {
-    // Cria novo indicador apenas se não existir
     indicator = document.createElement('div');
     indicator.id = 'typing-indicator';
     indicator.className = 'typing-indicator';
@@ -320,21 +304,17 @@ function esconderIndicadorDigitacao() {
   }
 }
 
-// Mostra ícone de nova mensagem no canto superior direito
 function mostrarIconeNovaMensagem(senderName) {
-  // Remove ícone anterior se existir
   const iconAnterior = document.getElementById('new-message-icon');
   if (iconAnterior) {
     iconAnterior.remove();
   }
   
-  // Cria container do ícone
   const iconContainer = document.createElement('div');
   iconContainer.id = 'new-message-icon';
   iconContainer.className = 'new-message-notification';
   iconContainer.title = `Nova mensagem de ${senderName}`; // Tooltip
   
-  // Ícone SVG de mensagem + texto
   iconContainer.innerHTML = `
     <div class="notification-content">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
@@ -347,7 +327,6 @@ function mostrarIconeNovaMensagem(senderName) {
   
   document.body.appendChild(iconContainer);
   
-  // Remove automaticamente após 5 segundos
   setTimeout(() => {
     iconContainer.classList.add('fade-out');
     setTimeout(() => iconContainer.remove(), 300);
@@ -357,35 +336,28 @@ function mostrarIconeNovaMensagem(senderName) {
 
 document.addEventListener('DOMContentLoaded', () => {
   
-  // Carrega mensagens iniciais
   carregarMensagens();
   
-  // Referências para elementos de status
   const statusIndicator = document.getElementById('statusIndicator');
   const contactStatus = document.getElementById('contactStatus');
   
-  // Variável para rastrear se o contato está no chat (não apenas online)
   let isContactInChat = false;
   
-  // Função para atualizar status do contato
   function updateContactStatus(isOnline, inChat = false) {
     
     if (inChat) {
-      // Usuário está ATIVAMENTE no chat
       statusIndicator.classList.add('online', 'in-chat');
       statusIndicator.classList.remove('offline');
       contactStatus.textContent = 'No chat';
       contactStatus.classList.add('online', 'in-chat');
       contactStatus.classList.remove('offline');
     } else if (isOnline) {
-      // Usuário está online na plataforma, mas não neste chat
       statusIndicator.classList.add('online');
       statusIndicator.classList.remove('offline', 'in-chat');
       contactStatus.textContent = 'Online';
       contactStatus.classList.add('online');
       contactStatus.classList.remove('offline', 'in-chat');
     } else {
-      // Usuário está offline
       statusIndicator.classList.remove('online', 'in-chat');
       statusIndicator.classList.add('offline');
       contactStatus.textContent = 'Offline';
@@ -394,30 +366,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // ========================================
-  // SISTEMA DE PRESENÇA GLOBAL
-  // ========================================
-  // SISTEMA DE PRESENÇA GLOBAL
-  // ========================================
-  // Usa WebSocket de presença para status online/offline (logado na plataforma)
   
-  // Conecta ao sistema de presença se não estiver conectado
   if (window.presenceManager && !window.presenceManager.isConnected()) {
     window.presenceManager.connect(userId, token);
   }
   
-  // Função para inscrever e verificar status
   function subscribeAndCheckStatus() {
     if (contactUserId && window.presenceManager) {
       window.presenceManager.subscribe([contactUserId]);
       
-      // Verifica status inicial do contato
       const isOnline = window.presenceManager.isUserOnline(contactUserId);
       updateContactStatus(isOnline, false); // Online na plataforma, mas ainda não sabemos se está no chat
     }
   }
   
-  // Aguarda conexão de presença antes de subscrever
   if (window.presenceManager && window.presenceManager.isConnected()) {
     subscribeAndCheckStatus();
   } else {
@@ -426,7 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { once: true });
   }
   
-  // Listener para quando contato fica online
   window.addEventListener('userOnline', (event) => {
     const { userId: onlineUserId } = event.detail;
     if (contactUserId && onlineUserId == contactUserId) {
@@ -434,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // Listener para quando contato fica offline
   window.addEventListener('userOffline', (event) => {
     const { userId: offlineUserId } = event.detail;
     if (contactUserId && offlineUserId == contactUserId) {
@@ -443,7 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // Listener para lista inicial de usuários online
   window.addEventListener('onlineUsersListUpdated', (event) => {
     const { userIds } = event.detail;
     if (contactUserId) {
@@ -452,33 +411,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // ========================================
-  // WEBSOCKET DO CHAT
-  // ========================================
-  // Usa WebSocket de chat para mensagens + digitação (apenas quando está no chat)
   
-  // Inicializa WebSocket do chat
   if (typeof ChatWebSocket !== 'undefined') {
     window.chatWS = new ChatWebSocket();
     window.chatWS.connect(chatId, userId, token);
     
-    // Listener para novas mensagens via WebSocket
     window.addEventListener('chatNewMessage', (event) => {
       const { message } = event.detail;
       
-      // Verifica se a mensagem é do chat atual
       if (message.chatId == chatId) {
-        // Se não for mensagem própria, adiciona na tela
         if (message.senderId != userId) {
-          // Remove indicador de digitação quando mensagem chegar
           esconderIndicadorDigitacao();
           
-          // Mostra ícone de nova mensagem
           mostrarIconeNovaMensagem(contactName);
           
           const tipo = 'outra-pessoa';
           
-          // Verifica se precisa adicionar separador de data
           const dataMsg = new Date(message.createdAt || Date.now());
           const ultimaMensagem = mensagensContainer.lastElementChild;
           
@@ -494,32 +442,24 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     
-    // Listener para indicador de digitação
     let typingTimeout;
     
     window.addEventListener('chatUserTyping', (event) => {
       const { userId: typingUserId, isTyping } = event.detail;
       
       if (isTyping) {
-        // Atualiza o status no header
         contactStatus.textContent = 'Digitando...';
         contactStatus.classList.add('typing');
         contactStatus.classList.remove('online', 'offline', 'in-chat');
         
-        // Mostra indicador visual embaixo das mensagens (só cria se não existir)
         mostrarIndicadorDigitacao();
         
-        // Limpa timeout anterior para resetar contagem
         clearTimeout(typingTimeout);
         
       } else {
-        // Quando receber isTyping: false, não remove imediatamente
-        // Aguarda 10 segundos antes de remover
         clearTimeout(typingTimeout);
       }
       
-      // Sempre configura timeout de 10 segundos (tanto para true quanto false)
-      // Se não receber novo evento em 10s, remove o indicador
       typingTimeout = setTimeout(() => {
         esconderIndicadorDigitacao();
         const isOnline = window.presenceManager && window.presenceManager.isUserOnline(contactUserId);
@@ -527,11 +467,9 @@ document.addEventListener('DOMContentLoaded', () => {
       },1500);
     });
     
-    // Listener para status do usuário no chat (in chat / not in chat)
     window.addEventListener('chatUserStatus', (event) => {
       const { userId: statusUserId, isInChat } = event.detail;
       
-      // Verifica se é o contato que estamos conversando
       if (contactUserId && statusUserId == contactUserId) {
         isContactInChat = isInChat;
         const isOnline = window.presenceManager && window.presenceManager.isUserOnline(contactUserId);
@@ -539,7 +477,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     
-    // Desconecta WebSocket ao sair da página
     window.addEventListener('beforeunload', () => {
       if (window.chatWS) {
         window.chatWS.disconnect();
@@ -548,17 +485,13 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
   }
   
-  // Adiciona listener para enviar status de digitação
   let typingTimeout;
   entrada.addEventListener('input', () => {
     if (window.chatWS && window.chatWS.isConnected()) {
-      // Envia status "digitando"
       window.chatWS.sendTypingStatus(true);
       
-      // Cancela timeout anterior
       clearTimeout(typingTimeout);
       
-      // Após 1 segundo sem digitar, envia status "parou de digitar"
       typingTimeout = setTimeout(() => {
         window.chatWS.sendTypingStatus(false);
       }, 1000);

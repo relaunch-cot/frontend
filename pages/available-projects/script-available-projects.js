@@ -1,14 +1,11 @@
-﻿// script-available-projects.js
-
+﻿
 const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 
-// Check authentication
 const token = localStorage.getItem('token');
 if (!token) {
   window.location.href = '/login';
 }
 
-// Parse JWT token to get user info
 function parseJwt(token) {
   try {
     const base64Url = token.split('.')[1];
@@ -25,7 +22,6 @@ function parseJwt(token) {
   }
 }
 
-// Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 const userType = decodedToken?.userType;
@@ -35,7 +31,6 @@ if (!userId) {
   window.location.href = '/login';
 }
 
-// Validação: apenas freelancers podem acessar esta página
 function verificarTipoUsuario() {
   if (userType !== 'freelancer') {
     showError('Acesso negado. Esta página é exclusiva para freelancers.');
@@ -47,11 +42,9 @@ function verificarTipoUsuario() {
   return true;
 }
 
-// Global variables
 let allProjects = [];
 let filteredProjects = [];
 
-// Category mapping
 const categorias = {
   'web': 'Desenvolvimento Web',
   'mobile': 'Desenvolvimento Mobile',
@@ -62,9 +55,6 @@ const categorias = {
   'front-end': 'Front-end'
 };
 
-/**
- * Format date to DD/MM/YYYY
- */
 function formatarData(dateString) {
   if (!dateString) return 'Não informado';
   const date = new Date(dateString);
@@ -74,18 +64,12 @@ function formatarData(dateString) {
   return `${dia}/${mes}/${ano}`;
 }
 
-/**
- * Normalize status
- */
 function normalizarStatus(status) {
   if (!status) return 'pendente';
   const statusLower = status.toLowerCase().trim();
   return statusLower === 'pendente' || statusLower === 'concluido' ? statusLower : 'pendente';
 }
 
-/**
- * Create project card HTML
- */
 function criarCardProjeto(project) {
   const card = document.createElement('div');
   card.className = 'project-card';
@@ -136,14 +120,11 @@ function criarCardProjeto(project) {
     </div>
   `;
 
-  // Add event listener to button
   const btn = card.querySelector('.request-btn');
   btn.addEventListener('click', () => {
     if (project.freelancerId) {
-      // Se já tem freelancer, redireciona para a página de detalhes
       window.location.href = `/projeto?id=${project.projectId}`;
     } else {
-      // Se não tem freelancer, inicia o processo de solicitação
       solicitarParticipacao(project.projectId, project.name);
     }
   });
@@ -151,9 +132,6 @@ function criarCardProjeto(project) {
   return card;
 }
 
-/**
- * Render projects on the page
- */
 function renderizarProjetos(projects) {
   const container = document.getElementById('projectsContainer');
   const emptyMsg = document.getElementById('emptyMsg');
@@ -174,9 +152,6 @@ function renderizarProjetos(projects) {
   });
 }
 
-/**
- * Fetch all projects from API
- */
 async function buscarProjetos() {
   const loadingMsg = document.getElementById('loadingMsg');
   const emptyMsg = document.getElementById('emptyMsg');
@@ -209,9 +184,6 @@ async function buscarProjetos() {
   }
 }
 
-/**
- * Apply filters
- */
 function aplicarFiltros() {
   const categoryFilter = document.getElementById('categoryFilter').value;
   const statusFilter = document.getElementById('statusFilter').value;
@@ -231,9 +203,6 @@ function aplicarFiltros() {
   renderizarProjetos(filteredProjects);
 }
 
-/**
- * Request to join a project - Envia notificação para o dono do projeto
- */
 async function solicitarParticipacao(projectId, projectName) {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -242,7 +211,6 @@ async function solicitarParticipacao(projectId, projectName) {
   }
 
   try {
-    // Busca os dados do projeto para pegar o clientId
     const projectResponse = await fetch(`${BASE_URL}/v1/project/${projectId}`, {
       headers: {
         'Authorization': token,
@@ -257,12 +225,10 @@ async function solicitarParticipacao(projectId, projectName) {
     const projectData = await projectResponse.json();
     const clientId = projectData.project.clientId;
 
-    // Decodifica o token para pegar o userId do freelancer (remove Bearer se presente)
     const tokenWithoutBearer = token.replace('Bearer ', '');
     const payload = JSON.parse(atob(tokenWithoutBearer.split('.')[1]));
     const freelancerId = payload.userId;
 
-    // Envia a notificação para o cliente
     const notificationData = {
       receiverId: clientId,
       title: 'Nova Solicitação de Projeto',
@@ -290,19 +256,15 @@ async function solicitarParticipacao(projectId, projectName) {
   }
 }
 
-// Event listeners
 document.addEventListener('DOMContentLoaded', () => {
-  // Primeiro verifica se o usuário é freelancer
   const isFreelancer = verificarTipoUsuario();
   
   if (!isFreelancer) {
     return; // Não carrega os projetos se não for freelancer
   }
 
-  // Load projects
   buscarProjetos();
 
-  // Filter event listeners
   document.getElementById('categoryFilter').addEventListener('change', aplicarFiltros);
   document.getElementById('statusFilter').addEventListener('change', aplicarFiltros);
   document.getElementById('searchInput').addEventListener('input', aplicarFiltros);

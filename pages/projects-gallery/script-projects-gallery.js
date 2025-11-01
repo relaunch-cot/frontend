@@ -29,7 +29,6 @@ function parseJwt(token) {
   }
 }
 
-// Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 const userType = decodedToken?.userType;
@@ -39,7 +38,6 @@ if (!userId) {
   window.location.href = '/login';
 }
 
-// Mostra botão de criar projeto apenas para clientes
 if (userType !== 'client') {
   const createButton = document.getElementById('openModal');
   if (createButton) {
@@ -47,9 +45,6 @@ if (userType !== 'client') {
   }
 }
 
-// ==========================
-// Modal
-// ==========================
 function openModal() {
   modal.style.display = 'block';
   setTimeout(() => modal.classList.add('show'), 10);
@@ -60,7 +55,6 @@ function closeModal() {
   setTimeout(() => {
     modal.style.display = 'none';
     form.reset();
-    // Remove classes ao fechar
     const fileInput = document.getElementById('logo');
     const dateInput = document.getElementById('projectDeliveryDeadline');
     if (fileInput) fileInput.classList.remove('has-file');
@@ -78,9 +72,6 @@ window.onclick = (e) => {
   }
 };
 
-// ==========================
-// File Input Handler
-// ==========================
 const fileInput = document.getElementById('logo');
 if (fileInput) {
   fileInput.addEventListener('change', (e) => {
@@ -92,12 +83,8 @@ if (fileInput) {
   });
 }
 
-// ==========================
-// Date Input Handler
-// ==========================
 const dateInput = document.getElementById('projectDeliveryDeadline');
 if (dateInput) {
-  // Adiciona classe quando tem valor
   dateInput.addEventListener('change', (e) => {
     if (e.target.value) {
       e.target.classList.add('has-value');
@@ -106,7 +93,6 @@ if (dateInput) {
     }
   });
   
-  // Remove classe ao resetar
   dateInput.addEventListener('input', (e) => {
     if (!e.target.value) {
       e.target.classList.remove('has-value');
@@ -114,15 +100,8 @@ if (dateInput) {
   });
 }
 
-// ==========================
-// Tipo de usuário
-// ==========================
 
-// userType agora vem do token JWT (removida função getUserType)
 
-// ==========================
-// Renderizar um projeto
-// ==========================
 function formatProjectDate(createdAt) {
     const date = new Date(createdAt); 
     const now = new Date();
@@ -164,7 +143,6 @@ function renderProjectCard(project) {
   const card = document.createElement('div');
   card.className = 'Projeto';
 
-  // Define a imagem do projeto (do banco ou placeholder)
   const imagemProjeto = project.urlImageProject && project.urlImageProject.trim() !== ''
     ? project.urlImageProject
     : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23e0e0e0' width='200' height='200'/%3E%3Cpath fill='%2346B1D5' d='M60 40h60l20 20v90c0 5.5-4.5 10-10 10H60c-5.5 0-10-4.5-10-10V50c0-5.5 4.5-10 10-10z'/%3E%3Cpath fill='%233a9dbf' d='M120 40v20h20z'/%3E%3Crect fill='white' x='70' y='80' width='60' height='6' rx='3'/%3E%3Crect fill='white' x='70' y='95' width='60' height='6' rx='3'/%3E%3Crect fill='white' x='70' y='110' width='40' height='6' rx='3'/%3E%3Ccircle fill='%2346B1D5' cx='100' cy='135' r='15'/%3E%3Cpath fill='white' d='M95 135l4 4 6-8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
@@ -189,9 +167,6 @@ function renderProjectCard(project) {
   main.appendChild(card);
 }
 
-// ==========================
-// Buscar projetos do usuário
-// ==========================
 async function fetchProjects() {
   if (!userId) {
     showError('Usuário não autenticado');
@@ -222,9 +197,6 @@ async function fetchProjects() {
   }
 }
 
-// ==========================
-// Criar novo projeto
-// ==========================
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -246,7 +218,6 @@ form.addEventListener('submit', async (e) => {
   };
 
   try {
-    // Mostra loading no modal
     const submitBtn = form.querySelector('.btn-submit');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Criando...';
@@ -265,33 +236,24 @@ form.addEventListener('submit', async (e) => {
 
     await res.json();
 
-    // Fecha o modal
     modal.classList.remove('show');
     setTimeout(() => modal.style.display = 'none', 300);
 
-    // Mostra mensagem de sucesso
     showSuccess('Projeto criado com sucesso!');
     
-    // Recarrega após 1 segundo
     setTimeout(() => {
       window.location.reload();
     }, 1000);
   } catch (err) {
     
-    // Restaura o botão
     const submitBtn = form.querySelector('.btn-submit');
     submitBtn.textContent = originalText;
     submitBtn.disabled = false;
     
-    // Mostra erro
     showError('Erro ao criar projeto. Tente novamente.');
   }
 });
 
-// ==========================
-// Inicializar
-// ==========================
 document.addEventListener('DOMContentLoaded', async () => {
-  // userType já vem do token JWT
   await fetchProjects();
 });

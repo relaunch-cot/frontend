@@ -1,5 +1,4 @@
-﻿// Gerenciador de WebSocket para notificações em tempo real
-class NotificationWebSocket {
+﻿class NotificationWebSocket {
   constructor() {
     this.ws = null;
     this.reconnectAttempts = 0;
@@ -9,13 +8,11 @@ class NotificationWebSocket {
     this.isIntentionallyClosed = false;
   }
 
-  // Conecta ao WebSocket do backend
   connect(userId, token) {
     if (!userId || !token) {
       return;
     }
 
-    // URL do WebSocket (ajuste conforme seu backend)
     const WS_BASE_URL = window.ENV_CONFIG?.WS_BACKEND || 'ws://localhost:8080';
     const wsUrl = `${WS_BASE_URL}/v1/ws/notifications?userId=${userId}&token=${encodeURIComponent(token)}`;
 
@@ -27,7 +24,6 @@ class NotificationWebSocket {
     }
   }
 
-  // Configura os event handlers do WebSocket
   setupEventHandlers() {
     this.ws.onopen = () => {
       this.reconnectAttempts = 0;
@@ -36,7 +32,6 @@ class NotificationWebSocket {
 
     this.ws.onmessage = (event) => {
       try {
-        // Verifica se é string vazia
         if (!event.data || event.data.trim() === '') {
           return;
         }
@@ -62,75 +57,59 @@ class NotificationWebSocket {
     };
   }
 
-  // Processa mensagens recebidas do WebSocket
   handleMessage(data) {
     switch (data.type) {
       case 'CONNECTED':
-        // Mensagem de confirmação de conexão
         break;
       
       case 'NEW_NOTIFICATION':
-        // Nova notificação recebida
         this.onNewNotification(data.notification);
         break;
       
       case 'NOTIFICATION_DELETED':
-        // Notificação foi deletada
         this.onNotificationDeleted(data.notificationId);
         break;
       
       case 'BADGE_UPDATE':
-        // Atualização do contador de notificações
         this.onBadgeUpdate(data.count);
         break;
       
       case 'PONG':
-        // Resposta ao heartbeat
         break;
       
       default:
     }
   }
 
-  // Callback quando nova notificação é recebida
   onNewNotification(notification) {
     
-    // Atualiza o badge
     if (typeof updateBadgeCount === 'function') {
-      // Busca contagem atual e incrementa
       this.fetchAndUpdateBadge();
     }
     
-    // Mostra notificação visual se não estiver na página de notificações
     const isNotificationPage = window.location.pathname.includes('/notification/notification.html');
     if (!isNotificationPage && typeof showInfo === 'function') {
       showInfo(notification.title || 'Nova notificação recebida!');
     }
     
-    // Dispara evento customizado para outras partes da aplicação
     window.dispatchEvent(new CustomEvent('newNotification', { detail: notification }));
   }
 
-  // Callback quando notificação é deletada
   onNotificationDeleted(notificationId) {
     
-    // Atualiza o badge
     if (typeof updateBadgeCount === 'function') {
       this.fetchAndUpdateBadge();
     }
     
-    // Dispara evento customizado
     window.dispatchEvent(new CustomEvent('notificationDeleted', { detail: { notificationId } }));
   }
 
-  // Callback para atualização do badge
   onBadgeUpdate(count) {
     if (typeof updateBadgeCount === 'function') {
       updateBadgeCount(count);
     }
   }
 
-  // Busca contagem atual de notificações
   async fetchAndUpdateBadge() {
     const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
     const token = localStorage.getItem('token');
@@ -161,7 +140,6 @@ class NotificationWebSocket {
     }
   }
 
-  // Heartbeat para manter conexão ativa
   startHeartbeat() {
     this.heartbeatInterval = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -177,14 +155,12 @@ class NotificationWebSocket {
     }
   }
 
-  // Agenda reconexão
   scheduleReconnect(userId, token) {
     this.reconnectAttempts++;
     
     if (this.reconnectAttempts <= this.maxReconnectAttempts) {
       setTimeout(() => {
         
-        // Se userId e token não foram passados, tenta extrair do localStorage
         if (!userId || !token) {
           const storedToken = localStorage.getItem('token');
           if (storedToken) {
@@ -205,7 +181,6 @@ class NotificationWebSocket {
     }
   }
 
-  // Desconecta WebSocket
   disconnect() {
     this.isIntentionallyClosed = true;
     this.stopHeartbeat();
@@ -216,16 +191,13 @@ class NotificationWebSocket {
     }
   }
 
-  // Verifica se está conectado
   isConnected() {
     return this.ws && this.ws.readyState === WebSocket.OPEN;
   }
 }
 
-// Instância global do WebSocket
 let notificationWS = null;
 
-// Inicializa WebSocket automaticamente quando usuário está autenticado
 function initializeNotificationWebSocket() {
   const token = localStorage.getItem('token');
   
@@ -242,11 +214,9 @@ function initializeNotificationWebSocket() {
       return;
     }
     
-    // Cria e conecta o WebSocket
     notificationWS = new NotificationWebSocket();
     notificationWS.connect(userId, token);
     
-    // Desconecta quando usuário sair ou fechar a página
     window.addEventListener('beforeunload', () => {
       if (notificationWS) {
         notificationWS.disconnect();
@@ -257,6 +227,5 @@ function initializeNotificationWebSocket() {
   }
 }
 
-// Exporta para uso global
 window.notificationWS = notificationWS;
 window.initializeNotificationWebSocket = initializeNotificationWebSocket;

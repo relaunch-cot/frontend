@@ -26,7 +26,6 @@ function updateMenuContent() {
   const token = localStorage.getItem('token');
   
   if (token) {
-    // Parse token to get user ID and userType
     let userId = null;
     let userType = null;
     try {
@@ -44,7 +43,6 @@ function updateMenuContent() {
     } catch (e) {
     }
 
-    // Renderiza menu com userType do token
     renderMenu(userType);
   } else {
     menu.innerHTML = `
@@ -58,7 +56,6 @@ function updateMenuContent() {
 function renderMenu(userType) {
   const menu = document.getElementById('hamburger-menu');
   
-  // Link de Projetos Disponíveis só aparece para freelancers
   const projetosDisponiveisLink = userType === 'freelancer' 
     ? `<a href="/available-projects"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19,19H5V8H19M16,1V3H8V1H6V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3H18V1M17,12H12V17H17V12Z"/></svg> Projetos Disponíveis</a>`
     : '';

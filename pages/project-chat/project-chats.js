@@ -25,7 +25,6 @@ function parseJwt(token) {
   }
 }
 
-// Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 if (!userId) {
@@ -101,7 +100,6 @@ async function carregarChats() {
     chatList.innerHTML = '';
     emptyMsg.style.display = 'none';
 
-    // Array para coletar IDs dos outros usuários para subscrever
     const userIdsToSubscribe = [];
 
     for (const chat of data.chats) {
@@ -118,7 +116,6 @@ async function carregarChats() {
         }
       }
 
-      // Adiciona à lista de subscrições
       if (outroUserId) {
         userIdsToSubscribe.push(outroUserId);
       }
@@ -130,7 +127,6 @@ async function carregarChats() {
       }
       const tempo = ultimaMsg ? formatarTempo(ultimaMsg.timestamp) : 'agora';
 
-      // Verifica se o outro usuário está online
       const isOnline = window.presenceManager && window.presenceManager.isUserOnline(outroUserId);
 
       const li = document.createElement('li');
@@ -155,7 +151,6 @@ async function carregarChats() {
       chatList.appendChild(li);
     }
 
-    // Inscreve para monitorar todos os usuários da lista
     if (userIdsToSubscribe.length > 0 && window.presenceManager) {
       window.presenceManager.subscribe(userIdsToSubscribe);
     }
@@ -166,7 +161,6 @@ async function carregarChats() {
   }
 }
 
-// Atualiza o status online/offline de um usuário específico
 function atualizarStatusUsuario(userId, isOnline) {
   const chatItem = document.querySelector(`li[data-user-id="${userId}"]`);
   if (chatItem) {
@@ -183,7 +177,6 @@ function atualizarStatusUsuario(userId, isOnline) {
   }
 }
 
-// Conecta ao sistema de presença se não estiver conectado
 if (window.presenceManager && !window.presenceManager.isConnected()) {
   const token = localStorage.getItem('token');
   if (token && userId) {
@@ -191,7 +184,6 @@ if (window.presenceManager && !window.presenceManager.isConnected()) {
   }
 }
 
-// Listeners para eventos de presença
 window.addEventListener('userOnline', (event) => {
   const { userId } = event.detail;
   atualizarStatusUsuario(userId, true);
@@ -205,7 +197,6 @@ window.addEventListener('userOffline', (event) => {
 window.addEventListener('onlineUsersListUpdated', (event) => {
   const { userIds } = event.detail;
   
-  // Atualiza todos os status
   document.querySelectorAll('li[data-user-id]').forEach(li => {
     const userId = li.getAttribute('data-user-id');
     const isOnline = userIds.includes(userId);
@@ -222,8 +213,6 @@ window.addEventListener('onlineUsersListUpdated', (event) => {
   });
 });
 
-// Listener para quando presença conectar
-// Garante que subscrição aconteça APÓS conexão estar pronta
 let chatsCarregados = false;
 window.addEventListener('presenceConnected', () => {
   if (!chatsCarregados) {
@@ -232,12 +221,10 @@ window.addEventListener('presenceConnected', () => {
   }
 });
 
-// Se já estiver conectado, carrega imediatamente
 if (window.presenceManager && window.presenceManager.isConnected()) {
   carregarChats();
   chatsCarregados = true;
 } else {
-  // Se não conectou ainda, aguarda evento presenceConnected
 }
 
 setInterval(carregarChats, 30000);

@@ -21,7 +21,6 @@ function parseJwt(token) {
     }
 }
 
-// Remove Bearer se presente antes de decodificar
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
 
@@ -105,7 +104,6 @@ async function loadUserData() {
                 skills: data.user.settings?.skills || []
             };
             
-            // Preencher os campos do formulário
             document.getElementById('name').value = originalData.name;
             document.getElementById('email').value = originalData.email;
             document.getElementById('telefone').value = originalData.phone;
@@ -114,12 +112,10 @@ async function loadUserData() {
             document.getElementById('biografia').value = originalData.biography;
             document.getElementById('competencias').value = originalData.skills.join(', ');
             
-            // Definir todos os campos como readonly
             ['name', 'email', 'telefone', 'cpf', 'dataInput', 'biografia', 'competencias'].forEach(id => {
                 document.getElementById(id).readOnly = true;
             });
             
-            // Atualizar preview das tags
             updateTagsPreview();
         }
     } catch (error) {

@@ -1,4 +1,4 @@
-*{
+﻿*{
     margin: 0;
 }
 
@@ -456,7 +456,6 @@ nav{
     transform: scale(0.95);
 }
 
-/* Indicador de digitação */
 .typing-indicator {
     display: flex;
     align-items: center;
@@ -527,9 +526,6 @@ nav{
     }
 }
 
-/* ========================================
-   ÍCONE DE NOVA MENSAGEM
-   ======================================== */
 .new-message-notification {
     position: fixed;
     top: 20px;

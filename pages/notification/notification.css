@@ -1,4 +1,4 @@
-*{
+﻿*{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -372,7 +372,6 @@ textarea{
     resize: none;
 }
 
-/* Estilos das notificações */
 .page-header {
     padding: 3vh 5vw;
     background: linear-gradient(135deg, #46B1D5 0%, #3498DB 100%);
@@ -621,7 +620,6 @@ textarea{
     font-size: 2vh;
 }
 
-/* Badges de sucesso/erro */
 .success-badge,
 .error-badge {
     position: fixed;

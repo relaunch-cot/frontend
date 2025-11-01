@@ -1,11 +1,10 @@
-* {
+﻿* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
 }
 
-/* === HEADER === */
 header {
     height: 12vh;
     display: grid;
@@ -93,7 +92,6 @@ header > :nth-child(1) {
     margin-right: 3vh;
 }
 
-/* === FOOTER === */
 footer {
     height: 15vh;
     background-color: #2A3B41;
@@ -186,7 +184,6 @@ footer > div > select:hover {
     color: #aeebff;
 }
 
-/* === MAIN === */
 main {
     min-height: 73vh;
     width: 100%;
@@ -195,7 +192,6 @@ main {
     position: relative;
 }
 
-/* === PAGE HEADER === */
 .page-header {
     text-align: center;
     margin-bottom: 2rem;
@@ -215,7 +211,6 @@ main {
     font-weight: 400;
 }
 
-/* === FILTERS === */
 .filters {
     display: flex;
     gap: 1rem;
@@ -249,7 +244,6 @@ main {
     box-shadow: 0 0 0 3px rgba(70, 177, 213, 0.1);
 }
 
-/* === PROJECTS CONTAINER === */
 .projects-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -258,7 +252,6 @@ main {
     max-width: 1400px;
 }
 
-/* === PROJECT CARD === */
 .project-card {
     background: white;
     border-radius: 12px;
@@ -421,7 +414,6 @@ main {
     transform: none;
 }
 
-/* === MESSAGES === */
 .empty-message {
     text-align: center;
     color: #777;
@@ -438,7 +430,6 @@ main {
     font-weight: 500;
 }
 
-/* === RESPONSIVE === */
 @media (max-width: 768px) {
     .projects-container {
         grid-template-columns: 1fr;

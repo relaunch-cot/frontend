@@ -1,4 +1,4 @@
-*{
+﻿*{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -319,7 +319,6 @@ main{
 }
 
 
-/* === MODAL === */
 .modal {
     display: none;
     position: fixed;
@@ -361,7 +360,6 @@ main{
     transform: translate(-50%, -50%) scale(1);
 }
 
-/* Scrollbar personalizada */
 .modal-content::-webkit-scrollbar {
     width: 8px;
 }
@@ -380,7 +378,6 @@ main{
     background: #3a9dbf;
 }
 
-/* Close Button */
 .close {
     position: absolute;
     right: 25px;
@@ -397,7 +394,6 @@ main{
     color: #46B1D5;
 }
 
-/* Modal Header */
 .modal-header {
     margin-bottom: 35px;
     padding-bottom: 20px;
@@ -419,7 +415,6 @@ main{
     margin: 0;
 }
 
-/* Form Layout */
 form {
     width: 100%;
 }
@@ -437,7 +432,6 @@ form {
     gap: 25px;
 }
 
-/* Input Groups - Animated Labels */
 .input-group {
     position: relative;
     display: flex;
@@ -470,7 +464,6 @@ form {
     transition: all 0.3s ease;
 }
 
-/* Animação de Label ao focar ou preencher */
 .input-group input:focus,
 .input-group textarea:focus,
 .input-group select:focus {
@@ -489,7 +482,6 @@ form {
     font-weight: 500;
 }
 
-/* Textarea específico */
 .input-group textarea {
     min-height: 135px;
     resize: none;
@@ -497,7 +489,6 @@ form {
     line-height: 1.5;
 }
 
-/* Select específico */
 .input-group select {
     cursor: pointer;
     color: #2C3E50;
@@ -513,7 +504,6 @@ form {
     color: #bbb;
 }
 
-/* Input de Data - Label sempre no topo */
 .input-group input[type="date"] {
     color: #2C3E50;
     cursor: pointer;
@@ -527,7 +517,6 @@ form {
     transition: all 0.3s ease;
 }
 
-/* Label azul apenas quando tiver valor ou estiver focado */
 .input-group input[type="date"]:focus ~ label,
 .input-group input[type="date"].has-value ~ label {
     color: #46B1D5;
@@ -543,7 +532,6 @@ form {
     filter: invert(45%) sepia(45%) saturate(1200%) hue-rotate(160deg);
 }
 
-/* Input de Número */
 .input-group input[type="number"] {
     color: #2C3E50;
 }
@@ -552,7 +540,6 @@ form {
     cursor: pointer;
 }
 
-/* File Input Simples */
 .file-input-group {
     position: relative;
     display: flex;
@@ -589,7 +576,6 @@ form {
     border-bottom-color: #46B1D5;
 }
 
-/* Label azul apenas quando tiver arquivo selecionado ou focado */
 .file-input-group input[type="file"]:focus ~ .file-label {
     color: #46B1D5;
     font-weight: 500;
@@ -618,7 +604,6 @@ form {
     background: #3a9dbf;
 }
 
-/* Form Actions */
 .form-actions {
     display: flex;
     gap: 15px;
@@ -668,7 +653,6 @@ form {
     transform: translateY(0);
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .modal-content {
         padding: 30px 20px;

@@ -1,11 +1,9 @@
 ﻿const BASE_URL = window.ENV_CONFIG.URL_BACKEND;
 const token = localStorage.getItem('token');
 
-// Extrai userId do token JWT
 function getUserIdFromToken() {
     if (!token) return null;
     try {
-        // Remove Bearer se presente antes de decodificar
         const tokenWithoutBearer = token.replace('Bearer ', '');
         const payload = JSON.parse(atob(tokenWithoutBearer.split('.')[1]));
         return payload.userId;
@@ -14,7 +12,6 @@ function getUserIdFromToken() {
     }
 }
 
-// Busca todas as notificações do usuário
 async function fetchNotifications() {
     const userId = getUserIdFromToken();
     if (!userId) {
@@ -42,18 +39,14 @@ async function fetchNotifications() {
     }
 }
 
-// Cria card de notificação baseado no tipo
 function createNotificationCard(notification) {
     const card = document.createElement('div');
     card.className = `notification-card ${notification.type.toLowerCase().replace('_', '-')}`;
     card.dataset.notificationId = notification.notificationId;
     card.dataset.senderId = notification.senderId;
     
-    // Extrai projectId do conteúdo se for PROJECT_REQUEST
     let projectId = null;
     if (notification.type === 'PROJECT_REQUEST' && notification.content) {
-        // Tenta encontrar o projectId no formato: "ID do Projeto: <id>"
-        // Aceita tanto números quanto UUIDs
         const match = notification.content.match(/ID do Projeto:\s*([a-zA-Z0-9\-]+)/);
         if (match) {
             projectId = match[1];
@@ -63,10 +56,8 @@ function createNotificationCard(notification) {
         card.dataset.projectId = projectId;
     }
 
-    // Ícone baseado no tipo de notificação
     const icon = getNotificationIcon(notification.type);
     
-    // Formata timestamp
     const timestamp = formatTimestamp(notification.createdAt);
 
     card.innerHTML = `
@@ -86,7 +77,6 @@ function createNotificationCard(notification) {
     return card;
 }
 
-// Retorna ícone SVG baseado no tipo de notificação
 function getNotificationIcon(type) {
     const icons = {
         'PROJECT_REQUEST': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="#46B1D5"><path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM112 256l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64l160 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-160 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg>`,
@@ -100,7 +90,6 @@ function getNotificationIcon(type) {
     return icons[type] || icons['PROJECT_REQUEST'];
 }
 
-// Cria botões de ação baseado no tipo de notificação
 function createActionButtons(notification) {
     if (notification.type === 'PROJECT_REQUEST') {
         return `
@@ -123,7 +112,6 @@ function createActionButtons(notification) {
         `;
     }
 
-    // Para outros tipos de notificação, adiciona botão de deletar
     return `
         <button class="btn-delete" onclick="deleteNotification('${notification.notificationId}')">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor"><path d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>
@@ -132,7 +120,6 @@ function createActionButtons(notification) {
     `;
 }
 
-// Formata timestamp para exibição amigável
 function formatTimestamp(timestamp) {
     const date = new Date(timestamp);
     const now = new Date();
@@ -149,7 +136,6 @@ function formatTimestamp(timestamp) {
     return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-// Renderiza todas as notificações
 function renderNotifications(notifications) {
     const container = document.getElementById('notifications-container');
     const emptyMessage = document.getElementById('empty-message');
@@ -164,7 +150,6 @@ function renderNotifications(notifications) {
         container.style.display = 'none';
         if (clearAllBtn) clearAllBtn.style.display = 'none';
         
-        // Atualiza badge com contagem 0
         if (typeof updateBadgeCount === 'function') {
             updateBadgeCount(0);
         }
@@ -176,7 +161,6 @@ function renderNotifications(notifications) {
     container.innerHTML = '';
     if (clearAllBtn) clearAllBtn.style.display = 'flex';
 
-    // Ordena notificações por data (mais recentes primeiro)
     const sortedNotifications = notifications.sort((a, b) => 
         new Date(b.createdAt) - new Date(a.createdAt)
     );
@@ -186,13 +170,11 @@ function renderNotifications(notifications) {
         container.appendChild(card);
     });
     
-    // Atualiza badge com a contagem atual
     if (typeof updateBadgeCount === 'function') {
         updateBadgeCount(notifications.length);
     }
 }
 
-// Aceita solicitação de projeto
 async function acceptRequest(notificationId, freelancerId) {
     try {
         const card = document.querySelector(`[data-notification-id="${notificationId}"]`);
@@ -209,7 +191,6 @@ async function acceptRequest(notificationId, freelancerId) {
             return;
         }
 
-        // 1. Adiciona freelancer ao projeto
         const addResponse = await fetch(`${BASE_URL}/v1/project/add-freelancer/${projectId}`, {
             method: 'PATCH',
             headers: {
@@ -223,7 +204,6 @@ async function acceptRequest(notificationId, freelancerId) {
             throw new Error('Erro ao adicionar freelancer ao projeto');
         }
 
-        // 2. Envia notificação de aceitação para o freelancer
         const clientId = getUserIdFromToken();
         await fetch(`${BASE_URL}/v1/notification/${clientId}`, {
             method: 'POST',
@@ -239,7 +219,6 @@ async function acceptRequest(notificationId, freelancerId) {
             })
         });
 
-        // 3. Deleta a notificação original
         await fetch(`${BASE_URL}/v1/notification/${notificationId}`, {
             method: 'DELETE',
             headers: {
@@ -247,19 +226,16 @@ async function acceptRequest(notificationId, freelancerId) {
             }
         });
 
-        // 4. Remove card da página
         card.style.animation = 'fadeOut 0.3s ease';
         setTimeout(() => {
             card.remove();
             
-            // Verifica se ainda há notificações
             const remaining = document.querySelectorAll('.notification-card');
             if (remaining.length === 0) {
                 document.getElementById('empty-message').style.display = 'flex';
                 document.getElementById('notifications-container').style.display = 'none';
             }
             
-            // Atualiza badge no header
             if (typeof updateBadgeCount === 'function') {
                 updateBadgeCount(remaining.length);
             }
@@ -271,7 +247,6 @@ async function acceptRequest(notificationId, freelancerId) {
     }
 }
 
-// Rejeita solicitação de projeto
 async function rejectRequest(notificationId, freelancerId) {
     try {
         const card = document.querySelector(`[data-notification-id="${notificationId}"]`);
@@ -288,7 +263,6 @@ async function rejectRequest(notificationId, freelancerId) {
             return;
         }
 
-        // 1. Envia notificação de rejeição para o freelancer
         const clientId = getUserIdFromToken();
         await fetch(`${BASE_URL}/v1/notification/${clientId}`, {
             method: 'POST',
@@ -304,7 +278,6 @@ async function rejectRequest(notificationId, freelancerId) {
             })
         });
 
-        // 2. Deleta a notificação original
         await fetch(`${BASE_URL}/v1/notification/${notificationId}`, {
             method: 'DELETE',
             headers: {
@@ -312,19 +285,16 @@ async function rejectRequest(notificationId, freelancerId) {
             }
         });
 
-        // 3. Remove card da página
         card.style.animation = 'fadeOut 0.3s ease';
         setTimeout(() => {
             card.remove();
             
-            // Verifica se ainda há notificações
             const remaining = document.querySelectorAll('.notification-card');
             if (remaining.length === 0) {
                 document.getElementById('empty-message').style.display = 'flex';
                 document.getElementById('notifications-container').style.display = 'none';
             }
             
-            // Atualiza badge no header
             if (typeof updateBadgeCount === 'function') {
                 updateBadgeCount(remaining.length);
             }
@@ -336,7 +306,6 @@ async function rejectRequest(notificationId, freelancerId) {
     }
 }
 
-// Deleta uma notificação específica
 async function deleteNotification(notificationId) {
     try {
         const response = await fetch(`${BASE_URL}/v1/notification/${notificationId}`, {
@@ -350,21 +319,18 @@ async function deleteNotification(notificationId) {
             throw new Error('Erro ao deletar notificação');
         }
 
-        // Remove card da página
         const card = document.querySelector(`[data-notification-id="${notificationId}"]`);
         if (card) {
             card.style.animation = 'fadeOut 0.3s ease';
             setTimeout(() => {
                 card.remove();
                 
-                // Verifica se ainda há notificações
                 const remaining = document.querySelectorAll('.notification-card');
                 if (remaining.length === 0) {
                     document.getElementById('empty-message').style.display = 'flex';
                     document.getElementById('notifications-container').style.display = 'none';
                 }
                 
-                // Atualiza badge no header
                 if (typeof updateBadgeCount === 'function') {
                     updateBadgeCount(remaining.length);
                 }
@@ -377,7 +343,6 @@ async function deleteNotification(notificationId) {
     }
 }
 
-// Deleta todas as notificações do usuário
 async function deleteAllNotifications() {
     try {
         const userId = getUserIdFromToken();
@@ -398,15 +363,12 @@ async function deleteAllNotifications() {
             throw new Error('Erro ao deletar todas as notificações');
         }
 
-        // Limpa o container
         const container = document.getElementById('notifications-container');
         container.innerHTML = '';
         
-        // Mostra mensagem de vazio
         document.getElementById('empty-message').style.display = 'flex';
         document.getElementById('notifications-container').style.display = 'none';
         
-        // Atualiza badge no header
         if (typeof updateBadgeCount === 'function') {
             updateBadgeCount(0);
         }
@@ -417,12 +379,10 @@ async function deleteAllNotifications() {
     }
 }
 
-// Inicia chat com o usuário
 async function startChat(userId) {
     try {
         const currentUserId = getUserIdFromToken();
         
-        // Busca informações do usuário para obter o nome
         let contactName = 'Contato';
         try {
             const userResponse = await fetch(`${BASE_URL}/v1/user/${userId}`, {
@@ -435,7 +395,6 @@ async function startChat(userId) {
         } catch (error) {
         }
         
-        // 1. Tenta criar o chat
         const response = await fetch(`${BASE_URL}/v1/chat`, {
             method: 'POST',
             headers: {
@@ -451,23 +410,19 @@ async function startChat(userId) {
         let chatId = null;
 
         if (response.ok) {
-            // Chat criado com sucesso
             const data = await response.json();
             chatId = data.chatId;
             showSuccessBadge('Chat criado com sucesso!');
             
-            // Redireciona para o chat específico
             setTimeout(() => {
                 window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(contactName)}`;
             }, 1000);
         } else {
             const errorText = await response.text();
             
-            // 2. Se chat já existe, busca pelo endpoint específico
             if (errorText.includes('already exists') || errorText.includes('AlreadyExists')) {
                 showSuccessBadge('Redirecionando para o chat...');
                 
-                // Busca chat pelos userIds usando query params
                 const chatsResponse = await fetch(
                     `${BASE_URL}/v1/chat/users?user1Id=${currentUserId}&user2Id=${userId}`,
                     {
@@ -481,13 +436,11 @@ async function startChat(userId) {
                     if (chatData && chatData.chat && chatData.chat.chatId) {
                         chatId = chatData.chat.chatId;
                         
-                        // Identifica o nome do outro usuário do chat
                         const otherUser = chatData.chat.user1.userId === currentUserId 
                             ? chatData.chat.user2 
                             : chatData.chat.user1;
                         const otherUserName = otherUser.name || 'Contato';
                         
-                        // Redireciona para o chat específico
                         setTimeout(() => {
                             window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(otherUserName)}`;
                         }, 1000);
@@ -511,12 +464,10 @@ async function startChat(userId) {
     }
 }
 
-// Visualiza perfil do freelancer
 function viewFreelancerProfile(userId) {
     window.location.href = `/perfil?userId=${userId}`;
 }
 
-// Mostra badge de sucesso
 function showSuccessBadge(message) {
     const badge = document.createElement('div');
     badge.className = 'success-badge';
@@ -530,7 +481,6 @@ function showSuccessBadge(message) {
     }, 3000);
 }
 
-// Mostra badge de erro
 function showErrorBadge(message) {
     const badge = document.createElement('div');
     badge.className = 'error-badge';
@@ -544,44 +494,35 @@ function showErrorBadge(message) {
     }, 3000);
 }
 
-// Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
-    // Verifica autenticação
     if (!token) {
         window.location.href = '/login';
         return;
     }
 
-    // Carrega notificações
     const notifications = await fetchNotifications();
     renderNotifications(notifications);
     
-    // Listener para novas notificações via WebSocket
     window.addEventListener('newNotification', async () => {
-        // Recarrega a lista de notificações
         const updatedNotifications = await fetchNotifications();
         renderNotifications(updatedNotifications);
     });
     
-    // Listener para notificações deletadas via WebSocket
     window.addEventListener('notificationDeleted', async (event) => {
         const { notificationId } = event.detail;
         
-        // Remove o card da página se existir
         const card = document.querySelector(`[data-notification-id="${notificationId}"]`);
         if (card) {
             card.style.animation = 'fadeOut 0.3s ease';
             setTimeout(() => {
                 card.remove();
                 
-                // Verifica se ainda há notificações
                 const remaining = document.querySelectorAll('.notification-card');
                 if (remaining.length === 0) {
                     document.getElementById('empty-message').style.display = 'flex';
                     document.getElementById('notifications-container').style.display = 'none';
                 }
                 
-                // Atualiza badge
                 if (typeof updateBadgeCount === 'function') {
                     updateBadgeCount(remaining.length);
                 }

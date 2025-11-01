@@ -1,4 +1,4 @@
-*{
+﻿*{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -410,7 +410,6 @@ article{
     font-size: 15px;
     font-style: italic;
 }
-/* === Bot�o de Adicionar Freelancer === */
 #add-freelancer-container {
     display: flex;
     align-items: center;
@@ -452,7 +451,6 @@ article{
     transform: none;
 }
 
-/* === Bot�o de Editar Projeto === */
 .edit-project-btn {
     background: linear-gradient(135deg, #46B1D5 0%, #3a9dbf 100%);
     color: white;
@@ -484,7 +482,6 @@ article{
     transform: translateY(0);
 }
 
-/* === Modal de Edi��o === */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -650,7 +647,6 @@ article{
     box-shadow: none;
 }
 
-/* Responsivo */
 @media (max-width: 768px) {
     .form-row {
         grid-template-columns: 1fr;
@@ -668,7 +664,6 @@ article{
 }
 
 
-/* === Input de Arquivo === */
 input[type='file'] {
     padding: 8px !important;
     cursor: pointer;
@@ -693,7 +688,6 @@ input[type='file']::file-selector-button:hover {
     box-shadow: 0 4px 12px rgba(70, 177, 213, 0.4);
 }
 
-/* Input de Arquivo */
 input[type='file'] {
     padding: 8px !important;
     cursor: pointer;
