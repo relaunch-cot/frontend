@@ -1,4 +1,4 @@
-// script-available-projects.js
+﻿// script-available-projects.js
 
 const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 
@@ -21,7 +21,6 @@ function parseJwt(token) {
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error('Erro ao decodificar token JWT:', e);
     return null;
   }
 }
@@ -205,7 +204,6 @@ async function buscarProjetos() {
     renderizarProjetos(filteredProjects);
 
   } catch (error) {
-    console.error('Erro ao buscar projetos:', error);
     loadingMsg.style.display = 'none';
     showError('Não foi possível carregar os projetos. Tente novamente mais tarde.');
   }
@@ -288,7 +286,6 @@ async function solicitarParticipacao(projectId, projectName) {
     showSuccess(`Solicitação enviada para o projeto "${projectName}"!`);
 
   } catch (error) {
-    console.error('Erro ao solicitar participação:', error);
     showError('Não foi possível enviar a solicitação. Tente novamente.');
   }
 }

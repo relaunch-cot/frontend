@@ -1,4 +1,4 @@
-// script-project.js
+﻿// script-project.js
 
 const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 
@@ -7,14 +7,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const projectId = urlParams.get("id");
 
   if (!projectId) {
-    console.error("Nenhum projectId encontrado na URL");
     return;
   }
 
   // 2. Token do localStorage
   const token = localStorage.getItem("token");
   if (!token) {
-    console.warn("Nenhum token encontrado. A requisição será bloqueada pelo backend.");
     return;
   }
 
@@ -29,7 +27,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("Erro ao buscar projeto:", errorData);
       return;
     }
 
@@ -39,7 +36,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     preencherPaginaComProjeto(backendResponse.project);
 
   } catch (error) {
-    console.error("Erro inesperado:", error);
   }
 });
 
@@ -51,7 +47,6 @@ function validarStatus(status) {
   const statusNormalizado = status?.toLowerCase().trim();
   
   if (!statusNormalizado || !statusValidos.includes(statusNormalizado)) {
-    console.warn(`Status inválido recebido: "${status}". Usando "pendente" como padrão.`);
     return 'pendente';
   }
   
@@ -240,7 +235,6 @@ async function adicionarFreelancerAoProjeto(projectId, freelancerId) {
       }
     }
   } catch (error) {
-    console.error("Erro ao adicionar freelancer:", error);
     showError("Erro de conexão. Tente novamente.");
     
     // Reabilita o botão em caso de erro
@@ -300,7 +294,6 @@ async function verificarSeEhCliente() {
     
     return userType === 'client';
   } catch (error) {
-    console.error('Erro ao verificar tipo de usuário:', error);
     return false;
   }
 }
@@ -443,7 +436,6 @@ async function atualizarProjeto(projectId, updateData) {
       window.location.reload();
     }, 1500);
   } catch (error) {
-    console.error('Erro ao atualizar projeto:', error);
     showError(error.message || 'Não foi possível atualizar o projeto. Tente novamente.');
     submitBtn.disabled = false;
     submitBtn.textContent = 'Salvar Alterações';
@@ -489,7 +481,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
           urlImageProject = await converterImagemParaBase64(imageInput.files[0]);
         } catch (error) {
-          console.error('Erro ao processar imagem:', error);
           // Mostra a mensagem específica do erro da imagem
           showError(error.message || 'Erro ao processar a imagem. Tente novamente.');
           return;

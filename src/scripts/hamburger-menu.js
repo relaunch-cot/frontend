@@ -1,4 +1,4 @@
-function toggleMenu() {
+﻿function toggleMenu() {
   const menu = document.getElementById('hamburger-menu');
   updateMenuContent();
   updateAuthButton();
@@ -42,7 +42,6 @@ function updateMenuContent() {
       userId = decoded.userId;
       userType = decoded.userType;
     } catch (e) {
-      console.error('Erro ao decodificar token:', e);
     }
 
     // Renderiza menu com userType do token

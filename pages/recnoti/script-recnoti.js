@@ -1,4 +1,4 @@
-document.querySelectorAll('.ent input').forEach(input => {
+﻿document.querySelectorAll('.ent input').forEach(input => {
     const ent = input.parentElement;
 
     function checkInput() {
@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             recnotiResponseDiv.innerHTML = "Erro ao conectar à API.";
-            console.error(err);
         }
     });
 });

@@ -1,4 +1,4 @@
-document.querySelectorAll('.ent input').forEach(input => {
+﻿document.querySelectorAll('.ent input').forEach(input => {
     const ent = input.parentElement;
 
     function checkInput() {
@@ -53,6 +53,5 @@ updatePasswordForm.addEventListener("submit", async (e) => {
         }
     } catch (err) {
         updatePasswordResponseDiv.innerHTML = "Erro ao conectar à API.";
-        console.error(err);
     }
 });

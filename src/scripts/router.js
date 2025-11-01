@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Sistema de Roteamento Universal
  * Funciona tanto em ambiente local quanto em produção
  * Não requer servidor - funciona abrindo arquivos diretamente
@@ -132,7 +132,6 @@
         }
       }
     } else {
-      console.warn('Rota não encontrada:', path);
     }
   }
 
@@ -242,8 +241,6 @@
       setupLocationInterception();
     }
     
-    console.log('🚀 Sistema de roteamento universal inicializado');
-    console.log('Ambiente:', isLocalEnvironment() ? 'Local (file://)' : (isLocalServer() ? 'Servidor Local' : 'Produção'));
   }
 
   // Inicializa

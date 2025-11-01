@@ -1,4 +1,4 @@
-const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
+﻿const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 const API_BASE = `${BASE_URL}/v1/user`;
 
 document.querySelectorAll('.ent input').forEach(input => {
@@ -51,7 +51,6 @@ loginForm.addEventListener("submit", async (e) => {
         
         const responseText = JSON.stringify(data);
         if (responseText.includes('password') || responseText.includes('senha')) {
-            console.warn('Backend retornando dados sensíveis');
         }
 
         if (res.ok && res.headers.get("Authorization")) {
@@ -66,7 +65,6 @@ loginForm.addEventListener("submit", async (e) => {
                 const userId = decodedToken?.userId;
                 
                 if (userId) {
-                    console.log('🔌 Conectando ao sistema de presença...');
                     window.presenceManager.connect(userId, authToken);
                 }
             }

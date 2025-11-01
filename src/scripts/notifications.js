@@ -1,4 +1,4 @@
-function createNotificationContainer() {
+﻿function createNotificationContainer() {
   if (!document.querySelector('.notification-container')) {
     const container = document.createElement('div');
     container.className = 'notification-container';
@@ -83,7 +83,6 @@ async function updateNotificationBadge() {
     // Atualiza badge com a contagem
     updateBadgeCount(count);
   } catch (error) {
-    console.error('Erro ao atualizar badge de notificações:', error);
   }
 }
 
@@ -143,19 +142,16 @@ if (!isAuthPage) {
     const token = localStorage.getItem('token');
     
     if (!token) {
-      console.log('⚠️ Token não encontrado - Presence Manager não inicializado');
       return;
     }
     
     // Verifica se presenceManager existe
     if (typeof window.presenceManager === 'undefined') {
-      console.warn('⚠️ presenceManager não está disponível');
       return;
     }
     
     // Verifica se já está conectado
     if (window.presenceManager.isConnected()) {
-      console.log('✅ Presence Manager já está conectado');
       return;
     }
     
@@ -166,14 +162,11 @@ if (!isAuthPage) {
       const userId = payload.userId;
       
       if (!userId) {
-        console.error('❌ UserId não encontrado no token');
         return;
       }
       
-      console.log('🔌 Inicializando Presence Manager globalmente...');
       window.presenceManager.connect(userId, token);
     } catch (error) {
-      console.error('❌ Erro ao inicializar Presence Manager:', error);
     }
   }
   

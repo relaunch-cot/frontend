@@ -1,4 +1,4 @@
-document.querySelectorAll('.ent input').forEach(input => {
+﻿document.querySelectorAll('.ent input').forEach(input => {
     const ent = input.parentElement;
     function checkInput() {
         if (input.value.trim() !== "") {
@@ -129,7 +129,6 @@ async function submitForm() {
         
         const responseText = JSON.stringify(data);
         if (responseText.includes('password') || responseText.includes('senha')) {
-            console.warn('Backend retornando dados sensíveis');
         }
 
         if (res.ok) {

@@ -1,4 +1,4 @@
-// Gerenciador de WebSocket para notificações em tempo real
+﻿// Gerenciador de WebSocket para notificações em tempo real
 class NotificationWebSocket {
   constructor() {
     this.ws = null;
@@ -12,7 +12,6 @@ class NotificationWebSocket {
   // Conecta ao WebSocket do backend
   connect(userId, token) {
     if (!userId || !token) {
-      console.error('UserId e token são necessários para conectar ao WebSocket');
       return;
     }
 
@@ -24,7 +23,6 @@ class NotificationWebSocket {
       this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
     } catch (error) {
-      console.error('Erro ao criar conexão WebSocket:', error);
       this.scheduleReconnect(userId, token);
     }
   }
@@ -32,7 +30,6 @@ class NotificationWebSocket {
   // Configura os event handlers do WebSocket
   setupEventHandlers() {
     this.ws.onopen = () => {
-      console.log('✅ WebSocket conectado - Notificações em tempo real ativadas');
       this.reconnectAttempts = 0;
       this.startHeartbeat();
     };
@@ -41,32 +38,25 @@ class NotificationWebSocket {
       try {
         // Verifica se é string vazia
         if (!event.data || event.data.trim() === '') {
-          console.warn('⚠️ Mensagem vazia recebida nas notificações');
           return;
         }
         
         const data = JSON.parse(event.data);
         this.handleMessage(data);
       } catch (error) {
-        console.error('❌ Erro ao processar mensagem WebSocket de notificações:', error);
-        console.error('📄 Conteúdo recebido:', event.data);
         
         if (event.data && typeof event.data === 'string' && event.data.includes('}{')) {
-          console.error('⚠️ Múltiplas mensagens JSON concatenadas nas notificações!');
         }
       }
     };
 
     this.ws.onerror = (error) => {
-      console.error('Erro no WebSocket:', error);
     };
 
     this.ws.onclose = (event) => {
-      console.log('WebSocket desconectado:', event.code, event.reason);
       this.stopHeartbeat();
       
       if (!this.isIntentionallyClosed && this.reconnectAttempts < this.maxReconnectAttempts) {
-        console.log(`Tentando reconectar... (${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})`);
         this.scheduleReconnect();
       }
     };
@@ -77,7 +67,6 @@ class NotificationWebSocket {
     switch (data.type) {
       case 'CONNECTED':
         // Mensagem de confirmação de conexão
-        console.log('✅ Conectado ao serviço de notificações:', data.message);
         break;
       
       case 'NEW_NOTIFICATION':
@@ -100,13 +89,11 @@ class NotificationWebSocket {
         break;
       
       default:
-        console.log('Mensagem WebSocket não tratada:', data);
     }
   }
 
   // Callback quando nova notificação é recebida
   onNewNotification(notification) {
-    console.log('📬 Nova notificação recebida:', notification);
     
     // Atualiza o badge
     if (typeof updateBadgeCount === 'function') {
@@ -126,7 +113,6 @@ class NotificationWebSocket {
 
   // Callback quando notificação é deletada
   onNotificationDeleted(notificationId) {
-    console.log('🗑️ Notificação deletada:', notificationId);
     
     // Atualiza o badge
     if (typeof updateBadgeCount === 'function') {
@@ -172,7 +158,6 @@ class NotificationWebSocket {
         updateBadgeCount(count);
       }
     } catch (error) {
-      console.error('Erro ao buscar contagem de notificações:', error);
     }
   }
 
@@ -198,7 +183,6 @@ class NotificationWebSocket {
     
     if (this.reconnectAttempts <= this.maxReconnectAttempts) {
       setTimeout(() => {
-        console.log('🔄 Reconectando WebSocket...');
         
         // Se userId e token não foram passados, tenta extrair do localStorage
         if (!userId || !token) {
@@ -210,7 +194,6 @@ class NotificationWebSocket {
               userId = payload.userId;
               token = storedToken;
             } catch (error) {
-              console.error('Erro ao extrair userId do token:', error);
               return;
             }
           }
@@ -219,7 +202,6 @@ class NotificationWebSocket {
         this.connect(userId, token);
       }, this.reconnectDelay * this.reconnectAttempts);
     } else {
-      console.error('❌ Número máximo de tentativas de reconexão atingido');
     }
   }
 
@@ -248,7 +230,6 @@ function initializeNotificationWebSocket() {
   const token = localStorage.getItem('token');
   
   if (!token) {
-    console.log('Usuário não autenticado - WebSocket não será inicializado');
     return;
   }
   
@@ -258,7 +239,6 @@ function initializeNotificationWebSocket() {
     const userId = payload.userId;
     
     if (!userId) {
-      console.error('UserId não encontrado no token');
       return;
     }
     
@@ -274,7 +254,6 @@ function initializeNotificationWebSocket() {
     });
     
   } catch (error) {
-    console.error('Erro ao inicializar WebSocket de notificações:', error);
   }
 }
 

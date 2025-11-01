@@ -1,4 +1,4 @@
-// Gerenciador de WebSocket para Chat em tempo real
+﻿// Gerenciador de WebSocket para Chat em tempo real
 class ChatWebSocket {
   constructor() {
     this.ws = null;
@@ -14,7 +14,6 @@ class ChatWebSocket {
   // Conecta ao WebSocket do chat
   connect(chatId, userId, token) {
     if (!chatId || !userId || !token) {
-      console.error('ChatId, userId e token são necessários para conectar ao WebSocket do chat');
       return;
     }
 
@@ -29,7 +28,6 @@ class ChatWebSocket {
       this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
     } catch (error) {
-      console.error('Erro ao criar conexão WebSocket do chat:', error);
       this.scheduleReconnect(chatId, userId, token);
     }
   }
@@ -37,7 +35,6 @@ class ChatWebSocket {
   // Configura os event handlers
   setupEventHandlers() {
     this.ws.onopen = () => {
-      console.log(`✅ WebSocket do Chat ${this.chatId} conectado`);
       this.reconnectAttempts = 0;
       this.startHeartbeat();
       
@@ -51,7 +48,6 @@ class ChatWebSocket {
       try {
         // Verifica se é string vazia
         if (!event.data || event.data.trim() === '') {
-          console.warn('⚠️ Mensagem vazia recebida no chat');
           return;
         }
         
@@ -61,7 +57,6 @@ class ChatWebSocket {
         const messages = event.data.trim().split('\n').filter(msg => msg.trim());
         
         if (messages.length > 1) {
-          console.log(`📦 Recebidas ${messages.length} mensagens concatenadas no chat`);
         }
         
         messages.forEach(msgStr => {
@@ -69,27 +64,19 @@ class ChatWebSocket {
             const data = JSON.parse(msgStr);
             this.handleMessage(data);
           } catch (parseError) {
-            console.error('❌ Erro ao parsear mensagem individual do chat:', parseError);
-            console.error('📄 Mensagem problemática:', msgStr);
           }
         });
       } catch (error) {
-        console.error('❌ Erro ao processar mensagem WebSocket do chat:', error);
-        console.error('📄 Conteúdo recebido:', event.data);
         
         if (event.data && typeof event.data === 'string' && event.data.includes('}{')) {
-          console.error('⚠️ Múltiplas mensagens JSON concatenadas SEM quebra de linha no chat!');
-          console.error('💡 Backend deveria enviar mensagens separadas por \\n');
         }
       }
     };
 
     this.ws.onerror = (error) => {
-      console.error('Erro no WebSocket do chat:', error);
     };
 
     this.ws.onclose = (event) => {
-      console.log('WebSocket do chat desconectado:', event.code, event.reason);
       this.stopHeartbeat();
       
       // Dispara evento de desconexão
@@ -98,7 +85,6 @@ class ChatWebSocket {
       }));
       
       if (!this.isIntentionallyClosed && this.reconnectAttempts < this.maxReconnectAttempts) {
-        console.log(`Tentando reconectar chat... (${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})`);
         this.scheduleReconnect();
       }
     };
@@ -106,7 +92,6 @@ class ChatWebSocket {
 
   // Processa mensagens recebidas
   handleMessage(data) {
-    console.log('📨 Mensagem WebSocket recebida:', data);
     
     switch (data.type) {
       case 'NEW_MESSAGE':
@@ -133,7 +118,6 @@ class ChatWebSocket {
       
       case 'CONNECTED':
         // Confirmação de conexão do backend
-        console.log('✅ Chat WebSocket confirmado:', data.message || 'Conectado');
         break;
       
       case 'PONG':
@@ -141,13 +125,11 @@ class ChatWebSocket {
         break;
       
       default:
-        console.log('⚠️ Mensagem WebSocket do chat não tratada:', data);
     }
   }
 
   // Callback quando nova mensagem é recebida
   onNewMessage(message) {
-    console.log('💬 Nova mensagem recebida no chat:', message);
     
     // Dispara evento customizado para a página processar
     window.dispatchEvent(new CustomEvent('chatNewMessage', { 
@@ -160,7 +142,6 @@ class ChatWebSocket {
     // Backend já não envia para o próprio usuário, mas vamos filtrar por segurança
     if (userId == this.userId) return;
     
-    console.log(`💬 ${userId} está ${isTyping ? 'digitando' : 'parou de digitar'}`);
     
     window.dispatchEvent(new CustomEvent('chatUserTyping', { 
       detail: { userId, isTyping, chatId: chatId || this.chatId } 
@@ -172,7 +153,6 @@ class ChatWebSocket {
     // Backend já não envia para o próprio usuário, mas vamos filtrar por segurança
     if (userId == this.userId) return;
     
-    console.log(`${isInChat ? '�' : '👁️'} Usuário ${userId} está ${isInChat ? 'NO CHAT' : 'FORA DO CHAT'}`);
     
     window.dispatchEvent(new CustomEvent('chatUserStatus', { 
       detail: { userId, isInChat, chatId: chatId || this.chatId } 
@@ -210,7 +190,6 @@ class ChatWebSocket {
         }
       };
       
-      console.log(`⌨️ Enviando status digitação: ${isTyping ? 'DIGITANDO' : 'PAROU'}`);
       this.ws.send(JSON.stringify(message));
     }
   }
@@ -248,7 +227,6 @@ class ChatWebSocket {
     
     if (this.reconnectAttempts <= this.maxReconnectAttempts) {
       setTimeout(() => {
-        console.log('🔄 Reconectando WebSocket do chat...');
         this.connect(
           chatId || this.chatId, 
           userId || this.userId, 
@@ -256,7 +234,6 @@ class ChatWebSocket {
         );
       }, this.reconnectDelay * this.reconnectAttempts);
     } else {
-      console.error('❌ Número máximo de tentativas de reconexão do chat atingido');
     }
   }
 

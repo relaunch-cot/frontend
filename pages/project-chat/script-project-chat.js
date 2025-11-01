@@ -1,4 +1,4 @@
-const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
+﻿const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 const API_BASE = `${BASE_URL}/v1/chat`;
 
 const token = localStorage.getItem('token');
@@ -19,7 +19,6 @@ function parseJwt(token) {
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error('Erro ao decodificar token JWT:', e);
     return null;
   }
 }
@@ -226,16 +225,13 @@ async function obterNomeRemetente(chatId) {
     });
 
     if (!response.ok) {
-      console.warn('⚠️ Falha ao buscar informações do chat');
       return null;
     }
 
     const data = await response.json();
-    console.log('📋 Dados do chat recebidos:', data);
     
     const chat = data.chat;
     if (!chat) {
-      console.warn('⚠️ Objeto chat não encontrado na resposta');
       return null;
     }
     
@@ -248,10 +244,8 @@ async function obterNomeRemetente(chatId) {
       return chat.user2?.name || null;
     }
     
-    console.warn('⚠️ UserId do usuário logado não encontrado no chat');
     return null;
   } catch (error) {
-    console.error('❌ Erro ao buscar nome do remetente:', error);
     return null;
   }
 }
@@ -284,12 +278,9 @@ async function enviarNotificacaoMensagem(receiverId, messageContent) {
     });
 
     if (response.ok) {
-      console.log('✅ Notificação enviada com sucesso');
     } else {
-      console.warn('⚠️ Falha ao enviar notificação:', await response.text());
     }
   } catch (error) {
-    console.error('❌ Erro ao enviar notificação:', error);
     // Não exibe erro para o usuário, pois notificação é secundária
   }
 }
@@ -319,7 +310,6 @@ function mostrarIndicadorDigitacao() {
     mensagensContainer.appendChild(indicator);
     mensagensContainer.scrollTop = mensagensContainer.scrollHeight;
   } else {
-    console.log('Indicador de digitação já existe (mantendo)');
   }
 }
 
@@ -327,7 +317,6 @@ function esconderIndicadorDigitacao() {
   const indicator = document.getElementById('typing-indicator');
   if (indicator) {
     indicator.remove();
-    console.log('Indicador de digitação removido');
   }
 }
 
@@ -367,8 +356,6 @@ function mostrarIconeNovaMensagem(senderName) {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Inicializando chat...');
-  console.log(`ChatId: ${chatId}, UserId: ${userId}, Contato: ${contactName}`);
   
   // Carrega mensagens iniciais
   carregarMensagens();
@@ -382,7 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Função para atualizar status do contato
   function updateContactStatus(isOnline, inChat = false) {
-    console.log(`Atualizando status: Online=${isOnline}, InChat=${inChat}`);
     
     if (inChat) {
       // Usuário está ATIVAMENTE no chat
@@ -417,31 +403,25 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Conecta ao sistema de presença se não estiver conectado
   if (window.presenceManager && !window.presenceManager.isConnected()) {
-    console.log('🔌 Conectando ao sistema de presença...');
     window.presenceManager.connect(userId, token);
   }
   
   // Função para inscrever e verificar status
   function subscribeAndCheckStatus() {
     if (contactUserId && window.presenceManager) {
-      console.log(`📡 [Chat] Inscrevendo para monitorar ${contactName} (${contactUserId})`);
       window.presenceManager.subscribe([contactUserId]);
       
       // Verifica status inicial do contato
       const isOnline = window.presenceManager.isUserOnline(contactUserId);
-      console.log(`📊 [Chat] Status inicial de ${contactName}: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
       updateContactStatus(isOnline, false); // Online na plataforma, mas ainda não sabemos se está no chat
     }
   }
   
   // Aguarda conexão de presença antes de subscrever
   if (window.presenceManager && window.presenceManager.isConnected()) {
-    console.log('✅ [Chat] Presença já conectada');
     subscribeAndCheckStatus();
   } else {
-    console.log('⏳ [Chat] Aguardando conexão de presença...');
     window.addEventListener('presenceConnected', () => {
-      console.log('✅ [Chat] Presença conectada');
       subscribeAndCheckStatus();
     }, { once: true });
   }
@@ -450,7 +430,6 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('userOnline', (event) => {
     const { userId: onlineUserId } = event.detail;
     if (contactUserId && onlineUserId == contactUserId) {
-      console.log(`🟢 [Chat] ${contactName} ficou ONLINE (presença global)`);
       updateContactStatus(true, isContactInChat); // Mantém status do chat
     }
   });
@@ -459,7 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('userOffline', (event) => {
     const { userId: offlineUserId } = event.detail;
     if (contactUserId && offlineUserId == contactUserId) {
-      console.log(`⚪ ${contactName} ficou OFFLINE (presença global)`);
       isContactInChat = false; // Se ficou offline, não está mais no chat
       updateContactStatus(false, false);
     }
@@ -470,7 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const { userIds } = event.detail;
     if (contactUserId) {
       const isOnline = userIds.includes(contactUserId);
-      console.log(`📋 Lista atualizada - ${contactName} está ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
       updateContactStatus(isOnline, isContactInChat); // Mantém status do chat
     }
   });
@@ -482,14 +459,12 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Inicializa WebSocket do chat
   if (typeof ChatWebSocket !== 'undefined') {
-    console.log('💬 ChatWebSocket disponível, conectando...');
     window.chatWS = new ChatWebSocket();
     window.chatWS.connect(chatId, userId, token);
     
     // Listener para novas mensagens via WebSocket
     window.addEventListener('chatNewMessage', (event) => {
       const { message } = event.detail;
-      console.log('Nova mensagem recebida via WebSocket:', message);
       
       // Verifica se a mensagem é do chat atual
       if (message.chatId == chatId) {
@@ -524,7 +499,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.addEventListener('chatUserTyping', (event) => {
       const { userId: typingUserId, isTyping } = event.detail;
-      console.log(`⌨️ Evento chatUserTyping recebido:`, event.detail);
       
       if (isTyping) {
         // Atualiza o status no header
@@ -547,7 +521,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Sempre configura timeout de 10 segundos (tanto para true quanto false)
       // Se não receber novo evento em 10s, remove o indicador
       typingTimeout = setTimeout(() => {
-        console.log('⏱️ Timeout de 10 segundos atingido, removendo indicador');
         esconderIndicadorDigitacao();
         const isOnline = window.presenceManager && window.presenceManager.isUserOnline(contactUserId);
         updateContactStatus(isOnline, isContactInChat);
@@ -557,26 +530,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Listener para status do usuário no chat (in chat / not in chat)
     window.addEventListener('chatUserStatus', (event) => {
       const { userId: statusUserId, isInChat } = event.detail;
-      console.log(`💬 Evento chatUserStatus recebido:`, event.detail);
       
       // Verifica se é o contato que estamos conversando
       if (contactUserId && statusUserId == contactUserId) {
         isContactInChat = isInChat;
         const isOnline = window.presenceManager && window.presenceManager.isUserOnline(contactUserId);
-        console.log(`${isInChat ? '💬' : '👁️'} ${contactName} ${isInChat ? 'ENTROU' : 'SAIU'} do chat`);
         updateContactStatus(isOnline, isInChat);
       }
     });
     
     // Desconecta WebSocket ao sair da página
     window.addEventListener('beforeunload', () => {
-      console.log('Saindo da página, desconectando WebSocket...');
       if (window.chatWS) {
         window.chatWS.disconnect();
       }
     });
   } else {
-    console.warn('ChatWebSocket não está disponível');
   }
   
   // Adiciona listener para enviar status de digitação

@@ -1,4 +1,4 @@
-const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
+﻿const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 const chatList = document.getElementById('chatList');
 const emptyMsg = document.getElementById('emptyMsg');
 
@@ -21,7 +21,6 @@ function parseJwt(token) {
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error('Erro ao decodificar token JWT:', e);
     return null;
   }
 }
@@ -158,7 +157,6 @@ async function carregarChats() {
 
     // Inscreve para monitorar todos os usuários da lista
     if (userIdsToSubscribe.length > 0 && window.presenceManager) {
-      console.log(`📡 [Chats] Inscrevendo para monitorar ${userIdsToSubscribe.length} usuários`);
       window.presenceManager.subscribe(userIdsToSubscribe);
     }
 
@@ -189,7 +187,6 @@ function atualizarStatusUsuario(userId, isOnline) {
 if (window.presenceManager && !window.presenceManager.isConnected()) {
   const token = localStorage.getItem('token');
   if (token && userId) {
-    console.log('🔌 Conectando ao sistema de presença...');
     window.presenceManager.connect(userId, token);
   }
 }
@@ -197,19 +194,16 @@ if (window.presenceManager && !window.presenceManager.isConnected()) {
 // Listeners para eventos de presença
 window.addEventListener('userOnline', (event) => {
   const { userId } = event.detail;
-  console.log(`🟢 [Chats] Usuário ${userId} ficou online`);
   atualizarStatusUsuario(userId, true);
 });
 
 window.addEventListener('userOffline', (event) => {
   const { userId } = event.detail;
-  console.log(`⚪ [Chats] Usuário ${userId} ficou offline (após delay de 5s)`);
   atualizarStatusUsuario(userId, false);
 });
 
 window.addEventListener('onlineUsersListUpdated', (event) => {
   const { userIds } = event.detail;
-  console.log('📋 [Chats] Lista de usuários online atualizada:', userIds);
   
   // Atualiza todos os status
   document.querySelectorAll('li[data-user-id]').forEach(li => {
@@ -232,7 +226,6 @@ window.addEventListener('onlineUsersListUpdated', (event) => {
 // Garante que subscrição aconteça APÓS conexão estar pronta
 let chatsCarregados = false;
 window.addEventListener('presenceConnected', () => {
-  console.log('✅ [Chats] Presença conectada, carregando chats...');
   if (!chatsCarregados) {
     carregarChats();
     chatsCarregados = true;
@@ -241,12 +234,10 @@ window.addEventListener('presenceConnected', () => {
 
 // Se já estiver conectado, carrega imediatamente
 if (window.presenceManager && window.presenceManager.isConnected()) {
-  console.log('✅ [Chats] Presença já conectada, carregando chats...');
   carregarChats();
   chatsCarregados = true;
 } else {
   // Se não conectou ainda, aguarda evento presenceConnected
-  console.log('⏳ [Chats] Aguardando conexão de presença...');
 }
 
 setInterval(carregarChats, 30000);

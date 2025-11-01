@@ -1,4 +1,4 @@
-const BASE_URL = window.ENV_CONFIG.URL_BACKEND;
+﻿const BASE_URL = window.ENV_CONFIG.URL_BACKEND;
 const token = localStorage.getItem('token');
 
 // Extrai userId do token JWT
@@ -10,7 +10,6 @@ function getUserIdFromToken() {
         const payload = JSON.parse(atob(tokenWithoutBearer.split('.')[1]));
         return payload.userId;
     } catch (error) {
-        console.error('Erro ao decodificar token:', error);
         return null;
     }
 }
@@ -38,7 +37,6 @@ async function fetchNotifications() {
         const data = await response.json();
         return data.notifications || [];
     } catch (error) {
-        console.error('Erro ao buscar notificações:', error);
         showErrorBadge('Erro ao carregar notificações');
         return [];
     }
@@ -200,7 +198,6 @@ async function acceptRequest(notificationId, freelancerId) {
         const card = document.querySelector(`[data-notification-id="${notificationId}"]`);
         
         if (!card) {
-            console.error('Card não encontrado para notificationId:', notificationId);
             showErrorBadge('Notificação não encontrada');
             return;
         }
@@ -209,7 +206,6 @@ async function acceptRequest(notificationId, freelancerId) {
         
         if (!projectId) {
             showErrorBadge('Projeto não encontrado na notificação');
-            console.error('Card datasets:', card.dataset);
             return;
         }
 
@@ -271,7 +267,6 @@ async function acceptRequest(notificationId, freelancerId) {
 
         showSuccessBadge('Solicitação aceita com sucesso!');
     } catch (error) {
-        console.error('Erro ao aceitar solicitação:', error);
         showErrorBadge('Erro ao processar solicitação');
     }
 }
@@ -282,7 +277,6 @@ async function rejectRequest(notificationId, freelancerId) {
         const card = document.querySelector(`[data-notification-id="${notificationId}"]`);
         
         if (!card) {
-            console.error('Card não encontrado para notificationId:', notificationId);
             showErrorBadge('Notificação não encontrada');
             return;
         }
@@ -338,7 +332,6 @@ async function rejectRequest(notificationId, freelancerId) {
 
         showSuccessBadge('Solicitação recusada');
     } catch (error) {
-        console.error('Erro ao recusar solicitação:', error);
         showErrorBadge('Erro ao processar solicitação');
     }
 }
@@ -380,7 +373,6 @@ async function deleteNotification(notificationId) {
 
         showSuccessBadge('Notificação removida');
     } catch (error) {
-        console.error('Erro ao deletar notificação:', error);
         showErrorBadge('Erro ao remover notificação');
     }
 }
@@ -421,7 +413,6 @@ async function deleteAllNotifications() {
 
         showSuccessBadge('Todas as notificações foram removidas');
     } catch (error) {
-        console.error('Erro ao deletar todas as notificações:', error);
         showErrorBadge('Erro ao remover notificações');
     }
 }
@@ -442,7 +433,6 @@ async function startChat(userId) {
                 contactName = userData.name || 'Contato';
             }
         } catch (error) {
-            console.error('Erro ao buscar informações do usuário:', error);
         }
         
         // 1. Tenta criar o chat
@@ -502,13 +492,11 @@ async function startChat(userId) {
                             window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(otherUserName)}`;
                         }, 1000);
                     } else {
-                        console.error('Chat não encontrado na resposta');
                         setTimeout(() => {
                             showErrorBadge('Chat não encontrado');
                         }, 3300);
                     }
                 } else {
-                    console.error('Erro ao buscar chat pelos userIds');
                     setTimeout(() => {
                         showErrorBadge('Erro ao buscar chat');
                     }, 3300);
@@ -519,7 +507,6 @@ async function startChat(userId) {
         }
         
     } catch (error) {
-        console.error('Erro ao iniciar chat:', error);
         showErrorBadge('Erro ao iniciar chat');
     }
 }

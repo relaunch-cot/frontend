@@ -1,4 +1,4 @@
-const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
+﻿const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 
 const token = localStorage.getItem('token');
 if (!token) {
@@ -17,7 +17,6 @@ function parseJwt(token) {
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error('Erro ao decodificar token JWT:', e);
     return null;
   }
 }
@@ -84,7 +83,6 @@ async function carregarPerfil() {
     }
 
   } catch (error) {
-    console.error('Erro ao carregar perfil:', error);
     showError('Erro ao carregar dados do perfil. Tente novamente.');
     
     document.getElementById('userName').textContent = 'Erro ao carregar perfil';

@@ -1,4 +1,4 @@
-const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
+﻿const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 
 const modal = document.getElementById('modal');
 const btn = document.getElementById('openModal');
@@ -25,7 +25,6 @@ function parseJwt(token) {
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error('Erro ao decodificar token JWT:', e);
     return null;
   }
 }
@@ -195,7 +194,6 @@ function renderProjectCard(project) {
 // ==========================
 async function fetchProjects() {
   if (!userId) {
-    console.warn("Usuário não autenticado");
     showError('Usuário não autenticado');
     emptyMsg.style.display = 'block';
     return;
@@ -219,7 +217,6 @@ async function fetchProjects() {
       emptyMsg.style.display = 'block';
     }
   } catch (err) {
-    console.error(err);
     showError('Erro ao carregar projetos.');
     emptyMsg.style.display = 'block';
   }
@@ -280,7 +277,6 @@ form.addEventListener('submit', async (e) => {
       window.location.reload();
     }, 1000);
   } catch (err) {
-    console.error(err);
     
     // Restaura o botão
     const submitBtn = form.querySelector('.btn-submit');

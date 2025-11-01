@@ -1,4 +1,4 @@
-// Gerenciador de Presença Global de Usuários com Sistema de Subscrições
+﻿// Gerenciador de Presença Global de Usuários com Sistema de Subscrições
 class PresenceManager {
   constructor() {
     this.ws = null;
@@ -31,14 +31,11 @@ class PresenceManager {
         // Cache válido por 10 segundos
         if (data.timestamp && (now - data.timestamp) < 10000) {
           data.onlineUsers.forEach(userId => this.onlineUsers.add(userId));
-          console.log(`📦 Cache carregado: ${this.onlineUsers.size} usuários online`);
         } else {
-          console.log('⏰ Cache expirado, será atualizado');
           localStorage.removeItem(this.CACHE_KEY);
         }
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar cache de presença:', error);
     }
   }
 
@@ -51,14 +48,12 @@ class PresenceManager {
       };
       localStorage.setItem(this.CACHE_KEY, JSON.stringify(data));
     } catch (error) {
-      console.error('❌ Erro ao salvar cache de presença:', error);
     }
   }
 
   // Conecta ao WebSocket de presença global
   connect(userId, token) {
     if (!token) {
-      console.error('Token é necessário para conectar ao sistema de presença');
       return;
     }
 
@@ -76,7 +71,6 @@ class PresenceManager {
       this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
     } catch (error) {
-      console.error('Erro ao criar conexão WebSocket de presença:', error);
       this.scheduleReconnect();
     }
   }
@@ -84,13 +78,11 @@ class PresenceManager {
   // Configura os event handlers
   setupEventHandlers() {
     this.ws.onopen = () => {
-      console.log('🟢 Sistema de presença conectado');
       this.reconnectAttempts = 0;
       this.startHeartbeat();
       
       // Re-inscreve usuários se reconectou
       if (this.subscribedUsers.size > 0) {
-        console.log(`🔄 Re-inscrevendo ${this.subscribedUsers.size} usuários após reconexão`);
         this.subscribe([...this.subscribedUsers]);
       }
       
@@ -103,11 +95,9 @@ class PresenceManager {
     this.ws.onmessage = (event) => {
       try {
         // Log da mensagem bruta para debug
-        console.log('📨 Presença (raw):', event.data);
         
         // Verifica se é string vazia ou inválida
         if (!event.data || event.data.trim() === '') {
-          console.warn('⚠️ Mensagem vazia recebida');
           return;
         }
         
@@ -115,47 +105,34 @@ class PresenceManager {
         const messages = event.data.trim().split('\n').filter(line => line.trim());
         
         if (messages.length > 1) {
-          console.warn('⚠️ Múltiplas mensagens concatenadas detectadas! Processando separadamente...');
         }
         
         // Processa cada mensagem
         messages.forEach((msg, index) => {
           try {
             const data = JSON.parse(msg);
-            console.log(`📨 Presença [${index + 1}/${messages.length}]:`, data);
             this.handleMessage(data);
           } catch (err) {
-            console.error(`❌ Erro ao processar mensagem ${index + 1}:`, err);
-            console.error('📄 Conteúdo:', msg);
           }
         });
         
       } catch (error) {
-        console.error('❌ Erro ao processar mensagem de presença:', error);
-        console.error('📄 Conteúdo recebido:', event.data);
-        console.error('📄 Tipo:', typeof event.data);
-        console.error('📄 Comprimento:', event.data?.length);
         
         // Tenta identificar o problema
         if (event.data && typeof event.data === 'string') {
           // Verifica se há múltiplas mensagens JSON concatenadas
           if (event.data.includes('}{')) {
-            console.error('⚠️ Múltiplas mensagens JSON concatenadas (sem quebra de linha)!');
-            console.error('💡 Backend deve enviar uma mensagem por vez OU separar com \\n');
           }
           
           // Mostra primeiros caracteres para debug
-          console.error('🔍 Primeiros 200 chars:', event.data.substring(0, 200));
         }
       }
     };
 
     this.ws.onerror = (error) => {
-      console.error('Erro no WebSocket de presença:', error);
     };
 
     this.ws.onclose = (event) => {
-      console.log('WebSocket de presença desconectado:', event.code);
       this.stopHeartbeat();
       
       // Limpa todos os timeouts pendentes de offline
@@ -165,7 +142,6 @@ class PresenceManager {
       window.dispatchEvent(new CustomEvent('presenceDisconnected'));
       
       if (!this.isIntentionallyClosed && this.reconnectAttempts < this.maxReconnectAttempts) {
-        console.log(`Reconectando presença... (${this.reconnectAttempts + 1}/${this.maxReconnectAttempts})`);
         this.scheduleReconnect();
       }
     };
@@ -173,12 +149,10 @@ class PresenceManager {
 
   // Processa mensagens recebidas
   handleMessage(data) {
-    console.log('📨 Presença:', data);
     
     switch (data.type) {
       case 'CONNECTED':
         // Mensagem de confirmação de conexão
-        console.log('✅ Conectado ao serviço de presença:', data.message);
         break;
       
       case 'USER_ONLINE':
@@ -215,7 +189,6 @@ class PresenceManager {
             this.onUserOffline(data.userId);
           }
         } else {
-          console.log('⚠️ USER_STATUS sem campo isOnline:', data);
         }
         break;
       
@@ -224,7 +197,6 @@ class PresenceManager {
         break;
       
       default:
-        console.log('⚠️ Mensagem de presença não tratada:', data);
     }
   }
 
@@ -234,7 +206,6 @@ class PresenceManager {
     
     // Cancela timeout de offline pendente (se houver)
     if (this.offlineTimeouts.has(userId)) {
-      console.log(`⏸️ Cancelando timeout de offline para ${userId} (reconectou)`);
       clearTimeout(this.offlineTimeouts.get(userId));
       this.offlineTimeouts.delete(userId);
     }
@@ -247,13 +218,11 @@ class PresenceManager {
     this.saveToCache();
     
     if (wasOffline) {
-      console.log(`🟢 Usuário ${userId} está ONLINE`);
       
       window.dispatchEvent(new CustomEvent('userOnline', { 
         detail: { userId } 
       }));
     } else {
-      console.log(`✅ Usuário ${userId} reconectou (permanece ONLINE)`);
     }
   }
 
@@ -263,18 +232,15 @@ class PresenceManager {
     
     // Verifica se já existe um timeout pendente
     if (this.offlineTimeouts.has(userId)) {
-      console.log(`⏱️ Timeout de offline já existe para ${userId}, ignorando...`);
       return;
     }
     
-    console.log(`⏳ Usuário ${userId} desconectou - aguardando ${this.OFFLINE_DELAY/1000}s antes de marcar como OFFLINE`);
     
     // Cria timeout de 5 segundos
     const timeoutId = setTimeout(() => {
       // Após 5 segundos sem receber USER_ONLINE, marca como offline
       if (this.onlineUsers.has(userId)) {
         this.onlineUsers.delete(userId);
-        console.log(`⚪ Usuário ${userId} está OFFLINE (confirmado após ${this.OFFLINE_DELAY/1000}s)`);
         
         // Salva no cache
         this.saveToCache();
@@ -301,7 +267,6 @@ class PresenceManager {
       }
     });
     
-    console.log(`📋 Usuários online:`, Array.from(this.onlineUsers));
     
     // Salva no cache
     this.saveToCache();
@@ -328,7 +293,6 @@ class PresenceManager {
   // Inscreve para monitorar usuários específicos
   subscribe(userIds) {
     if (!Array.isArray(userIds) || userIds.length === 0) {
-      console.warn('⚠️ subscribe() requer array não-vazio de userIds');
       return;
     }
 
@@ -336,8 +300,6 @@ class PresenceManager {
     userIds.forEach(id => this.subscribedUsers.add(id));
 
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('⚠️ WebSocket não está conectado, subscrição será feita ao conectar');
-      console.log(`📋 ${userIds.length} usuários agendados para subscrição:`, userIds);
       return;
     }
 
@@ -345,7 +307,6 @@ class PresenceManager {
     const newUsers = userIds;
     
     if (newUsers.length === 0) {
-      console.log('ℹ️ Todos os usuários já foram enviados');
       return;
     }
 
@@ -354,10 +315,8 @@ class PresenceManager {
     const toSubscribe = newUsers.slice(0, availableSlots);
     
     if (toSubscribe.length < newUsers.length) {
-      console.warn(`⚠️ Limite de ${this.MAX_SUBSCRIPTIONS} subscrições atingido. Inscrevendo apenas ${toSubscribe.length} de ${newUsers.length}`);
     }
 
-    console.log(`📡 Enviando SUBSCRIBE_PRESENCE para ${toSubscribe.length} usuários:`, toSubscribe);
 
     // Envia mensagem de subscrição
     const message = {
@@ -367,19 +326,16 @@ class PresenceManager {
       }
     };
     
-    console.log('📤 Mensagem WebSocket:', JSON.stringify(message));
     this.ws.send(JSON.stringify(message));
   }
 
   // Cancela inscrição de usuários específicos
   unsubscribe(userIds) {
     if (!Array.isArray(userIds) || userIds.length === 0) {
-      console.warn('⚠️ unsubscribe() requer array não-vazio de userIds');
       return;
     }
 
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('⚠️ WebSocket não está conectado');
       return;
     }
 
@@ -387,7 +343,6 @@ class PresenceManager {
     const toUnsubscribe = userIds.filter(id => this.subscribedUsers.has(id));
 
     if (toUnsubscribe.length === 0) {
-      console.log('ℹ️ Nenhum usuário para desinscrever');
       return;
     }
 
@@ -401,7 +356,6 @@ class PresenceManager {
       }
     });
 
-    console.log(`📡 Desinscrevendo ${toUnsubscribe.length} usuários:`, toUnsubscribe);
 
     // Envia mensagem de desinscrição
     this.ws.send(JSON.stringify({
@@ -443,11 +397,9 @@ class PresenceManager {
     
     if (this.reconnectAttempts <= this.maxReconnectAttempts) {
       setTimeout(() => {
-        console.log('🔄 Reconectando sistema de presença...');
         this.connect(this.userId, this.token);
       }, this.reconnectDelay * this.reconnectAttempts);
     } else {
-      console.error('❌ Número máximo de tentativas de reconexão de presença atingido');
     }
   }
 
@@ -467,16 +419,13 @@ class PresenceManager {
     // Limpa o cache ao desconectar
     try {
       localStorage.removeItem(this.CACHE_KEY);
-      console.log('🗑️ Cache de presença limpo');
     } catch (error) {
-      console.warn('Erro ao limpar cache:', error);
     }
   }
 
   // Limpa todos os timeouts pendentes de offline
   clearAllOfflineTimeouts() {
     if (this.offlineTimeouts.size > 0) {
-      console.log(`🧹 Limpando ${this.offlineTimeouts.size} timeouts de offline pendentes`);
       this.offlineTimeouts.forEach((timeoutId) => {
         clearTimeout(timeoutId);
       });
