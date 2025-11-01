@@ -239,13 +239,13 @@ async function obterNomeRemetente(chatId) {
       return null;
     }
     
-    // Verifica qual usuário está logado e pega o nome do outro
+    // Retorna o nome do usuário LOGADO (quem está enviando a mensagem)
     if (chat.user1?.userId === userId) {
-      // Se user1 é o usuário logado, retorna nome do user2
-      return chat.user2?.name || null;
-    } else if (chat.user2?.userId === userId) {
-      // Se user2 é o usuário logado, retorna nome do user1
+      // Se user1 é o usuário logado, retorna nome do user1
       return chat.user1?.name || null;
+    } else if (chat.user2?.userId === userId) {
+      // Se user2 é o usuário logado, retorna nome do user2
+      return chat.user2?.name || null;
     }
     
     console.warn('⚠️ UserId do usuário logado não encontrado no chat');
