@@ -141,7 +141,7 @@ async function submitForm() {
             
             showSuccess("Cadastro realizado com sucesso!");
             setTimeout(() => {
-                window.location.href = "../login/login.html";
+                window.location.href = "/login";
             }, 2000);
         } else {
             showError("Erro ao realizar cadastro. Verifique os dados e tente novamente.");

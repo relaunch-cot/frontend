@@ -2,7 +2,7 @@ const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 
 const token = localStorage.getItem('token');
 if (!token) {
-  window.location.href = '../login/login.html';
+  window.location.href = '/login';
 }
 
 function parseJwt(token) {
@@ -28,7 +28,7 @@ const currentUserId = decodedToken?.userId;
 
 if (!currentUserId) {
   localStorage.removeItem('token');
-  window.location.href = '../login/login.html';
+  window.location.href = '/login';
 }
 
 // Verifica se há userId na URL (para visualizar perfil de outro usuário)

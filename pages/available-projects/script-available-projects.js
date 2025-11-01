@@ -5,7 +5,7 @@ const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 // Check authentication
 const token = localStorage.getItem('token');
 if (!token) {
-  window.location.href = '../login/login.html';
+  window.location.href = '/login';
 }
 
 // Parse JWT token to get user info
@@ -33,7 +33,7 @@ const userType = decodedToken?.userType;
 
 if (!userId) {
   localStorage.removeItem('token');
-  window.location.href = '../login/login.html';
+  window.location.href = '/login';
 }
 
 // Validação: apenas freelancers podem acessar esta página
@@ -41,7 +41,7 @@ function verificarTipoUsuario() {
   if (userType !== 'freelancer') {
     showError('Acesso negado. Esta página é exclusiva para freelancers.');
     setTimeout(() => {
-      window.location.href = '../projects-gallery/projects-gallery.html';
+      window.location.href = '/projects-gallery';
     }, 2000);
     return false;
   }
@@ -142,7 +142,7 @@ function criarCardProjeto(project) {
   btn.addEventListener('click', () => {
     if (project.freelancerId) {
       // Se já tem freelancer, redireciona para a página de detalhes
-      window.location.href = `../project/project.html?id=${project.projectId}`;
+      window.location.href = `/projeto?id=${project.projectId}`;
     } else {
       // Se não tem freelancer, inicia o processo de solicitação
       solicitarParticipacao(project.projectId, project.name);

@@ -10,7 +10,7 @@ const emptyMsg = document.getElementById('emptyMsg');
 
 const token = localStorage.getItem('token');
 if (!token) {
-  window.location.href = '../login/login.html';
+  window.location.href = '/login';
 }
 
 function parseJwt(token) {
@@ -37,7 +37,7 @@ const userType = decodedToken?.userType;
 
 if (!userId) {
   localStorage.removeItem('token');
-  window.location.href = '../login/login.html';
+  window.location.href = '/login';
 }
 
 // Mostra botão de criar projeto apenas para clientes
@@ -182,7 +182,7 @@ function renderProjectCard(project) {
         <img src="${imagemProjeto}" alt="${project.name || 'Projeto'}">
       </div>
       <div id="project-open">
-        <a href="../project/project.html?id=${project.projectId}" class="project-page">Abrir</a>
+        <a href="/projeto?id=${project.projectId}" class="project-page">Abrir</a>
       </div>
     </div>
   `;

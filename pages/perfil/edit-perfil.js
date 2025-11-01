@@ -2,7 +2,7 @@ const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 
 const token = localStorage.getItem('token');
 if (!token) {
-    window.location.href = '../login/login.html';
+    window.location.href = '/login';
 }
 
 function parseJwt(token) {
@@ -28,7 +28,7 @@ const userId = decodedToken?.userId;
 
 if (!userId) {
     localStorage.removeItem('token');
-    window.location.href = '../login/login.html';
+    window.location.href = '/login';
 }
 
 
@@ -213,7 +213,7 @@ async function confirmChanges() {
             closeModal();
             showSuccess("Perfil atualizado com sucesso!");
             setTimeout(() => {
-                window.location.href = "perfil.html";
+                window.location.href = "/perfil";
             }, 2000);
         } else {
             closeModal();

@@ -19,7 +19,7 @@ function getUserIdFromToken() {
 async function fetchNotifications() {
     const userId = getUserIdFromToken();
     if (!userId) {
-        window.location.href = '../login/login.html';
+        window.location.href = '/login';
         return [];
     }
 
@@ -468,7 +468,7 @@ async function startChat(userId) {
             
             // Redireciona para o chat específico
             setTimeout(() => {
-                window.location.href = `../project-chat/project-chat.html?chatId=${chatId}&contactName=${encodeURIComponent(contactName)}`;
+                window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(contactName)}`;
             }, 1000);
         } else {
             const errorText = await response.text();
@@ -499,7 +499,7 @@ async function startChat(userId) {
                         
                         // Redireciona para o chat específico
                         setTimeout(() => {
-                            window.location.href = `../project-chat/project-chat.html?chatId=${chatId}&contactName=${encodeURIComponent(otherUserName)}`;
+                            window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(otherUserName)}`;
                         }, 1000);
                     } else {
                         console.error('Chat não encontrado na resposta');
@@ -526,7 +526,7 @@ async function startChat(userId) {
 
 // Visualiza perfil do freelancer
 function viewFreelancerProfile(userId) {
-    window.location.href = `../perfil/perfil.html?userId=${userId}`;
+    window.location.href = `/perfil?userId=${userId}`;
 }
 
 // Mostra badge de sucesso
@@ -561,7 +561,7 @@ function showErrorBadge(message) {
 document.addEventListener('DOMContentLoaded', async () => {
     // Verifica autenticação
     if (!token) {
-        window.location.href = '../login/login.html';
+        window.location.href = '/login';
         return;
     }
 
