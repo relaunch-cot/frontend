@@ -108,19 +108,13 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`
 ╔═══════════════════════════════════════════════════╗
-║          🚀 ReLaunch - Servidor Local            ║
+║          🚀 ReLaunch - Servidor Local             ║
 ╠═══════════════════════════════════════════════════╣
 ║                                                   ║
-║  Servidor rodando em:                            ║
-║  ➜  http://localhost:${PORT}                        ║
+║  Servidor rodando em:                             ║
+║  ➜  http://localhost:${PORT}                         ║
 ║                                                   ║
-║  URLs Limpas disponíveis:                        ║
-║  ➜  http://localhost:${PORT}/home                   ║
-║  ➜  http://localhost:${PORT}/login                  ║
-║  ➜  http://localhost:${PORT}/projects-gallery       ║
-║  ➜  http://localhost:${PORT}/chats                  ║
-║                                                   ║
-║  Pressione Ctrl+C para parar o servidor          ║
+║  Pressione Ctrl+C para parar o servidor           ║
 ║                                                   ║
 ╚═══════════════════════════════════════════════════╝
   `);
