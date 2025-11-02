@@ -32,7 +32,9 @@ const routes = {
   '/project-file': '/pages/project-file/project-file-0.html',
   '/arquivos-projeto': '/pages/project-file/project-file-0.html',
   '/project-payment': '/pages/project-payment/project-payment-0.html',
-  '/pagamento-projeto': '/pages/project-payment/project-payment-0.html'
+  '/pagamento-projeto': '/pages/project-payment/project-payment-0.html',
+  '/posts': '/pages/posts/posts.html',
+  '/postagens': '/pages/posts/posts.html'
 };
 
 // Tipos MIME

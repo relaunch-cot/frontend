@@ -64,6 +64,7 @@ function renderMenu(userType) {
     <a href="/home" class="home-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Início</a>
     <a href="/projects-gallery"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg> Projetos</a>
     ${projetosDisponiveisLink}
+    <a href="/posts"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19,5V19H5V5H19M21,3H3V21H21V3M17,17H7V16H17V17M17,15H7V14H17V15M17,12H7V7H17V12Z"/></svg> Posts</a>
     <a href="/chats"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12,3C6.5,3 2,6.6 2,11C2,13.2 3.2,15.2 5,16.5V21L9.5,18.5C10.3,18.7 11.1,18.8 12,18.8C17.5,18.8 22,15.2 22,10.7C22,6.1 17.5,2.5 12,2.5V3Z"/></svg> Chats</a>
     <a href="/perfil"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg> Perfil</a>
     <a href="#" class="logout-btn" onclick="showLogoutModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16,17V14H9V10H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z"/></svg> Sair</a>
