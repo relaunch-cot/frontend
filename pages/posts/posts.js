@@ -228,38 +228,6 @@ async function renderPosts() {
     });
 }
 
-function showError(message) {
-    const badge = document.createElement('div');
-    badge.className = 'error-badge';
-    badge.textContent = message;
-    document.body.appendChild(badge);
-    
-    setTimeout(() => {
-        badge.classList.add('show');
-    }, 100);
-    
-    setTimeout(() => {
-        badge.classList.remove('show');
-        setTimeout(() => badge.remove(), 300);
-    }, 3000);
-}
-
-function showSuccess(message) {
-    const badge = document.createElement('div');
-    badge.className = 'success-badge';
-    badge.textContent = message;
-    document.body.appendChild(badge);
-    
-    setTimeout(() => {
-        badge.classList.add('show');
-    }, 100);
-    
-    setTimeout(() => {
-        badge.classList.remove('show');
-        setTimeout(() => badge.remove(), 300);
-    }, 3000);
-}
-
 const createModal = document.getElementById('createPostModal');
 const viewModal = document.getElementById('viewPostModal');
 const createBtn = document.getElementById('createPostBtn');
