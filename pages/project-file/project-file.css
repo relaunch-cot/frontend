@@ -400,9 +400,10 @@ input {
 .user-avatar {
     width: 35px;
     height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #46B1D5;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .user-name {

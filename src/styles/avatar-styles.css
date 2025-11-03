@@ -1,0 +1,64 @@
+/* avatar-styles.css - Estilos reutilizáveis para avatares */
+
+.avatar-letter {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #46B1D5, #3a8eb5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.avatar-letter.avatar-small {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+}
+
+.avatar-letter.avatar-large {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+}
+
+.avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #46B1D5;
+    flex-shrink: 0;
+}
+
+.avatar-img.avatar-small {
+    width: 35px;
+    height: 35px;
+}
+
+.avatar-img.avatar-large {
+    width: 50px;
+    height: 50px;
+}
+
+/* Container para avatar quando precisa conter img + fallback */
+.avatar-container {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+}
+
+.avatar-container.avatar-small {
+    width: 35px;
+    height: 35px;
+}
+
+.avatar-container.avatar-large {
+    width: 50px;
+    height: 50px;
+}

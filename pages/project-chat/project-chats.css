@@ -87,13 +87,33 @@ h1 {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: #46B1D5;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 1rem;
   flex-shrink: 0;
   position: relative;
+}
+
+.avatar .avatar-letter {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #46B1D5, #3a8eb5);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.avatar .avatar-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #46B1D5;
 }
 
 .avatar svg {

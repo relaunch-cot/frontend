@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="src/components/notifications.css">
     <link rel="stylesheet" href="src/components/hamburger-menu.css">
+    <link rel="stylesheet" href="/src/styles/avatar-styles.css">
 </head>
 <body>
     <header>
@@ -32,7 +33,7 @@
                 <a href="" class="icone" id="lampada"></a>
                 <a href="/notificacoes" class="icone" id="sino"></a>
             <div class="user-profile" id="userProfile" style="display: none;">
-                <img src="" alt="User" class="user-avatar" id="userAvatar">
+                <div class="user-avatar" id="userAvatar"></div>
                 <span class="user-name" id="userName"></span>
             </div><a href="#" class="icone" id="menu" onclick="toggleMenu()"></a>
         </div>
@@ -132,6 +133,7 @@
             </select>
         </div>
     </footer>
+    <script src="/src/scripts/avatar-utils.js"></script>
     <script src="/src/scripts/header-user-profile.js"></script>
 </body>
 <script src="src/scripts/router.js"></script>

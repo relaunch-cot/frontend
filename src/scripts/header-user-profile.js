@@ -18,10 +18,27 @@ function updateHeaderProfile(userData) {
         return;
     }
     
-    const avatarImg = document.getElementById('userAvatar');
-    if (avatarImg) {
-        avatarImg.src = userData.urlImagePerfil || '/src/images/default-avatar.png';
-        avatarImg.alt = userData.name || 'User';
+    // Atualiza o avatar usando o sistema de avatar reutilizável
+    const avatarContainer = document.getElementById('userAvatar');
+    if (avatarContainer && typeof window.updateAvatar === 'function') {
+        window.updateAvatar(avatarContainer, userData.name || 'Usuário', userData.urlImagePerfil);
+    } else if (avatarContainer) {
+        // Fallback se avatar-utils.js não estiver carregado
+        if (userData.urlImagePerfil && userData.urlImagePerfil.trim() !== '') {
+            avatarContainer.innerHTML = `
+                <img src="${userData.urlImagePerfil}" 
+                     alt="${userData.name}" 
+                     class="avatar-img avatar-small" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="avatar-letter avatar-small" style="display: none;">
+                    ${(userData.name || 'U').charAt(0).toUpperCase()}
+                </div>`;
+        } else {
+            avatarContainer.innerHTML = `
+                <div class="avatar-letter avatar-small">
+                    ${(userData.name || 'U').charAt(0).toUpperCase()}
+                </div>`;
+        }
     }
     
     const userName = document.getElementById('userName');

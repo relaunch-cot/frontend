@@ -105,14 +105,17 @@ async function carregarChats() {
     for (const chat of data.chats) {
       let nomeOutroUsuario = 'Desconhecido';
       let outroUserId = null;
+      let urlImagePerfil = null;
 
       if (chat.user1 && chat.user2) {
         if (chat.user1.userId === userId) {
           nomeOutroUsuario = chat.user2.name || `Usuário ${chat.user2.userId}`;
           outroUserId = chat.user2.userId;
+          urlImagePerfil = chat.user2.urlImagePerfil;
         } else {
           nomeOutroUsuario = chat.user1.name || `Usuário ${chat.user1.userId}`;
           outroUserId = chat.user1.userId;
+          urlImagePerfil = chat.user1.urlImagePerfil;
         }
       }
 
@@ -129,14 +132,30 @@ async function carregarChats() {
 
       const isOnline = window.presenceManager && window.presenceManager.isUserOnline(outroUserId);
 
+      // Cria o avatar usando o sistema de avatar reutilizável
+      let avatarHtml;
+      if (urlImagePerfil && urlImagePerfil.trim() !== '') {
+        avatarHtml = `
+          <img src="${urlImagePerfil}" 
+               alt="${nomeOutroUsuario}" 
+               class="avatar-img" 
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="avatar-letter" style="display: none;">
+            ${nomeOutroUsuario.charAt(0).toUpperCase()}
+          </div>`;
+      } else {
+        avatarHtml = `
+          <div class="avatar-letter">
+            ${nomeOutroUsuario.charAt(0).toUpperCase()}
+          </div>`;
+      }
+
       const li = document.createElement('li');
       li.setAttribute('data-user-id', outroUserId);
       li.innerHTML = `
         <a href="/chat?chatId=${chat.chatId}&contactName=${encodeURIComponent(nomeOutroUsuario)}&contactUserId=${outroUserId}" class="chat-item">
           <div class="avatar">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
+            ${avatarHtml}
             <span class="status-indicator ${isOnline ? 'online' : 'offline'}"></span>
           </div>
           <div class="chat-info">
