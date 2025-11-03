@@ -135,7 +135,7 @@ header > :nth-child(1) {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 5px 12px;
+    padding: 5px 12px 5px 4px;
     background: #f0f0f0;
     border-radius: 20px;
     cursor: pointer;
