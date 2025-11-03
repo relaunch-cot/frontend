@@ -1,5 +1,3 @@
-// avatar-utils.js - Funções utilitárias para avatares
-
 /**
  * Cria um elemento de avatar com a primeira letra do nome ou imagem
  * @param {string} name - Nome do usuário
@@ -27,7 +25,6 @@ function createAvatar(name, imageUrl = null, size = 'medium') {
 function updateAvatar(element, name, imageUrl = null) {
     if (!element) return;
     
-    // Limpa o conteúdo anterior
     element.innerHTML = '';
     
     if (imageUrl && imageUrl.trim() !== '') {
@@ -56,6 +53,5 @@ function updateAvatar(element, name, imageUrl = null) {
     }
 }
 
-// Expõe as funções globalmente
 window.createAvatar = createAvatar;
 window.updateAvatar = updateAvatar;
