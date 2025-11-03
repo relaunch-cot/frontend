@@ -90,9 +90,11 @@ async function createPost(postData) {
 }
 
 function formatDate(dateString) {
-    const date = new Date(dateString);
+    const data = new Date(dateString);
+    const dataCorrigida = new Date(data.getTime() + (3 * 60 * 60 * 1000));
+    
     const now = new Date();
-    const diffMs = now - date;
+    const diffMs = now - dataCorrigida;
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
@@ -102,7 +104,7 @@ function formatDate(dateString) {
     if (diffHours < 24) return `${diffHours}h atrás`;
     if (diffDays < 7) return `${diffDays}d atrás`;
 
-    return date.toLocaleDateString('pt-BR', { 
+    return dataCorrigida.toLocaleDateString('pt-BR', { 
         day: '2-digit', 
         month: '2-digit', 
         year: 'numeric' 
