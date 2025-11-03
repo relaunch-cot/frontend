@@ -99,6 +99,7 @@ header > :nth-child(1) {
     justify-content: right;
     align-items: center;
     gap: 2vh;
+    padding-right: 2vh;
 }
 
 .icones > a,

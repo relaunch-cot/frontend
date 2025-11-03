@@ -5,60 +5,58 @@
     font-family: poppins, sans-serif;
 }
 
-header{
+header {
     height: 12vh;
     display: grid;
     grid-template: 12vh / 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-#logo{
+#logo {
     height: 100%;
     width: 100%;
     object-fit: contain;
 }
 
-header>div>a{
+header > div > a {
     width: 80%;
 }
 
-#pesquisa{
+#pesquisa {
     grid-area: 1/4/1/6;
     display: flex;
     align-items: center;
-      position: relative;
-
+    position: relative;
 }
 
-header>:nth-child(1){
+header > :nth-child(1) {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-
-#pesquisa>input{
-  width: 100%;
-  height: 4vh;
-  font-size: 2vh;
-  font-family: "Gudea", sans-serif;
-  border-radius: 15px;
-  border: 0;
-  padding-right: 40px; 
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  padding-left: 5px;
+#pesquisa > input {
+    width: 100%;
+    height: 4vh;
+    font-size: 2vh;
+    font-family: "Gudea", sans-serif;
+    border-radius: 15px;
+    border: 0;
+    padding-right: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    padding-left: 5px;
 }
 
-#pesquisa>svg.lupa{
-  position: absolute;
-  right: 10px;
-  width: 20px;
-  height: 20px;
-  pointer-events: none;
+#pesquisa > svg.lupa {
+    position: absolute;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
 }
 
-.icone{
+.icone {
     position: relative;
     display: inline-block;
     width: 30px;
@@ -67,28 +65,85 @@ header>:nth-child(1){
     background-repeat: no-repeat;
     background-position: center;
     text-decoration: none;
+    cursor: pointer;
 }
 
-#lampada{
+#lampada {
     background-image: url('../../src/images/lampada-incandescente.png');
 }
 
-#sino{
+#sino {
     background-image: url('../../src/images/notificacao.png');
 }
-#menu{
+
+#menu {
     background-image: url('../../src/images/menu-aberto.png');
 }
 
-.icones{
-    grid-area:1/6/1/8;
+.icones {
+    grid-area: 1/6/1/8;
     display: flex;
     justify-content: right;
     align-items: center;
+
+    gap: 2vh;
+    padding-right: 2vh;}
+
+.icones > a,
+.icones > button {
+    margin-right: 0;
 }
 
-.icones>a{
-    margin-right: 3vh;
+.search-bar {
+    display: flex;
+    align-items: center;
+}
+
+.search-bar input {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px 0 0 20px;
+    outline: none;
+}
+
+.search-bar button {
+    border: 1px solid #ccc;
+    background: #f4f4f4;
+    padding: 6px 10px;
+    border-radius: 0 20px 20px 0;
+    cursor: pointer;
+}
+
+.header-icons span {
+    margin-left: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.perfil-container {
+    display: flex;
+    justify-content: space-between;
+    background: #1f2c33;
+    color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    margin: 20px;
+}
+
+.perfil-esquerda {
+    display: flex;
+    align-items: flex-start;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px; 
+}
+.avatar img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 footer{

@@ -1,5 +1,4 @@
-﻿
-const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
+﻿const BASE_URL = window.ENV_CONFIG?.URL_BACKEND;
 
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -145,7 +144,7 @@ function preencherPaginaComProjeto(project) {
       }
     }
 
-    atualizarTempoRestante(); // atualiza imediatamente
+    atualizarTempoRestante();
     setInterval(atualizarTempoRestante, 1000);
     }
 }
@@ -241,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-let projectData = null; // Armazena dados do projeto carregado
+let projectData = null;
 
 async function verificarSeEhCliente() {
   const token = localStorage.getItem('token');
@@ -414,7 +413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const userId = payload.userId;
       
       const imageInput = document.getElementById('edit-image-url');
-      let urlImageProject = projectData.urlImageProject || ''; // Mantém a imagem atual
+      let urlImageProject = projectData.urlImageProject || '';
       
       if (imageInput.files && imageInput.files[0]) {
         try {

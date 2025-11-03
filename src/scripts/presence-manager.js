@@ -8,12 +8,12 @@
     this.isIntentionallyClosed = false;
     this.userId = null;
     this.token = null;
-    this.onlineUsers = new Set(); // IDs dos usuários online
-    this.offlineTimeouts = new Map(); // Timeouts pendentes para marcar como offline
-    this.OFFLINE_DELAY = 5000; // 5 segundos de delay antes de marcar offline
-    this.subscribedUsers = new Set(); // IDs dos usuários que estamos monitorando
-    this.MAX_SUBSCRIPTIONS = 50; // Limite de subscrições simultâneas
-    this.CACHE_KEY = 'presence_online_users'; // Chave para cache no localStorage
+    this.onlineUsers = new Set(); 
+    this.offlineTimeouts = new Map(); 
+    this.OFFLINE_DELAY = 5000; 
+    this.subscribedUsers = new Set();
+    this.MAX_SUBSCRIPTIONS = 50; 
+    this.CACHE_KEY = 'presence_online_users'; 
     
     this.loadFromCache();
   }
@@ -172,7 +172,7 @@
   }
 
   onUserOnline(userId) {
-    if (userId == this.userId) return; // Ignora próprio usuário
+    if (userId == this.userId) return; 
     
     if (this.offlineTimeouts.has(userId)) {
       clearTimeout(this.offlineTimeouts.get(userId));
@@ -194,7 +194,7 @@
   }
 
   onUserOffline(userId) {
-    if (userId == this.userId) return; // Ignora próprio usuário
+    if (userId == this.userId) return;
     
     if (this.offlineTimeouts.has(userId)) {
       return;

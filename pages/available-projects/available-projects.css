@@ -86,11 +86,64 @@ header > :nth-child(1) {
     justify-content: right;
     align-items: center;
 
-    gap: 2vh;}
+    gap: 2vh;
+    padding-right: 2vh;}
 
 .icones > a,
 .icones > button {
     margin-right: 0;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+}
+
+.search-bar input {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px 0 0 20px;
+    outline: none;
+}
+
+.search-bar button {
+    border: 1px solid #ccc;
+    background: #f4f4f4;
+    padding: 6px 10px;
+    border-radius: 0 20px 20px 0;
+    cursor: pointer;
+}
+
+.header-icons span {
+    margin-left: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.perfil-container {
+    display: flex;
+    justify-content: space-between;
+    background: #1f2c33;
+    color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    margin: 20px;
+}
+
+.perfil-esquerda {
+    display: flex;
+    align-items: flex-start;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px; 
+}
+.avatar img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 footer {

@@ -37,7 +37,7 @@ const mensagensContainer = document.getElementById('mensagens');
 const urlParams = new URLSearchParams(window.location.search);
 const chatId = urlParams.get('chatId') || 1;
 const contactName = urlParams.get('contactName') || 'Contato';
-const contactUserId = urlParams.get('contactUserId'); // ID do outro usuário
+const contactUserId = urlParams.get('contactUserId');
 
 if (!chatId) {
   showError('Nenhum chat selecionado.');
@@ -313,7 +313,7 @@ function mostrarIconeNovaMensagem(senderName) {
   const iconContainer = document.createElement('div');
   iconContainer.id = 'new-message-icon';
   iconContainer.className = 'new-message-notification';
-  iconContainer.title = `Nova mensagem de ${senderName}`; // Tooltip
+  iconContainer.title = `Nova mensagem de ${senderName}`; 
   
   iconContainer.innerHTML = `
     <div class="notification-content">
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.presenceManager.subscribe([contactUserId]);
       
       const isOnline = window.presenceManager.isUserOnline(contactUserId);
-      updateContactStatus(isOnline, false); // Online na plataforma, mas ainda não sabemos se está no chat
+      updateContactStatus(isOnline, false); 
     }
   }
   
@@ -391,14 +391,14 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('userOnline', (event) => {
     const { userId: onlineUserId } = event.detail;
     if (contactUserId && onlineUserId == contactUserId) {
-      updateContactStatus(true, isContactInChat); // Mantém status do chat
+      updateContactStatus(true, isContactInChat); 
     }
   });
   
   window.addEventListener('userOffline', (event) => {
     const { userId: offlineUserId } = event.detail;
     if (contactUserId && offlineUserId == contactUserId) {
-      isContactInChat = false; // Se ficou offline, não está mais no chat
+      isContactInChat = false;
       updateContactStatus(false, false);
     }
   });
@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const { userIds } = event.detail;
     if (contactUserId) {
       const isOnline = userIds.includes(contactUserId);
-      updateContactStatus(isOnline, isContactInChat); // Mantém status do chat
+      updateContactStatus(isOnline, isContactInChat);
     }
   });
   

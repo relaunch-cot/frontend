@@ -2,9 +2,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000; // Mudado de 3001 para 3000
+const PORT = 3000;
 
-// Mapeamento de URLs limpas para arquivos reais
 const routes = {
   '/': '/index.html',
   '/home': '/index.html',
@@ -37,7 +36,6 @@ const routes = {
   '/postagens': '/pages/posts/posts.html'
 };
 
-// Tipos MIME
 const mimeTypes = {
   '.html': 'text/html',
   '.css': 'text/css',
@@ -59,30 +57,24 @@ const mimeTypes = {
 const server = http.createServer((req, res) => {
   let filePath = req.url;
 
-  // Remove query string
   const queryIndex = filePath.indexOf('?');
   if (queryIndex !== -1) {
     filePath = filePath.substring(0, queryIndex);
   }
 
-  // Verifica se é uma rota limpa
   if (routes[filePath]) {
     filePath = routes[filePath];
   }
 
-  // Se não tem extensão e não é uma rota conhecida, tenta adicionar .html
   if (!path.extname(filePath) && !routes[filePath]) {
     filePath += '.html';
   }
 
-  // Remove a barra inicial para o path.join funcionar
   const fullPath = path.join(__dirname, filePath.substring(1));
 
-  // Lê o arquivo
   fs.readFile(fullPath, (err, content) => {
     if (err) {
       if (err.code === 'ENOENT') {
-        // Arquivo não encontrado - tenta servir index.html (SPA fallback)
         fs.readFile(path.join(__dirname, 'index.html'), (err, content) => {
           if (err) {
             res.writeHead(404, { 'Content-Type': 'text/html' });
@@ -97,11 +89,9 @@ const server = http.createServer((req, res) => {
         res.end(`Erro no servidor: ${err.code}`, 'utf-8');
       }
     } else {
-      // Determina o tipo MIME
       const ext = path.extname(fullPath);
       const contentType = mimeTypes[ext] || 'application/octet-stream';
 
-      // Para arquivos binários (imagens, fontes), não usa encoding UTF-8
       const isBinary = ['.png', '.jpg', '.jpeg', '.gif', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.otf'].includes(ext);
       
       res.writeHead(200, { 'Content-Type': contentType });

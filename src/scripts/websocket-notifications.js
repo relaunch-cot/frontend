@@ -145,7 +145,7 @@
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.ws.send(JSON.stringify({ type: 'PING' }));
       }
-    }, 30000); // A cada 30 segundos
+    }, 30000);
   }
 
   stopHeartbeat() {

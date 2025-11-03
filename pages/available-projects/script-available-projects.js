@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const isFreelancer = verificarTipoUsuario();
   
   if (!isFreelancer) {
-    return; // Não carrega os projetos se não for freelancer
+    return;
   }
 
   buscarProjetos();
