@@ -98,11 +98,46 @@ header > :nth-child(1) {
     display: flex;
     justify-content: right;
     align-items: center;
+    gap: 2vh;
 }
 
 .icones > a,
 .icones > button {
-    margin-right: 3vh;
+    margin-right: 0;
+}
+
+/* User Profile in Header */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 12px;
+    background: #f0f0f0;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.user-profile:hover {
+    background: #e0e0e0;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #46B1D5;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #222;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 main {
@@ -678,6 +713,21 @@ footer > div > select:hover {
 
     #pesquisa {
         grid-area: 1/2/1/3;
+    }
+
+    .user-profile {
+        padding: 3px 8px;
+        gap: 5px;
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .user-name {
+        font-size: 12px;
+        max-width: 80px;
     }
 
     .posts-header {

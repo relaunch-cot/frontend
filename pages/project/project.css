@@ -710,3 +710,38 @@ input[type='file']::file-selector-button:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(70, 177, 213, 0.4);
 }
+
+
+/* User Profile in Header */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 12px;
+    background: #f0f0f0;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.user-profile:hover {
+    background: #e0e0e0;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #46B1D5;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #222;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

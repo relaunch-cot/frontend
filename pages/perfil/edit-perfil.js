@@ -94,6 +94,12 @@ async function loadUserData() {
         const data = await response.json();
         
         if (data.user) {
+            // Atualiza o header com os dados carregados para evitar requisição duplicada
+            if (typeof window.updateHeaderProfile === 'function') {
+                console.log('Atualizando header do perfil com dados já carregados');
+                window.updateHeaderProfile(data.user);
+            }
+            
             originalData = {
                 name: data.user.name || '',
                 email: data.user.email || '',

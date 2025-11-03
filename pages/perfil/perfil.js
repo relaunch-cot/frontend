@@ -50,12 +50,19 @@ async function carregarPerfil() {
 
     const data = await response.json();
 
-    const userNameElement = document.getElementById('userName');
-    const userEmailElement = document.getElementById('userEmail');
+    const userNameElement = document.getElementById('userNameFromContainer');
+    const userEmailElement = document.getElementById('userEmailFromContainer');
     
     if (data.user) {
       userNameElement.textContent = data.user.name || 'Nome não disponível';
       userEmailElement.textContent = data.user.email || 'Email não disponível';
+      
+      // Se está vendo o próprio perfil, atualiza o header com os dados carregados
+      // Isso evita fazer uma segunda requisição para a mesma rota
+      if (isOwnProfile && typeof window.updateHeaderProfile === 'function') {
+        console.log('Atualizando header do perfil com dados já carregados');
+        window.updateHeaderProfile(data.user);
+      }
       
       if (data.user.settings) {
         const biografiaElement = document.getElementById('userBiografia');
