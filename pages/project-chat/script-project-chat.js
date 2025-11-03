@@ -46,6 +46,63 @@ if (!chatId) {
 
 document.getElementById('contactName').textContent = contactName;
 
+// Carrega foto do contato
+async function loadContactAvatar() {
+  if (!contactUserId) return;
+  
+  try {
+    const response = await fetch(`${BASE_URL}/v1/user/${contactUserId}`, {
+      headers: {
+        'Authorization': token
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const user = data.user;
+      
+      // Atualiza o avatar do contato
+      const contactAvatarDiv = document.querySelector('.contact-avatar');
+      if (contactAvatarDiv) {
+        // Remove o SVG antigo
+        const oldSvg = contactAvatarDiv.querySelector('svg:not(.status-indicator)');
+        if (oldSvg) oldSvg.remove();
+        
+        // Adiciona o novo avatar
+        let avatarHtml;
+        if (user.urlImagePerfil && user.urlImagePerfil.trim() !== '') {
+          avatarHtml = `
+            <img src="${user.urlImagePerfil}" 
+                 alt="${user.name}" 
+                 class="avatar-img avatar-large" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="avatar-letter avatar-large" style="display: none;">
+              ${user.name.charAt(0).toUpperCase()}
+            </div>`;
+        } else {
+          avatarHtml = `
+            <div class="avatar-letter avatar-large">
+              ${user.name.charAt(0).toUpperCase()}
+            </div>`;
+        }
+        
+        // Insere antes do status-indicator
+        const statusIndicator = contactAvatarDiv.querySelector('.status-indicator');
+        if (statusIndicator) {
+          statusIndicator.insertAdjacentHTML('beforebegin', avatarHtml);
+        } else {
+          contactAvatarDiv.innerHTML = avatarHtml;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar avatar do contato:', error);
+  }
+}
+
+// Carrega o avatar quando a página carregar
+loadContactAvatar();
+
 entrada.addEventListener('input', ajustarAltura);
 function ajustarAltura() {
   entrada.style.height = 'auto';
