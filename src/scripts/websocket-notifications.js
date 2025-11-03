@@ -46,10 +46,39 @@
     };
 
     this.ws.onerror = (error) => {
+      console.error('WebSocket Notifications error:', error);
     };
 
     this.ws.onclose = (event) => {
       this.stopHeartbeat();
+      
+      console.log('WebSocket Notifications fechado. Code:', event.code, 'Reason:', event.reason);
+      
+      // Verifica se é erro de token inválido/expirado
+      const reason = event.reason?.toLowerCase() || '';
+      const hasTokenError = 
+        reason.includes('token') ||
+        reason.includes('expired') ||
+        reason.includes('invalid') ||
+        reason.includes('unauthorized');
+      
+      // Códigos 1008 e 4001 são erros de autenticação
+      // 1006 só se tiver mensagem de erro relacionada a token
+      if (
+        event.code === 1008 ||
+        event.code === 4001 ||
+        (event.code === 1006 && hasTokenError)
+      ) {
+        console.log('Token inválido ou expirado detectado no WebSocket de Notificações');
+        console.log('Limpando localStorage e redirecionando para login...');
+        
+        // Limpa o localStorage
+        localStorage.clear();
+        
+        // Redireciona para login
+        window.location.href = '/login';
+        return;
+      }
       
       if (!this.isIntentionallyClosed && this.reconnectAttempts < this.maxReconnectAttempts) {
         this.scheduleReconnect();
@@ -58,8 +87,56 @@
   }
 
   handleMessage(data) {
+    console.log('=== WebSocket Notifications - handleMessage ===');
+    console.log('Dados recebidos:', JSON.stringify(data, null, 2));
+    
+    // Verifica se é uma mensagem de erro do backend
+    if (data.message || data.error) {
+      console.log('🔍 Notificações - Mensagem ou erro detectado:', data.message || data.error);
+      
+      const messageText = (data.message || '').toLowerCase();
+      const detailsText = (data.details || '').toLowerCase();
+      const errorText = (data.error || '').toLowerCase();
+      
+      const hasInvalidToken = 
+        messageText.includes('invalid token') ||
+        messageText.includes('token') ||
+        detailsText.includes('expired') ||
+        detailsText.includes('invalid') ||
+        errorText.includes('token');
+      
+      if (hasInvalidToken) {
+        console.error('❌ Notificações - Token inválido ou expirado!');
+        console.error('Dados completos:', data);
+        
+        alert('Sua sessão expirou. Você será redirecionado para o login.');
+        
+        this.isIntentionallyClosed = true;
+        if (this.ws) {
+          try {
+            this.ws.close();
+          } catch (e) {
+            console.error('Erro ao fechar WebSocket:', e);
+          }
+        }
+        
+        console.log('🧹 Limpando localStorage...');
+        localStorage.clear();
+        console.log('✅ localStorage limpo');
+        
+        console.log('🚪 Redirecionando para /login...');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1000);
+        return;
+      }
+    }
+    
+    console.log('📨 Notificações - Processando tipo:', data.type);
+    
     switch (data.type) {
       case 'CONNECTED':
+        console.log('✅ WebSocket Notifications conectado');
         break;
       
       case 'NEW_NOTIFICATION':

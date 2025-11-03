@@ -83,35 +83,28 @@
 
     this.ws.onmessage = (event) => {
       try {
-        
         if (!event.data || event.data.trim() === '') {
           return;
         }
         
         const messages = event.data.trim().split('\n').filter(line => line.trim());
         
-        if (messages.length > 1) {
-        }
-        
         messages.forEach((msg, index) => {
           try {
             const data = JSON.parse(msg);
             this.handleMessage(data);
           } catch (err) {
+            console.error('Erro ao fazer parse da mensagem do WebSocket');
           }
         });
         
       } catch (error) {
-        
-        if (event.data && typeof event.data === 'string') {
-          if (event.data.includes('}{')) {
-          }
-          
-        }
+        console.error('Erro no WebSocket onmessage');
       }
     };
 
     this.ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
     };
 
     this.ws.onclose = (event) => {
@@ -121,6 +114,25 @@
       
       window.dispatchEvent(new CustomEvent('presenceDisconnected'));
       
+      const reason = event.reason?.toLowerCase() || '';
+      const hasTokenError = 
+        reason.includes('token') ||
+        reason.includes('expired') ||
+        reason.includes('invalid') ||
+        reason.includes('unauthorized');
+      
+      if (
+        event.code === 1008 ||
+        event.code === 4001 ||
+        (event.code === 1006 && hasTokenError)
+      ) {
+        localStorage.clear();
+        
+        // Redireciona para login
+        window.location.href = '/login';
+        return;
+      }
+      
       if (!this.isIntentionallyClosed && this.reconnectAttempts < this.maxReconnectAttempts) {
         this.scheduleReconnect();
       }
@@ -128,9 +140,69 @@
   }
 
   handleMessage(data) {
+    console.log('=== handleMessage chamado ===');
+    console.log('Dados recebidos:', JSON.stringify(data, null, 2));
+    
+    // Verifica se é uma mensagem de erro do backend
+    // Formato: { "message": "invalid token", "details": "token has invalid claims: token is expired" }
+    if (data.message || data.error) {
+      console.log('🔍 Mensagem ou erro detectado:', data.message || data.error);
+      
+      const messageText = (data.message || '').toLowerCase();
+      const detailsText = (data.details || '').toLowerCase();
+      const errorText = (data.error || '').toLowerCase();
+      
+      // Verifica se contém indicadores de token inválido
+      const hasInvalidToken = 
+        messageText.includes('invalid token') ||
+        messageText.includes('token') ||
+        detailsText.includes('expired') ||
+        detailsText.includes('invalid') ||
+        errorText.includes('token');
+      
+      console.log('🔍 Verificação de token inválido:', {
+        messageText,
+        detailsText,
+        errorText,
+        hasInvalidToken
+      });
+      
+      if (hasInvalidToken) {
+        console.error('❌ Token inválido ou expirado detectado!');
+        console.error('Dados completos:', data);
+        
+        alert('Sua sessão expirou. Você será redirecionado para o login.');
+        
+        // Fecha o WebSocket
+        this.isIntentionallyClosed = true;
+        if (this.ws) {
+          try {
+            this.ws.close();
+          } catch (e) {
+            console.error('Erro ao fechar WebSocket:', e);
+          }
+        }
+        
+        // Limpa o localStorage
+        console.log('🧹 Limpando localStorage...');
+        localStorage.clear();
+        console.log('✅ localStorage limpo');
+        
+        // Redireciona para login
+        console.log('🚪 Redirecionando para /login...');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1000);
+        return;
+      }
+    }
+    
+    // Processa mensagens normais
+    console.log('📨 Processando mensagem tipo:', data.type);
     
     switch (data.type) {
       case 'CONNECTED':
+        console.log('✅ WebSocket conectado');
         break;
       
       case 'USER_ONLINE':
