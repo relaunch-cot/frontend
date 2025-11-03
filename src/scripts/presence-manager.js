@@ -128,7 +128,6 @@
       ) {
         localStorage.clear();
         
-        // Redireciona para login
         window.location.href = '/login';
         return;
       }
@@ -140,19 +139,11 @@
   }
 
   handleMessage(data) {
-    console.log('=== handleMessage chamado ===');
-    console.log('Dados recebidos:', JSON.stringify(data, null, 2));
-    
-    // Verifica se é uma mensagem de erro do backend
-    // Formato: { "message": "invalid token", "details": "token has invalid claims: token is expired" }
     if (data.message || data.error) {
-      console.log('🔍 Mensagem ou erro detectado:', data.message || data.error);
-      
       const messageText = (data.message || '').toLowerCase();
       const detailsText = (data.details || '').toLowerCase();
       const errorText = (data.error || '').toLowerCase();
       
-      // Verifica se contém indicadores de token inválido
       const hasInvalidToken = 
         messageText.includes('invalid token') ||
         messageText.includes('token') ||
@@ -160,36 +151,20 @@
         detailsText.includes('invalid') ||
         errorText.includes('token');
       
-      console.log('🔍 Verificação de token inválido:', {
-        messageText,
-        detailsText,
-        errorText,
-        hasInvalidToken
-      });
-      
       if (hasInvalidToken) {
-        console.error('❌ Token inválido ou expirado detectado!');
-        console.error('Dados completos:', data);
-        
         alert('Sua sessão expirou. Você será redirecionado para o login.');
         
-        // Fecha o WebSocket
         this.isIntentionallyClosed = true;
         if (this.ws) {
           try {
             this.ws.close();
           } catch (e) {
-            console.error('Erro ao fechar WebSocket:', e);
+            // Ignora erro ao fechar
           }
         }
         
-        // Limpa o localStorage
-        console.log('🧹 Limpando localStorage...');
         localStorage.clear();
-        console.log('✅ localStorage limpo');
         
-        // Redireciona para login
-        console.log('🚪 Redirecionando para /login...');
         setTimeout(() => {
           window.location.href = '/login';
         }, 1000);
@@ -197,12 +172,8 @@
       }
     }
     
-    // Processa mensagens normais
-    console.log('📨 Processando mensagem tipo:', data.type);
-    
     switch (data.type) {
       case 'CONNECTED':
-        console.log('✅ WebSocket conectado');
         break;
       
       case 'USER_ONLINE':
