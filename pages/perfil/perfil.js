@@ -97,4 +97,246 @@ async function carregarPerfil() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', carregarPerfil);
+async function carregarPostsDoUsuario() {
+  const container = document.getElementById('userPostsContainer');
+  const emptyState = document.getElementById('emptyPostsState');
+  const postsCount = document.querySelector('.posts-count');
+
+  try {
+    container.innerHTML = '<div class="loading">Carregando posts...</div>';
+    
+    const response = await fetch(`${BASE_URL}/v1/post/user`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao carregar posts');
+    }
+
+    const data = await response.json();
+    const posts = data.posts || [];
+
+    container.innerHTML = '';
+
+    if (posts.length === 0) {
+      emptyState.style.display = 'block';
+      postsCount.textContent = '0 posts';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    postsCount.textContent = `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`;
+
+    // Ordena posts do mais recente para o mais antigo
+    posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    posts.forEach(post => {
+      const card = criarCardPost(post);
+      container.appendChild(card);
+    });
+
+  } catch (error) {
+    container.innerHTML = '<div class="loading">Erro ao carregar posts. Tente novamente.</div>';
+    postsCount.textContent = '0 posts';
+  }
+}
+
+function formatarData(dateString) {
+  const data = new Date(dateString);
+  const dataCorrigida = new Date(data.getTime() + (3 * 60 * 60 * 1000));
+  
+  const now = new Date();
+  const diffMs = now - dataCorrigida;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'agora';
+  if (diffMins < 60) return `${diffMins}min atrás`;
+  if (diffHours < 24) return `${diffHours}h atrás`;
+  if (diffDays < 7) return `${diffDays}d atrás`;
+
+  return dataCorrigida.toLocaleDateString('pt-BR', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric' 
+  });
+}
+
+function criarCardPost(post) {
+  const card = document.createElement('div');
+  card.className = 'user-post-card';
+  card.dataset.postId = post.postId;
+
+  const contentPreview = post.content.length > 200 
+    ? post.content.substring(0, 200) + '...' 
+    : post.content;
+
+  card.innerHTML = `
+    <div class="post-card-header">
+      <div class="post-author-info">
+        <div class="post-author-avatar">${post.authorName.charAt(0).toUpperCase()}</div>
+        <div class="post-author-details">
+          <span class="post-author-name">${post.authorName}</span>
+          <span class="post-date">${formatarData(post.createdAt)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="post-card-content">
+      <h3 class="post-card-title">${post.title}</h3>
+      <p class="post-card-text">${contentPreview}</p>
+      ${post.urlImagePost ? `<img src="${post.urlImagePost}" alt="${post.title}" class="post-card-image">` : ''}
+    </div>
+
+    <div class="post-card-footer">
+      <button class="btn-view-post" data-post-id="${post.postId}">
+        Ler mais
+      </button>
+      <div class="post-actions-mini">
+        <button class="btn-action-mini edit" title="Editar" onclick="event.stopPropagation(); editarPost('${post.postId}')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
+            <path fill="currentColor" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
+          </svg>
+        </button>
+        <button class="btn-action-mini delete" title="Excluir" onclick="event.stopPropagation(); confirmarExclusaoPost('${post.postId}')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
+            <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  `;
+
+  return card;
+}
+
+function editarPost(postId) {
+  window.location.href = `/posts?edit=${postId}`;
+}
+
+function confirmarExclusaoPost(postId) {
+  if (confirm('Tem certeza que deseja excluir este post? Esta ação não pode ser desfeita.')) {
+    excluirPost(postId);
+  }
+}
+
+async function excluirPost(postId) {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/post/${postId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': token
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao excluir post');
+    }
+
+    showSuccess('Post excluído com sucesso!');
+    
+    // Fecha modal se estiver aberto
+    const modal = document.getElementById('viewPostModal');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+    
+    await carregarPostsDoUsuario();
+  } catch (error) {
+    showError('Erro ao excluir post. Tente novamente.');
+  }
+}
+
+async function buscarPost(postId) {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/post/${postId}`, {
+      headers: {
+        'Authorization': token
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao buscar post');
+    }
+
+    const data = await response.json();
+    return data.post;
+  } catch (error) {
+    showError('Erro ao carregar post');
+    return null;
+  }
+}
+
+function exibirPostDetalhado(post) {
+  const modal = document.getElementById('viewPostModal');
+  const detailContainer = document.getElementById('postDetail');
+
+  detailContainer.innerHTML = `
+    <div class="post-detail-header">
+      <div class="author-avatar">${post.authorName.charAt(0).toUpperCase()}</div>
+      <div class="author-info">
+        <span class="author-name">${post.authorName}</span>
+        <span class="post-date">${formatarData(post.createdAt)}</span>
+        ${post.updatedAt && post.updatedAt !== post.createdAt ? 
+          `<span class="post-updated">(editado em ${formatarData(post.updatedAt)})</span>` : ''}
+      </div>
+    </div>
+
+    <h2 class="post-detail-title">${post.title}</h2>
+    
+    ${post.urlImagePost ? `<img src="${post.urlImagePost}" alt="${post.title}" class="post-detail-image">` : ''}
+    
+    <div class="post-detail-content">${post.content}</div>
+
+    <div class="post-detail-actions">
+      <button class="btn-action btn-edit" onclick="editarPost('${post.postId}')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
+          <path fill="currentColor" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
+        </svg>
+        Editar Post
+      </button>
+      <button class="btn-action btn-delete" onclick="confirmarExclusaoPost('${post.postId}')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
+          <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+        </svg>
+        Excluir Post
+      </button>
+    </div>
+  `;
+
+  modal.classList.add('active');
+}
+
+// Event listeners
+document.addEventListener('click', async (e) => {
+  // Botão "Ler mais"
+  if (e.target.classList.contains('btn-view-post')) {
+    const postId = e.target.dataset.postId;
+    const post = await buscarPost(postId);
+    if (post) {
+      exibirPostDetalhado(post);
+    }
+  }
+
+  // Fechar modal
+  if (e.target.classList.contains('close')) {
+    document.getElementById('viewPostModal').classList.remove('active');
+  }
+});
+
+// Fechar modal clicando fora
+window.addEventListener('click', (e) => {
+  const modal = document.getElementById('viewPostModal');
+  if (e.target === modal) {
+    modal.classList.remove('active');
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  carregarPerfil();
+  carregarPostsDoUsuario();
+});
