@@ -93,6 +93,47 @@
         </div>
     </div>
 
+    <div id="editPostModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Editar Post</h2>
+            <form id="editPostForm">
+                <div class="form-group">
+                    <label for="editPostTitle">Título *</label>
+                    <input type="text" id="editPostTitle" required maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="editPostContent">Conteúdo *</label>
+                    <textarea id="editPostContent" required rows="6"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="editPostImage">Imagem (opcional)</label>
+                    <input type="file" id="editPostImage" accept="image/*">
+                    <small class="image-info">Deixe em branco para manter a imagem atual</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" id="cancelEditBtn">Cancelar</button>
+                    <button type="submit" class="btn-submit">Atualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content modal-confirm">
+            <h2>Confirmar Exclusão</h2>
+            <p>Tem certeza que deseja excluir este post?</p>
+            <p class="warning-text">Esta ação não pode ser desfeita.</p>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" id="cancelDeleteBtn">Cancelar</button>
+                <button type="button" class="btn-delete-confirm" id="confirmDeleteBtn">Excluir</button>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div>
             <a href="/home">

@@ -197,12 +197,12 @@ function criarCardPost(post) {
         Ler mais
       </button>
       <div class="post-actions-mini">
-        <button class="btn-action-mini edit" title="Editar" onclick="event.stopPropagation(); editarPost('${post.postId}')">
+        <button class="btn-action-mini edit" title="Editar" data-post-id="${post.postId}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
             <path fill="currentColor" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
           </svg>
         </button>
-        <button class="btn-action-mini delete" title="Excluir" onclick="event.stopPropagation(); confirmarExclusaoPost('${post.postId}')">
+        <button class="btn-action-mini delete" title="Excluir" data-post-id="${post.postId}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
             <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
           </svg>
@@ -215,13 +215,72 @@ function criarCardPost(post) {
 }
 
 function editarPost(postId) {
-  window.location.href = `/posts?edit=${postId}`;
+  // Fecha modal de visualização se estiver aberto
+  const viewModal = document.getElementById('viewPostModal');
+  if (viewModal) {
+    viewModal.classList.remove('active');
+  }
+  
+  // Busca o post e abre modal de edição
+  buscarPost(postId).then(post => {
+    if (post) {
+      abrirModalEdicao(post);
+    }
+  });
 }
 
-function confirmarExclusaoPost(postId) {
-  if (confirm('Tem certeza que deseja excluir este post? Esta ação não pode ser desfeita.')) {
-    excluirPost(postId);
+function abrirModalEdicao(post) {
+  document.getElementById('editPostTitle').value = post.title;
+  document.getElementById('editPostContent').value = post.content;
+  
+  const editModal = document.getElementById('editPostModal');
+  const editForm = document.getElementById('editPostForm');
+  
+  // Armazena o postId no form
+  editForm.dataset.postId = post.postId;
+  editForm.dataset.currentImage = post.urlImagePost || '';
+  
+  editModal.classList.add('active');
+}
+
+async function atualizarPost(postId, postData) {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/post/${postId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(postData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      
+      // Verifica se é o erro específico de "no fields to update"
+      if (errorData.message && errorData.message.includes('no fields to update')) {
+        return { noChanges: true };
+      }
+      
+      throw new Error('Erro ao atualizar post');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (error.message === 'Erro ao atualizar post') {
+      throw error;
+    }
+    showError('Erro ao atualizar post');
+    throw error;
   }
+}
+
+let postToDelete = null;
+
+function confirmarExclusaoPost(postId) {
+  postToDelete = postId;
+  document.getElementById('deleteConfirmModal').classList.add('active');
 }
 
 async function excluirPost(postId) {
@@ -239,12 +298,18 @@ async function excluirPost(postId) {
 
     showSuccess('Post excluído com sucesso!');
     
-    // Fecha modal se estiver aberto
-    const modal = document.getElementById('viewPostModal');
-    if (modal) {
-      modal.classList.remove('active');
+    // Fecha modais
+    const viewModal = document.getElementById('viewPostModal');
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    
+    if (viewModal) {
+      viewModal.classList.remove('active');
+    }
+    if (deleteModal) {
+      deleteModal.classList.remove('active');
     }
     
+    postToDelete = null;
     await carregarPostsDoUsuario();
   } catch (error) {
     showError('Erro ao excluir post. Tente novamente.');
@@ -293,13 +358,13 @@ function exibirPostDetalhado(post) {
     <div class="post-detail-content">${post.content}</div>
 
     <div class="post-detail-actions">
-      <button class="btn-action btn-edit" onclick="editarPost('${post.postId}')">
+      <button class="btn-action btn-edit" data-post-id="${post.postId}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
           <path fill="currentColor" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
         </svg>
         Editar Post
       </button>
-      <button class="btn-action btn-delete" onclick="confirmarExclusaoPost('${post.postId}')">
+      <button class="btn-action btn-delete" data-post-id="${post.postId}">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
           <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
         </svg>
@@ -322,17 +387,136 @@ document.addEventListener('click', async (e) => {
     }
   }
 
+  // Botão editar (mini e no modal)
+  if (e.target.closest('.btn-action-mini.edit') || e.target.closest('.btn-edit')) {
+    e.stopPropagation();
+    const button = e.target.closest('.btn-action-mini.edit') || e.target.closest('.btn-edit');
+    const postId = button.dataset.postId;
+    if (postId) {
+      editarPost(postId);
+    }
+  }
+
+  // Botão excluir (mini e no modal)
+  if (e.target.closest('.btn-action-mini.delete') || 
+      (e.target.closest('.btn-delete') && !e.target.closest('.btn-delete-confirm'))) {
+    e.stopPropagation();
+    const button = e.target.closest('.btn-action-mini.delete') || e.target.closest('.btn-delete');
+    const postId = button.dataset.postId;
+    if (postId) {
+      confirmarExclusaoPost(postId);
+    }
+  }
+
   // Fechar modal
   if (e.target.classList.contains('close')) {
     document.getElementById('viewPostModal').classList.remove('active');
+    document.getElementById('editPostModal').classList.remove('active');
+    document.getElementById('deleteConfirmModal').classList.remove('active');
+    document.getElementById('editPostForm').reset();
+    postToDelete = null;
+  }
+});
+
+// Botões do modal de confirmação
+document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+  document.getElementById('deleteConfirmModal').classList.remove('active');
+  postToDelete = null;
+});
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+  if (!postToDelete) return;
+  
+  const confirmBtn = document.getElementById('confirmDeleteBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Excluindo...';
+  
+  try {
+    await excluirPost(postToDelete);
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Excluir';
+  }
+});
+
+// Botões do modal de edição
+document.getElementById('cancelEditBtn').addEventListener('click', () => {
+  document.getElementById('editPostModal').classList.remove('active');
+  document.getElementById('editPostForm').reset();
+});
+
+// Submeter edição de post
+document.getElementById('editPostForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const editForm = e.target;
+  const postId = editForm.dataset.postId;
+  const currentImage = editForm.dataset.currentImage;
+  const title = document.getElementById('editPostTitle').value.trim();
+  const content = document.getElementById('editPostContent').value.trim();
+  const imageFile = document.getElementById('editPostImage').files[0];
+  
+  const submitBtn = editForm.querySelector('.btn-submit');
+  const originalBtnText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Salvando...';
+  
+  try {
+    const postData = {
+      title,
+      content
+    };
+    
+    // Se há nova imagem, converte para base64
+    if (imageFile) {
+      const reader = new FileReader();
+      const base64Image = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(imageFile);
+      });
+      postData.urlImagePost = base64Image;
+    } else if (currentImage) {
+      // Mantém a imagem atual
+      postData.urlImagePost = currentImage;
+    }
+    
+    const result = await atualizarPost(postId, postData);
+    
+    if (result.noChanges) {
+      showInfo('Nenhuma alteração foi feita no post');
+    } else {
+      showSuccess('Post atualizado com sucesso!');
+      document.getElementById('editPostModal').classList.remove('active');
+      editForm.reset();
+      await carregarPostsDoUsuario(); // Recarrega a lista
+    }
+  } catch (error) {
+    showError('Erro ao atualizar post');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalBtnText;
   }
 });
 
 // Fechar modal clicando fora
 window.addEventListener('click', (e) => {
-  const modal = document.getElementById('viewPostModal');
-  if (e.target === modal) {
-    modal.classList.remove('active');
+  const viewModal = document.getElementById('viewPostModal');
+  const editModal = document.getElementById('editPostModal');
+  const deleteModal = document.getElementById('deleteConfirmModal');
+  
+  if (e.target === viewModal) {
+    viewModal.classList.remove('active');
+  }
+  
+  if (e.target === editModal) {
+    editModal.classList.remove('active');
+    document.getElementById('editPostForm').reset();
+  }
+  
+  if (e.target === deleteModal) {
+    deleteModal.classList.remove('active');
+    postToDelete = null;
   }
 });
 

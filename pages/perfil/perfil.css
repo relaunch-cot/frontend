@@ -495,6 +495,168 @@ main {
     transform: translateY(-2px);
 }
 
+/* Modal de Confirmação de Exclusão */
+.modal-confirm {
+    max-width: 450px;
+    text-align: center;
+}
+
+.modal-confirm h2 {
+    color: #e74c3c;
+    border-bottom: 2px solid #ffebee;
+    margin-bottom: 20px;
+}
+
+.modal-confirm p {
+    color: #2C3E50;
+    font-size: 16px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.warning-text {
+    color: #e74c3c;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 35px;
+    padding-top: 25px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.btn-cancel,
+.btn-delete-confirm {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Gudea', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel {
+    background: #e0e0e0;
+    color: #2C3E50;
+}
+
+.btn-cancel:hover {
+    background: #d0d0d0;
+    transform: translateY(-2px);
+}
+
+.btn-delete-confirm {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-delete-confirm:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+/* Formulário de Edição */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2C3E50;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: 'Gudea', sans-serif;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #46B1D5;
+    box-shadow: 0 0 0 3px rgba(70, 177, 213, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+}
+
+.form-group input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Gudea', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+}
+
+.form-group input[type="file"]:hover {
+    border-color: #46B1D5;
+    background-color: #f0f8fb;
+}
+
+.form-group input[type="file"]:focus {
+    outline: none;
+    border-style: solid;
+}
+
+.image-info {
+    display: block;
+    margin-top: 8px;
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.btn-submit {
+    background: #46B1D5;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Gudea', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    background: #3a9dbf;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(70, 177, 213, 0.3);
+}
+
+.btn-submit:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+
 /* Responsivo */
 @media (max-width: 768px) {
     .user-posts-container {

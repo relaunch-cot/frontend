@@ -476,4 +476,22 @@ function resetCreateModal() {
     modalTitle.textContent = 'Criar Novo Post';
 }
 
-renderPosts();
+// Verifica se há parâmetro 'edit' na URL
+async function checkEditParameter() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editPostId = urlParams.get('edit');
+    
+    if (editPostId) {
+        const post = await fetchPost(editPostId);
+        if (post) {
+            openEditModal(post);
+        }
+        // Remove o parâmetro da URL sem recarregar a página
+        window.history.replaceState({}, '', '/posts');
+    }
+}
+
+// Inicializa a página
+renderPosts().then(() => {
+    checkEditParameter();
+});
