@@ -7,6 +7,12 @@
 }
 
 function showNotification(message, type = 'info') {
+  // Se está redirecionando para login, só permite a mensagem de sessão expirada
+  const isSessionExpiredMsg = message.includes('sessão expirou') || message.includes('session expired');
+  if (window.__redirectingToLogin && !isSessionExpiredMsg) {
+    return; // Bloqueia outras notificações
+  }
+  
   createNotificationContainer();
   
   const container = document.querySelector('.notification-container');

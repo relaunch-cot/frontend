@@ -4,10 +4,14 @@
     const originalFetch = window.fetch;
     
     window.fetch = async function(...args) {
+        if (window.__redirectingToLogin) {
+            return Promise.reject(new Error('Redirecting to login'));
+        }
+        
         try {
             const response = await originalFetch.apply(this, args);
             
-            if (response.status === 401) {
+            if (response.status === 401 && !window.__redirectingToLogin) {
                 const clonedResponse = response.clone();
                 try {
                     const data = await clonedResponse.json();
@@ -25,13 +29,17 @@
                         if (!window.location.pathname.includes('/login') && 
                             !window.location.pathname.includes('/cadastro')) {
                             
-                            alert('Sua sessão expirou. Você será redirecionado para o login.');
+                            window.__redirectingToLogin = true;
+                            
+                            if (typeof showError === 'function') {
+                                showError('Sua sessão expirou. Redirecionando para o login...');
+                            }
                             
                             localStorage.clear();
                             
                             setTimeout(() => {
                                 window.location.href = '/login';
-                            }, 1000);
+                            }, 1500);
                         }
                     }
                 } catch (e) {

@@ -139,6 +139,11 @@
   }
 
   handleMessage(data) {
+    // Se já está redirecionando, ignora tudo
+    if (window.__redirectingToLogin) {
+      return;
+    }
+    
     if (data.message || data.error) {
       const messageText = (data.message || '').toLowerCase();
       const detailsText = (data.details || '').toLowerCase();
@@ -151,8 +156,14 @@
         detailsText.includes('invalid') ||
         errorText.includes('token');
       
-      if (hasInvalidToken) {
-        alert('Sua sessão expirou. Você será redirecionado para o login.');
+      if (hasInvalidToken && !window.__redirectingToLogin) {
+        // Marca que está redirecionando
+        window.__redirectingToLogin = true;
+        
+        // Usa notificação toast ao invés de alert
+        if (typeof showError === 'function') {
+          showError('Sua sessão expirou. Redirecionando para o login...');
+        }
         
         this.isIntentionallyClosed = true;
         if (this.ws) {
@@ -167,7 +178,7 @@
         
         setTimeout(() => {
           window.location.href = '/login';
-        }, 1000);
+        }, 1500);
         return;
       }
     }
