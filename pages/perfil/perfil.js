@@ -254,24 +254,20 @@ async function atualizarPost(postId, postData) {
       body: JSON.stringify(postData)
     });
 
+    const data = await response.json();
+    
     if (!response.ok) {
-      const errorData = await response.json();
-      
       // Verifica se é o erro específico de "no fields to update"
-      if (errorData.message && errorData.message.includes('no fields to update')) {
+      if (data.message && data.message.includes('no fields to update')) {
         return { noChanges: true };
       }
       
-      throw new Error('Erro ao atualizar post');
+      throw new Error(data.message || 'Erro ao atualizar post');
     }
 
-    const data = await response.json();
     return data;
   } catch (error) {
-    if (error.message === 'Erro ao atualizar post') {
-      throw error;
-    }
-    showError('Erro ao atualizar post');
+    console.error('Erro ao atualizar post:', error);
     throw error;
   }
 }
@@ -487,12 +483,17 @@ document.getElementById('editPostForm').addEventListener('submit', async (e) => 
       showInfo('Nenhuma alteração foi feita no post');
     } else {
       showSuccess('Post atualizado com sucesso!');
-      document.getElementById('editPostModal').classList.remove('active');
-      editForm.reset();
       await carregarPostsDoUsuario(); // Recarrega a lista
     }
+    
+    // Fecha o modal sempre após a operação
+    document.getElementById('editPostModal').classList.remove('active');
+    editForm.reset();
   } catch (error) {
     showError('Erro ao atualizar post');
+    // Fecha o modal mesmo em caso de erro
+    document.getElementById('editPostModal').classList.remove('active');
+    editForm.reset();
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = originalBtnText;
