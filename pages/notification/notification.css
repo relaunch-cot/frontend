@@ -2,10 +2,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
 }
 
 main{
+    font-family: "Poppins", sans-serif;
     height: 73vh;
     width: 100%;
     display: flex;
@@ -478,39 +478,4 @@ textarea{
     height: 7vh;
     width: 7vh;
     border-radius: 50%;
-}
-
-/* User Profile in Header */
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 12px;
-    background: #f0f0f0;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-.user-profile:hover {
-    background: #e0e0e0;
-}
-
-.user-avatar {
-    width: 35px;
-    height: 35px;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.user-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: #222;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
