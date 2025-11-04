@@ -635,3 +635,56 @@ footer > div > select:hover {
         padding: 0 1rem;
     }
 }
+
+/* Modal de Confirmação de Exclusão */
+.modal-confirm {
+    max-width: 450px;
+    text-align: center;
+}
+
+.modal-confirm h2 {
+    color: #e74c3c;
+    border-bottom: 2px solid #ffebee;
+    margin-bottom: 20px;
+}
+
+.modal-confirm p {
+    color: #2C3E50;
+    font-size: 16px;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.warning-text {
+    color: #e74c3c;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-delete-confirm {
+    background: #e74c3c;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Gudea', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-delete-confirm:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 35px;
+    padding-top: 25px;
+    border-top: 2px solid #f0f0f0;
+}

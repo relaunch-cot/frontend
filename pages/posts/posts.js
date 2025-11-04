@@ -89,6 +89,58 @@ async function createPost(postData) {
     }
 }
 
+async function updatePost(postId, postData) {
+    try {
+        const response = await fetch(`${BASE_URL}/v1/post/${postId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(postData)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            
+            if (errorData.message && errorData.message.includes('no fields to update')) {
+                return { noChanges: true };
+            }
+            
+            throw new Error('Erro ao atualizar post');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        if (error.message === 'Erro ao atualizar post') {
+            throw error;
+        }
+        showError('Erro ao atualizar post');
+        throw error;
+    }
+}
+
+async function deletePost(postId) {
+    try {
+        const response = await fetch(`${BASE_URL}/v1/post/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao deletar post');
+        }
+
+        return true;
+    } catch (error) {
+        showError('Erro ao deletar post');
+        throw error;
+    }
+}
+
 function formatDate(dateString) {
     const data = new Date(dateString);
     const dataCorrigida = new Date(data.getTime() + (3 * 60 * 60 * 1000));
@@ -139,13 +191,13 @@ function createPostCard(post) {
             <button class="btn-read-more" data-post-id="${post.postId}">Ler mais</button>
             <div class="post-actions">
                 ${isAuthor ? `
-                    <button class="btn-action btn-edit" data-post-id="${post.postId}" disabled title="Funcionalidade em breve">
+                    <button class="btn-action btn-edit" data-post-id="${post.postId}">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
                             <path fill="currentColor" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
                         </svg>
                         Editar
                     </button>
-                    <button class="btn-action btn-delete" data-post-id="${post.postId}" disabled title="Funcionalidade em breve">
+                    <button class="btn-action btn-delete" data-post-id="${post.postId}">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
                             <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
                         </svg>
@@ -186,13 +238,13 @@ function showPostDetail(post) {
 
         ${isAuthor ? `
             <div class="post-detail-actions">
-                <button class="btn-action btn-edit" disabled title="Funcionalidade em breve">
+                <button class="btn-action btn-edit" data-post-id="${post.postId}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
                         <path fill="currentColor" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
                     </svg>
                     Editar Post
                 </button>
-                <button class="btn-action btn-delete" disabled title="Funcionalidade em breve">
+                <button class="btn-action btn-delete" data-post-id="${post.postId}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
                         <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
                     </svg>
@@ -232,35 +284,73 @@ async function renderPosts() {
 
 const createModal = document.getElementById('createPostModal');
 const viewModal = document.getElementById('viewPostModal');
+const deleteConfirmModal = document.getElementById('deleteConfirmModal');
 const createBtn = document.getElementById('createPostBtn');
 const cancelBtn = document.getElementById('cancelBtn');
+const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 const closeButtons = document.querySelectorAll('.close');
 const createForm = document.getElementById('createPostForm');
 
+let postToDelete = null;
+
 createBtn.addEventListener('click', () => {
+    resetCreateModal();
     createModal.classList.add('active');
 });
 
 cancelBtn.addEventListener('click', () => {
     createModal.classList.remove('active');
-    createForm.reset();
+    resetCreateModal();
+});
+
+cancelDeleteBtn.addEventListener('click', () => {
+    deleteConfirmModal.classList.remove('active');
+    postToDelete = null;
+});
+
+confirmDeleteBtn.addEventListener('click', async () => {
+    if (!postToDelete) return;
+    
+    confirmDeleteBtn.disabled = true;
+    confirmDeleteBtn.textContent = 'Excluindo...';
+    
+    try {
+        await deletePost(postToDelete);
+        showSuccess('Post excluído com sucesso!');
+        deleteConfirmModal.classList.remove('active');
+        viewModal.classList.remove('active');
+        postToDelete = null;
+        await renderPosts();
+    } catch (error) {
+        showError('Erro ao excluir post. Tente novamente.');
+    } finally {
+        confirmDeleteBtn.disabled = false;
+        confirmDeleteBtn.textContent = 'Excluir';
+    }
 });
 
 closeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         createModal.classList.remove('active');
         viewModal.classList.remove('active');
-        createForm.reset();
+        deleteConfirmModal.classList.remove('active');
+        resetCreateModal();
+        postToDelete = null;
     });
 });
 
 window.addEventListener('click', (e) => {
     if (e.target === createModal) {
         createModal.classList.remove('active');
-        createForm.reset();
+        resetCreateModal();
     }
     if (e.target === viewModal) {
         viewModal.classList.remove('active');
+    }
+    if (e.target === deleteConfirmModal) {
+        deleteConfirmModal.classList.remove('active');
+        postToDelete = null;
     }
 });
 
@@ -269,7 +359,8 @@ createForm.addEventListener('submit', async (e) => {
 
     const submitBtn = createForm.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Publicando...';
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = editingPostId ? 'Atualizando...' : 'Publicando...';
 
     const imageFile = document.getElementById('postImage').files[0];
     let imageUrl = '';
@@ -286,21 +377,48 @@ createForm.addEventListener('submit', async (e) => {
     const postData = {
         title: document.getElementById('postTitle').value.trim(),
         content: document.getElementById('postContent').value.trim(),
-        type: document.getElementById('postType').value,
         urlImagePost: imageUrl
     };
 
+    // Se não tem imagem nova, precisamos buscar a existente para modo de edição
+    if (!imageUrl && editingPostId) {
+        const existingPost = await fetchPost(editingPostId);
+        if (existingPost && existingPost.urlImagePost) {
+            postData.urlImagePost = existingPost.urlImagePost;
+        }
+    }
+
+    // Adiciona o tipo apenas na criação
+    if (!editingPostId) {
+        postData.type = document.getElementById('postType').value;
+    }
+
     try {
-        await createPost(postData);
-        showSuccess('Post criado com sucesso!');
+        if (editingPostId) {
+            const result = await updatePost(editingPostId, postData);
+            
+            // Verifica se não houve alterações
+            if (result.noChanges) {
+                showInfo('Nenhuma alteração foi feita no post.');
+                createModal.classList.remove('active');
+                resetCreateModal();
+                return;
+            }
+            
+            showSuccess('Post atualizado com sucesso!');
+        } else {
+            await createPost(postData);
+            showSuccess('Post criado com sucesso!');
+        }
+        
         createModal.classList.remove('active');
-        createForm.reset();
+        resetCreateModal();
         await renderPosts();
     } catch (error) {
-        showError('Erro ao criar post. Tente novamente.');
+        showError(editingPostId ? 'Erro ao atualizar post. Tente novamente.' : 'Erro ao criar post. Tente novamente.');
     } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Publicar';
+        submitBtn.textContent = originalText;
     }
 });
 
@@ -314,12 +432,48 @@ document.addEventListener('click', async (e) => {
     }
 
     if (e.target.closest('.btn-edit')) {
-        showError('Funcionalidade de edição ainda não implementada');
+        const postId = e.target.closest('.btn-edit').dataset.postId;
+        const post = await fetchPost(postId);
+        if (post) {
+            openEditModal(post);
+        }
     }
 
     if (e.target.closest('.btn-delete')) {
-        showError('Funcionalidade de exclusão ainda não implementada');
+        const postId = e.target.closest('.btn-delete').dataset.postId;
+        postToDelete = postId;
+        deleteConfirmModal.classList.add('active');
     }
 });
+
+let editingPostId = null;
+
+function openEditModal(post) {
+    editingPostId = post.postId;
+    
+    document.getElementById('postTitle').value = post.title;
+    document.getElementById('postContent').value = post.content;
+    document.getElementById('postType').value = post.type;
+    
+    const submitBtn = createForm.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Atualizar Post';
+    
+    const modalTitle = createModal.querySelector('h2');
+    modalTitle.textContent = 'Editar Post';
+    
+    viewModal.classList.remove('active');
+    createModal.classList.add('active');
+}
+
+function resetCreateModal() {
+    editingPostId = null;
+    createForm.reset();
+    
+    const submitBtn = createForm.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Publicar';
+    
+    const modalTitle = createModal.querySelector('h2');
+    modalTitle.textContent = 'Criar Novo Post';
+}
 
 renderPosts();
