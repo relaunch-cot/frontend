@@ -319,14 +319,18 @@ async function renderPosts() {
 const createModal = document.getElementById('createPostModal');
 const viewModal = document.getElementById('viewPostModal');
 const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+const deleteCommentModal = document.getElementById('deleteCommentModal');
 const createBtn = document.getElementById('createPostBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+const cancelDeleteCommentBtn = document.getElementById('cancelDeleteCommentBtn');
+const confirmDeleteCommentBtn = document.getElementById('confirmDeleteCommentBtn');
 const closeButtons = document.querySelectorAll('.close');
 const createForm = document.getElementById('createPostForm');
 
 let postToDelete = null;
+let commentToDelete = { postId: null, commentId: null };
 
 createBtn.addEventListener('click', () => {
     resetCreateModal();
@@ -364,13 +368,38 @@ confirmDeleteBtn.addEventListener('click', async () => {
     }
 });
 
+cancelDeleteCommentBtn.addEventListener('click', () => {
+    deleteCommentModal.classList.remove('active');
+    commentToDelete = { postId: null, commentId: null };
+});
+
+confirmDeleteCommentBtn.addEventListener('click', async () => {
+    if (!commentToDelete.commentId || !commentToDelete.postId) return;
+    
+    confirmDeleteCommentBtn.disabled = true;
+    confirmDeleteCommentBtn.textContent = 'Excluindo...';
+    
+    try {
+        await handleDeleteComment(commentToDelete.postId, commentToDelete.commentId);
+        deleteCommentModal.classList.remove('active');
+        commentToDelete = { postId: null, commentId: null };
+    } catch (error) {
+        // Erro já tratado na função handleDeleteComment
+    } finally {
+        confirmDeleteCommentBtn.disabled = false;
+        confirmDeleteCommentBtn.textContent = 'Excluir';
+    }
+});
+
 closeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         createModal.classList.remove('active');
         viewModal.classList.remove('active');
         deleteConfirmModal.classList.remove('active');
+        deleteCommentModal.classList.remove('active');
         resetCreateModal();
         postToDelete = null;
+        commentToDelete = { postId: null, commentId: null };
     });
 });
 
@@ -385,6 +414,10 @@ window.addEventListener('click', (e) => {
     if (e.target === deleteConfirmModal) {
         deleteConfirmModal.classList.remove('active');
         postToDelete = null;
+    }
+    if (e.target === deleteCommentModal) {
+        deleteCommentModal.classList.remove('active');
+        commentToDelete = { postId: null, commentId: null };
     }
 });
 
@@ -525,9 +558,8 @@ document.addEventListener('click', async (e) => {
         const commentId = e.target.dataset.commentId;
         const postId = e.target.dataset.postId;
         
-        if (confirm('Tem certeza que deseja excluir este comentário?')) {
-            handleDeleteComment(postId, commentId);
-        }
+        commentToDelete = { postId, commentId };
+        deleteCommentModal.classList.add('active');
     }
 });
 

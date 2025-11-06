@@ -636,7 +636,6 @@ footer > div > select:hover {
     }
 }
 
-/* Modal de Confirmação de Exclusão */
 .modal-confirm {
     max-width: 450px;
     text-align: center;
@@ -689,7 +688,6 @@ footer > div > select:hover {
     border-top: 2px solid #f0f0f0;
 }
 
-/* Interações (Likes e Comentários) */
 .post-interactions {
     display: flex;
     gap: 1rem;
