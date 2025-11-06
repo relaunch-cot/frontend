@@ -876,6 +876,13 @@ footer > div > select:hover {
     color: #8e8e8e;
 }
 
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
 .comment-action-btn {
     background: none;
     border: none;
@@ -884,12 +891,35 @@ footer > div > select:hover {
     font-weight: 600;
     cursor: pointer;
     padding: 0.25rem 0;
-    margin-top: 0.25rem;
     transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.comment-action-icon {
+    width: 12px;
+    height: 12px;
 }
 
 .comment-action-btn:hover {
     color: #262626;
+}
+
+.like-comment-btn:hover {
+    color: #ed4956;
+}
+
+.like-comment-btn.liked {
+    color: #ed4956;
+}
+
+.like-comment-btn.liked svg {
+    fill: #ed4956;
+}
+
+.reply-comment-btn:hover {
+    color: #0095f6;
 }
 
 .delete-comment-btn {
