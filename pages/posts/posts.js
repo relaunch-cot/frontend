@@ -228,6 +228,29 @@ async function createPostCard(post) {
                     <span class="post-date">${formatDate(post.createdAt)}</span>
                 </div>
             </div>
+            ${isAuthor ? `
+                <div class="post-menu-container">
+                    <button class="btn-post-menu" data-post-id="${post.postId}">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
+                            <path fill="currentColor" d="M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"/>
+                        </svg>
+                    </button>
+                    <div class="post-menu-dropdown" data-post-id="${post.postId}" style="display: none;">
+                        <button class="menu-item btn-edit" data-post-id="${post.postId}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
+                                <path fill="currentColor" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
+                            </svg>
+                            Editar
+                        </button>
+                        <button class="menu-item btn-delete" data-post-id="${post.postId}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
+                                <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                            </svg>
+                            Excluir
+                        </button>
+                    </div>
+                </div>
+            ` : ''}
         </div>
 
         <div class="post-content">
@@ -254,22 +277,6 @@ async function createPostCard(post) {
 
         <div class="post-footer">
             <button class="btn-read-more" data-post-id="${post.postId}">Ler mais</button>
-            <div class="post-actions">
-                ${isAuthor ? `
-                    <button class="btn-action btn-edit" data-post-id="${post.postId}">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
-                            <path fill="currentColor" d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
-                        </svg>
-                        Editar
-                    </button>
-                    <button class="btn-action btn-delete" data-post-id="${post.postId}">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
-                            <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
-                        </svg>
-                        Excluir
-                    </button>
-                ` : ''}
-            </div>
         </div>
 
         <div class="comments-section" style="display: none;" data-post-id="${post.postId}">
@@ -460,6 +467,13 @@ window.addEventListener('click', (e) => {
         deleteCommentModal.classList.remove('active');
         commentToDelete = { postId: null, commentId: null };
     }
+    
+    // Fecha menus dropdown ao clicar fora
+    if (!e.target.closest('.post-menu-container') && !e.target.closest('.comment-menu-container')) {
+        document.querySelectorAll('.post-menu-dropdown, .comment-menu-dropdown').forEach(menu => {
+            menu.style.display = 'none';
+        });
+    }
 });
 
 createForm.addEventListener('submit', async (e) => {
@@ -536,8 +550,48 @@ document.addEventListener('click', async (e) => {
         }
     }
 
+    // Toggle post menu
+    if (e.target.closest('.btn-post-menu')) {
+        e.stopPropagation();
+        const btn = e.target.closest('.btn-post-menu');
+        const postId = btn.dataset.postId;
+        const dropdown = document.querySelector(`.post-menu-dropdown[data-post-id="${postId}"]`);
+        
+        // Fecha outros menus abertos
+        document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+            if (menu !== dropdown) menu.style.display = 'none';
+        });
+        document.querySelectorAll('.comment-menu-dropdown').forEach(menu => {
+            menu.style.display = 'none';
+        });
+        
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Toggle comment menu
+    if (e.target.closest('.btn-comment-menu')) {
+        e.stopPropagation();
+        const btn = e.target.closest('.btn-comment-menu');
+        const commentId = btn.dataset.commentId;
+        const dropdown = document.querySelector(`.comment-menu-dropdown[data-comment-id="${commentId}"]`);
+        
+        // Fecha outros menus abertos
+        document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+            menu.style.display = 'none';
+        });
+        document.querySelectorAll('.comment-menu-dropdown').forEach(menu => {
+            if (menu !== dropdown) menu.style.display = 'none';
+        });
+        
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+
     if (e.target.closest('.btn-edit')) {
         const postId = e.target.closest('.btn-edit').dataset.postId;
+        // Fecha o menu
+        document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+            menu.style.display = 'none';
+        });
         const post = await fetchPost(postId);
         if (post) {
             openEditModal(post);
@@ -546,6 +600,10 @@ document.addEventListener('click', async (e) => {
 
     if (e.target.closest('.btn-delete')) {
         const postId = e.target.closest('.btn-delete').dataset.postId;
+        // Fecha o menu
+        document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+            menu.style.display = 'none';
+        });
         postToDelete = postId;
         deleteConfirmModal.classList.add('active');
     }
@@ -599,14 +657,19 @@ document.addEventListener('click', async (e) => {
         const commentId = e.target.dataset.commentId;
         const postId = e.target.dataset.postId;
         
+        // Fecha o menu
+        document.querySelectorAll('.comment-menu-dropdown').forEach(menu => {
+            menu.style.display = 'none';
+        });
+        
         commentToDelete = { postId, commentId };
         deleteCommentModal.classList.add('active');
     }
 
     // Like comment (placeholder - funcionalidade a ser implementada)
-    if (e.target.closest('.like-comment-btn')) {
+    if (e.target.closest('.comment-like-btn')) {
         e.stopPropagation();
-        const btn = e.target.closest('.like-comment-btn');
+        const btn = e.target.closest('.comment-like-btn');
         // TODO: Implementar lógica de curtir comentário
         console.log('Curtir comentário:', btn.dataset.commentId);
         btn.classList.toggle('liked');
@@ -735,23 +798,36 @@ function renderComments(commentsList, comments, postId) {
                     <div class="comment-header">
                         <span class="comment-author">${comment.userName || 'Usuário'}</span>
                         <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
+                        ${isOwner ? `
+                            <div class="comment-menu-container">
+                                <button class="btn-comment-menu" data-comment-id="${comment.commentId}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="12" height="12">
+                                        <path fill="currentColor" d="M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"/>
+                                    </svg>
+                                </button>
+                                <div class="comment-menu-dropdown" data-comment-id="${comment.commentId}" style="display: none;">
+                                    <button class="menu-item delete-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="14" height="14">
+                                            <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                                        </svg>
+                                        Excluir
+                                    </button>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
-                    <p class="comment-text">${escapeHtml(comment.content)}</p>
-                    <div class="comment-actions">
-                        <button class="comment-action-btn like-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
-                            <svg class="comment-action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="12" height="12">
+                    <div class="comment-text-wrapper">
+                        <p class="comment-text">${escapeHtml(comment.content)}</p>
+                        <button class="comment-like-btn like-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
+                            <svg class="comment-like-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="14" height="14">
                                 <path fill="currentColor" d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/>
                             </svg>
-                            Curtir
                         </button>
+                    </div>
+                    <div class="comment-actions">
                         <button class="comment-action-btn reply-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
                             Responder
                         </button>
-                        ${isOwner ? `
-                            <button class="comment-action-btn delete-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
-                                Excluir
-                            </button>
-                        ` : ''}
                     </div>
                 </div>
             </div>
