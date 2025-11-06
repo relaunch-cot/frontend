@@ -67,6 +67,46 @@ async function fetchPost(postId) {
     }
 }
 
+async function fetchLikesFromPost(postId) {
+    try {
+        const response = await fetch(`${BASE_URL}/v1/post/likes/${postId}`, {
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao buscar likes');
+        }
+
+        const data = await response.json();
+        return data.likesFromPost || { likesCount: 0, likes: [] };
+    } catch (error) {
+        console.error('Erro ao carregar likes:', error);
+        return { likesCount: 0, likes: [] };
+    }
+}
+
+async function fetchCommentsFromPost(postId) {
+    try {
+        const response = await fetch(`${BASE_URL}/v1/post/comments/${postId}`, {
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao buscar comentários');
+        }
+
+        const data = await response.json();
+        return data.commentsFromPost || { commentsCount: 0, comments: [] };
+    } catch (error) {
+        console.error('Erro ao carregar comentários:', error);
+        return { commentsCount: 0, comments: [] };
+    }
+}
+
 async function createPost(postData) {
     try {
         const response = await fetch(`${BASE_URL}/v1/post`, {
@@ -164,18 +204,19 @@ function formatDate(dateString) {
     });
 }
 
-function createPostCard(post) {
+async function createPostCard(post) {
     const card = document.createElement('div');
     card.className = 'post-card';
     card.dataset.postId = post.postId;
 
     const isAuthor = post.authorId === userId;
 
-    const likesData = post.likes || {};
+    // Busca likes e comentários separadamente
+    const likesData = await fetchLikesFromPost(post.postId);
     const likesCount = likesData.likesCount || 0;
     const userLiked = likesData.likes?.some(like => like.userId === userId) || false;
 
-    const commentsData = post.comments || {};
+    const commentsData = await fetchCommentsFromPost(post.postId);
     const commentsCount = commentsData.commentsCount || 0;
 
     card.innerHTML = `
@@ -310,10 +351,10 @@ async function renderPosts() {
 
     posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    posts.forEach(post => {
-        const card = createPostCard(post);
+    for (const post of posts) {
+        const card = await createPostCard(post);
         container.appendChild(card);
-    });
+    }
 }
 
 const createModal = document.getElementById('createPostModal');
@@ -608,8 +649,7 @@ async function checkEditParameter() {
 
 async function toggleLike(postId, currentlyLiked) {
     try {
-        const liked = !currentlyLiked; 
-        const response = await fetch(`${BASE_URL}/v1/post/like/${postId}?liked=${liked}`, {
+        const response = await fetch(`${BASE_URL}/v1/post/like/${postId}`, {
             method: 'PATCH',
             headers: {
                 'Authorization': token
@@ -620,12 +660,10 @@ async function toggleLike(postId, currentlyLiked) {
             throw new Error('Erro ao processar like');
         }
 
-        const data = await response.json();
-        
-        const likesFromPost = data.likesFromPost || {};
-        const likesCount = likesFromPost.likesCount !== undefined ? likesFromPost.likesCount : 0;
-        const likes = likesFromPost.likes || [];
-        const userLiked = likes.some(like => like.userId === userId);
+        // Busca os likes atualizados
+        const likesData = await fetchLikesFromPost(postId);
+        const likesCount = likesData.likesCount || 0;
+        const userLiked = likesData.likes?.some(like => like.userId === userId) || false;
         
         return { 
             likesCount, 
@@ -647,8 +685,7 @@ async function toggleComments(postId) {
         
         commentsList.innerHTML = '<div class="loading-comments">Carregando comentários...</div>';
         
-        const post = await fetchPost(postId);
-        const commentsData = post?.comments || {};
+        const commentsData = await fetchCommentsFromPost(postId);
         const comments = commentsData.comments || [];
         
         renderComments(commentsList, comments, postId);
@@ -709,10 +746,9 @@ async function addComment(postId, content) {
             throw new Error('Erro ao adicionar comentário');
         }
 
-        const data = await response.json();
-        
-        const commentsFromPost = data.data?.commentsFromPost || {};
-        const comments = commentsFromPost.comments || [];
+        // Busca comentários atualizados
+        const commentsData = await fetchCommentsFromPost(postId);
+        const comments = commentsData.comments || [];
         
         return comments;
     } catch (error) {
@@ -734,10 +770,9 @@ async function deleteComment(postId, commentId) {
             throw new Error('Erro ao excluir comentário');
         }
 
-        const data = await response.json();
-        
-        const commentsFromPost = data.commentsFromPost || {};
-        const comments = commentsFromPost.comments || [];
+        // Busca comentários atualizados
+        const commentsData = await fetchCommentsFromPost(postId);
+        const comments = commentsData.comments || [];
         
         showSuccess('Comentário excluído com sucesso!');
         return comments;
