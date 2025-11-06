@@ -46,7 +46,6 @@ if (!chatId) {
 
 document.getElementById('contactName').textContent = contactName;
 
-// Carrega foto do contato
 async function loadContactAvatar() {
   if (!contactUserId) return;
   
@@ -61,14 +60,11 @@ async function loadContactAvatar() {
       const data = await response.json();
       const user = data.user;
       
-      // Atualiza o avatar do contato
       const contactAvatarDiv = document.querySelector('.contact-avatar');
       if (contactAvatarDiv) {
-        // Remove o SVG antigo
         const oldSvg = contactAvatarDiv.querySelector('svg:not(.status-indicator)');
         if (oldSvg) oldSvg.remove();
         
-        // Adiciona o novo avatar
         let avatarHtml;
         if (user.urlImagePerfil && user.urlImagePerfil.trim() !== '') {
           avatarHtml = `
@@ -86,7 +82,6 @@ async function loadContactAvatar() {
             </div>`;
         }
         
-        // Insere antes do status-indicator
         const statusIndicator = contactAvatarDiv.querySelector('.status-indicator');
         if (statusIndicator) {
           statusIndicator.insertAdjacentHTML('beforebegin', avatarHtml);
@@ -100,7 +95,6 @@ async function loadContactAvatar() {
   }
 }
 
-// Carrega o avatar quando a página carregar
 loadContactAvatar();
 
 entrada.addEventListener('input', ajustarAltura);

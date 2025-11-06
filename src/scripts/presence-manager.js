@@ -139,7 +139,6 @@
   }
 
   handleMessage(data) {
-    // Se já está redirecionando, ignora tudo
     if (window.__redirectingToLogin) {
       return;
     }
@@ -157,10 +156,8 @@
         errorText.includes('token');
       
       if (hasInvalidToken && !window.__redirectingToLogin) {
-        // Marca que está redirecionando
         window.__redirectingToLogin = true;
         
-        // Usa notificação toast ao invés de alert
         if (typeof showError === 'function') {
           showError('Sua sessão expirou. Redirecionando para o login...');
         }

@@ -130,7 +130,6 @@ async function carregarPostsDoUsuario() {
     emptyState.style.display = 'none';
     postsCount.textContent = `${posts.length} ${posts.length === 1 ? 'post' : 'posts'}`;
 
-    // Ordena posts do mais recente para o mais antigo
     posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     posts.forEach(post => {
@@ -215,13 +214,11 @@ function criarCardPost(post) {
 }
 
 function editarPost(postId) {
-  // Fecha modal de visualização se estiver aberto
   const viewModal = document.getElementById('viewPostModal');
   if (viewModal) {
     viewModal.classList.remove('active');
   }
   
-  // Busca o post e abre modal de edição
   buscarPost(postId).then(post => {
     if (post) {
       abrirModalEdicao(post);
@@ -236,7 +233,6 @@ function abrirModalEdicao(post) {
   const editModal = document.getElementById('editPostModal');
   const editForm = document.getElementById('editPostForm');
   
-  // Armazena o postId no form
   editForm.dataset.postId = post.postId;
   editForm.dataset.currentImage = post.urlImagePost || '';
   
@@ -257,7 +253,6 @@ async function atualizarPost(postId, postData) {
     const data = await response.json();
     
     if (!response.ok) {
-      // Verifica se é o erro específico de "no fields to update"
       if (data.message && data.message.includes('no fields to update')) {
         return { noChanges: true };
       }
@@ -294,7 +289,6 @@ async function excluirPost(postId) {
 
     showSuccess('Post excluído com sucesso!');
     
-    // Fecha modais
     const viewModal = document.getElementById('viewPostModal');
     const deleteModal = document.getElementById('deleteConfirmModal');
     
@@ -372,9 +366,7 @@ function exibirPostDetalhado(post) {
   modal.classList.add('active');
 }
 
-// Event listeners
 document.addEventListener('click', async (e) => {
-  // Botão "Ler mais"
   if (e.target.classList.contains('btn-view-post')) {
     const postId = e.target.dataset.postId;
     const post = await buscarPost(postId);
@@ -383,7 +375,6 @@ document.addEventListener('click', async (e) => {
     }
   }
 
-  // Botão editar (mini e no modal)
   if (e.target.closest('.btn-action-mini.edit') || e.target.closest('.btn-edit')) {
     e.stopPropagation();
     const button = e.target.closest('.btn-action-mini.edit') || e.target.closest('.btn-edit');
@@ -393,7 +384,6 @@ document.addEventListener('click', async (e) => {
     }
   }
 
-  // Botão excluir (mini e no modal)
   if (e.target.closest('.btn-action-mini.delete') || 
       (e.target.closest('.btn-delete') && !e.target.closest('.btn-delete-confirm'))) {
     e.stopPropagation();
@@ -404,7 +394,6 @@ document.addEventListener('click', async (e) => {
     }
   }
 
-  // Fechar modal
   if (e.target.classList.contains('close')) {
     document.getElementById('viewPostModal').classList.remove('active');
     document.getElementById('editPostModal').classList.remove('active');
@@ -414,7 +403,6 @@ document.addEventListener('click', async (e) => {
   }
 });
 
-// Botões do modal de confirmação
 document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
   document.getElementById('deleteConfirmModal').classList.remove('active');
   postToDelete = null;
@@ -435,13 +423,11 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async () =
   }
 });
 
-// Botões do modal de edição
 document.getElementById('cancelEditBtn').addEventListener('click', () => {
   document.getElementById('editPostModal').classList.remove('active');
   document.getElementById('editPostForm').reset();
 });
 
-// Submeter edição de post
 document.getElementById('editPostForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
@@ -463,7 +449,6 @@ document.getElementById('editPostForm').addEventListener('submit', async (e) => 
       content
     };
     
-    // Se há nova imagem, converte para base64
     if (imageFile) {
       const reader = new FileReader();
       const base64Image = await new Promise((resolve, reject) => {
@@ -473,7 +458,6 @@ document.getElementById('editPostForm').addEventListener('submit', async (e) => 
       });
       postData.urlImagePost = base64Image;
     } else if (currentImage) {
-      // Mantém a imagem atual
       postData.urlImagePost = currentImage;
     }
     
@@ -483,15 +467,13 @@ document.getElementById('editPostForm').addEventListener('submit', async (e) => 
       showInfo('Nenhuma alteração foi feita no post');
     } else {
       showSuccess('Post atualizado com sucesso!');
-      await carregarPostsDoUsuario(); // Recarrega a lista
+      await carregarPostsDoUsuario();
     }
     
-    // Fecha o modal sempre após a operação
     document.getElementById('editPostModal').classList.remove('active');
     editForm.reset();
   } catch (error) {
     showError('Erro ao atualizar post');
-    // Fecha o modal mesmo em caso de erro
     document.getElementById('editPostModal').classList.remove('active');
     editForm.reset();
   } finally {
@@ -500,7 +482,6 @@ document.getElementById('editPostForm').addEventListener('submit', async (e) => 
   }
 });
 
-// Fechar modal clicando fora
 window.addEventListener('click', (e) => {
   const viewModal = document.getElementById('viewPostModal');
   const editModal = document.getElementById('editPostModal');

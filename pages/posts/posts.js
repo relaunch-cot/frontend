@@ -24,7 +24,8 @@ function parseJwt(token) {
 
 const decodedToken = parseJwt(token.replace('Bearer ', ''));
 const userId = decodedToken?.userId;
-const userName = decodedToken?.name;
+const userName = decodedToken?.userName;
+const userEmail = decodedToken?.userEmail;
 
 async function fetchAllPosts() {
     try {
@@ -170,12 +171,10 @@ function createPostCard(post) {
 
     const isAuthor = post.authorId === userId;
 
-    // Extrai dados de likes do post (já vêm no GET)
     const likesData = post.likes || {};
     const likesCount = likesData.likesCount || 0;
     const userLiked = likesData.likes?.some(like => like.userId === userId) || false;
 
-    // Extrai dados de comentários do post (já vêm no GET)
     const commentsData = post.comments || {};
     const commentsCount = commentsData.commentsCount || 0;
 
@@ -229,6 +228,16 @@ function createPostCard(post) {
                         Excluir
                     </button>
                 ` : ''}
+            </div>
+        </div>
+
+        <div class="comments-section" style="display: none;" data-post-id="${post.postId}">
+            <div class="comments-list"></div>
+            <div class="comment-form">
+                <div class="comment-input-wrapper">
+                    <div class="user-avatar-small">${(userName && userName.trim()) ? userName.charAt(0).toUpperCase() : 'U'}</div>
+                    <input type="text" class="comment-input" placeholder="Adicione um comentário..." data-post-id="${post.postId}">
+                </div>
             </div>
         </div>
     `;
@@ -405,7 +414,6 @@ createForm.addEventListener('submit', async (e) => {
         urlImagePost: imageUrl
     };
 
-    // Se não tem imagem nova, precisamos buscar a existente para modo de edição
     if (!imageUrl && editingPostId) {
         const existingPost = await fetchPost(editingPostId);
         if (existingPost && existingPost.urlImagePost) {
@@ -413,7 +421,6 @@ createForm.addEventListener('submit', async (e) => {
         }
     }
 
-    // Adiciona o tipo apenas na criação
     if (!editingPostId) {
         postData.type = document.getElementById('postType').value;
     }
@@ -422,7 +429,6 @@ createForm.addEventListener('submit', async (e) => {
         if (editingPostId) {
             const result = await updatePost(editingPostId, postData);
             
-            // Verifica se não houve alterações
             if (result.noChanges) {
                 showInfo('Nenhuma alteração foi feita no post.');
                 createModal.classList.remove('active');
@@ -470,12 +476,11 @@ document.addEventListener('click', async (e) => {
         deleteConfirmModal.classList.add('active');
     }
 
-    // Like button
     if (e.target.closest('.btn-like')) {
         e.stopPropagation();
         const btn = e.target.closest('.btn-like');
         const postId = btn.dataset.postId;
-        const currentlyLiked = btn.classList.contains('liked'); // Verifica estado atual
+        const currentlyLiked = btn.classList.contains('liked'); 
         
         btn.disabled = true;
         
@@ -496,12 +501,33 @@ document.addEventListener('click', async (e) => {
         }
     }
 
-    // Comment button
     if (e.target.closest('.btn-comment')) {
         e.stopPropagation();
         const btn = e.target.closest('.btn-comment');
         const postId = btn.dataset.postId;
-        openCommentsModal(postId);
+        toggleComments(postId);
+    }
+
+    if (e.target.classList.contains('comment-input')) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const input = e.target;
+            const postId = input.dataset.postId;
+            const content = input.value.trim();
+            
+            if (content) {
+                handleAddComment(postId, input);
+            }
+        }
+    }
+
+    if (e.target.classList.contains('delete-comment-btn')) {
+        const commentId = e.target.dataset.commentId;
+        const postId = e.target.dataset.postId;
+        
+        if (confirm('Tem certeza que deseja excluir este comentário?')) {
+            handleDeleteComment(postId, commentId);
+        }
     }
 });
 
@@ -548,11 +574,9 @@ async function checkEditParameter() {
     }
 }
 
-// ============== LIKES ==============
-
 async function toggleLike(postId, currentlyLiked) {
     try {
-        const liked = !currentlyLiked; // Inverte o estado atual
+        const liked = !currentlyLiked; 
         const response = await fetch(`${BASE_URL}/v1/post/like/${postId}?liked=${liked}`, {
             method: 'PATCH',
             headers: {
@@ -566,7 +590,6 @@ async function toggleLike(postId, currentlyLiked) {
 
         const data = await response.json();
         
-        // Valida se likesFromPost está vazio (sem likes)
         const likesFromPost = data.likesFromPost || {};
         const likesCount = likesFromPost.likesCount !== undefined ? likesFromPost.likesCount : 0;
         const likes = likesFromPost.likes || [];
@@ -582,12 +605,62 @@ async function toggleLike(postId, currentlyLiked) {
     }
 }
 
-// ============== COMENTÁRIOS ==============
+async function toggleComments(postId) {
+    const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+    const commentsSection = card.querySelector('.comments-section');
+    const commentsList = commentsSection.querySelector('.comments-list');
+    
+    if (commentsSection.style.display === 'none') {
+        commentsSection.style.display = 'block';
+        
+        commentsList.innerHTML = '<div class="loading-comments">Carregando comentários...</div>';
+        
+        const post = await fetchPost(postId);
+        const commentsData = post?.comments || {};
+        const comments = commentsData.comments || [];
+        
+        renderComments(commentsList, comments, postId);
+    } else {
+        commentsSection.style.display = 'none';
+    }
+}
 
-let currentPostIdForComments = null;
-const commentsModal = document.getElementById('commentsModal');
-const commentInput = document.getElementById('commentInput');
-const submitCommentBtn = document.getElementById('submitCommentBtn');
+function renderComments(commentsList, comments, postId) {
+    if (comments.length === 0) {
+        commentsList.innerHTML = `
+            <div class="empty-comments">
+                <p>Nenhum comentário ainda</p>
+                <small>Seja o primeiro a comentar!</small>
+            </div>
+        `;
+        return;
+    }
+    
+    commentsList.innerHTML = comments.map(comment => {
+        const isOwner = comment.userId === userId;
+        const avatar = createAvatar(comment.userName || 'Usuário', null, 'small');
+        
+        return `
+            <div class="comment-item" data-comment-id="${comment.commentId}">
+                <div class="comment-avatar">
+                    ${avatar}
+                </div>
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <span class="comment-author">${comment.userName || 'Usuário'}</span>
+                        <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
+                    </div>
+                    <p class="comment-text">${escapeHtml(comment.content)}</p>
+                    ${isOwner ? `
+                        <button class="comment-action-btn delete-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
+                            Excluir
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
 async function addComment(postId, content) {
     try {
@@ -606,7 +679,6 @@ async function addComment(postId, content) {
 
         const data = await response.json();
         
-        // Valida se commentsFromPost está vazio (sem comentários)
         const commentsFromPost = data.data?.commentsFromPost || {};
         const comments = commentsFromPost.comments || [];
         
@@ -632,7 +704,6 @@ async function deleteComment(postId, commentId) {
 
         const data = await response.json();
         
-        // Valida se commentsFromPost está vazio (sem comentários)
         const commentsFromPost = data.commentsFromPost || {};
         const comments = commentsFromPost.comments || [];
         
@@ -651,53 +722,11 @@ async function openCommentsModal(postId) {
     const commentsList = document.getElementById('commentsList');
     commentsList.innerHTML = '<div class="loading-comments">Carregando comentários...</div>';
     
-    // Busca o post atualizado para pegar os comentários
     const post = await fetchPost(postId);
     const commentsData = post?.comments || {};
     const comments = commentsData.comments || [];
     
     renderComments(comments);
-}
-
-function renderComments(comments) {
-    const commentsList = document.getElementById('commentsList');
-    
-    if (comments.length === 0) {
-        commentsList.innerHTML = `
-            <div class="empty-comments">
-                <p>Nenhum comentário ainda</p>
-                <small>Seja o primeiro a comentar!</small>
-            </div>
-        `;
-        return;
-    }
-    
-    commentsList.innerHTML = comments.map(comment => {
-        const isOwner = comment.userId === userId;
-        const avatar = createAvatar(comment.userName || 'Usuário', null, 'medium');
-        
-        return `
-            <div class="comment-item" data-comment-id="${comment.commentId}">
-                <div class="comment-avatar">
-                    ${avatar}
-                </div>
-                <div class="comment-content">
-                    <div class="comment-header">
-                        <span class="comment-author">${comment.userName || 'Usuário'}</span>
-                        <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
-                    </div>
-                    <p class="comment-text">${escapeHtml(comment.content)}</p>
-                    ${isOwner ? `
-                        <div class="comment-actions">
-                            <button class="comment-action-btn delete-comment-btn" data-comment-id="${comment.commentId}">
-                                Excluir
-                            </button>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
 }
 
 function escapeHtml(text) {
@@ -731,70 +760,55 @@ function formatRelativeTime(timestamp) {
     return dateCorrigida.toLocaleDateString('pt-BR');
 }
 
-// Event listener para enviar comentário
-submitCommentBtn.addEventListener('click', async () => {
-    const content = commentInput.value.trim();
+async function handleAddComment(postId, inputElement) {
+    const content = inputElement.value.trim();
     
-    if (!content) {
-        showError('Digite um comentário');
-        return;
-    }
+    if (!content) return;
     
-    if (!currentPostIdForComments) return;
-    
-    submitCommentBtn.disabled = true;
-    submitCommentBtn.textContent = 'Enviando...';
+    inputElement.disabled = true;
+    const originalPlaceholder = inputElement.placeholder;
+    inputElement.placeholder = 'Enviando...';
     
     try {
-        const comments = await addComment(currentPostIdForComments, content);
-        commentInput.value = '';
+        const comments = await addComment(postId, content);
+        inputElement.value = '';
         
-        renderComments(comments);
+        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        const commentsList = card.querySelector('.comments-list');
+        renderComments(commentsList, comments, postId);
         
-        // Atualiza contagem no card do post
-        await renderPosts();
+        const commentBtn = card.querySelector('.btn-comment .interaction-count');
+        commentBtn.textContent = comments.length;
         
         showSuccess('Comentário adicionado!');
     } catch (error) {
         // Erro já tratado na função addComment
     } finally {
-        submitCommentBtn.disabled = false;
-        submitCommentBtn.textContent = 'Enviar';
+        inputElement.disabled = false;
+        inputElement.placeholder = originalPlaceholder;
     }
-});
+}
 
-// Event listener para excluir comentário
-document.getElementById('commentsList').addEventListener('click', async (e) => {
-    if (e.target.classList.contains('delete-comment-btn')) {
-        const commentId = e.target.dataset.commentId;
+async function handleDeleteComment(postId, commentId) {
+    try {
+        const comments = await deleteComment(postId, commentId);
         
-        if (!currentPostIdForComments) return;
+        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        const commentsList = card.querySelector('.comments-list');
+        renderComments(commentsList, comments, postId);
         
-        if (confirm('Tem certeza que deseja excluir este comentário?')) {
-            try {
-                const comments = await deleteComment(currentPostIdForComments, commentId);
-                renderComments(comments);
-                await renderPosts();
-            } catch (error) {
-                // Erro já tratado na função deleteComment
-            }
-        }
+        const commentBtn = card.querySelector('.btn-comment .interaction-count');
+        commentBtn.textContent = comments.length;
+    } catch (error) {
+        // Erro já tratado na função deleteComment
     }
-});
+}
 
-// Fechar modal de comentários
-const closeCommentsBtn = commentsModal.querySelector('.close-comments');
-closeCommentsBtn.addEventListener('click', () => {
-    commentsModal.classList.remove('active');
-    currentPostIdForComments = null;
-    commentInput.value = '';
-});
-
-commentsModal.addEventListener('click', (e) => {
-    if (e.target === commentsModal) {
-        commentsModal.classList.remove('active');
-        currentPostIdForComments = null;
-        commentInput.value = '';
+document.addEventListener('keypress', (e) => {
+    if (e.target.classList.contains('comment-input') && e.key === 'Enter') {
+        e.preventDefault();
+        const postId = e.target.dataset.postId;
+        handleAddComment(postId, e.target);
     }
 });
 

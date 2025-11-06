@@ -132,7 +132,6 @@ async function carregarChats() {
 
       const isOnline = window.presenceManager && window.presenceManager.isUserOnline(outroUserId);
 
-      // Cria o avatar usando o sistema de avatar reutilizável
       let avatarHtml;
       if (urlImagePerfil && urlImagePerfil.trim() !== '') {
         avatarHtml = `

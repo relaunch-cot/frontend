@@ -18,12 +18,10 @@ function updateHeaderProfile(userData) {
         return;
     }
     
-    // Atualiza o avatar usando o sistema de avatar reutilizável
     const avatarContainer = document.getElementById('userAvatar');
     if (avatarContainer && typeof window.updateAvatar === 'function') {
         window.updateAvatar(avatarContainer, userData.name || 'Usuário', userData.urlImagePerfil);
     } else if (avatarContainer) {
-        // Fallback se avatar-utils.js não estiver carregado
         if (userData.urlImagePerfil && userData.urlImagePerfil.trim() !== '') {
             avatarContainer.innerHTML = `
                 <img src="${userData.urlImagePerfil}" 
@@ -66,11 +64,11 @@ async function loadUserProfile() {
     }
     
     try {
-        const userData = parseJwt(token);
+        const decodedToken = parseJwt(token.replace('Bearer ', ''));
         
-        if (userData && userData.userId) {
+        if (decodedToken && decodedToken.userId) {
             const apiUrl = window.ENV_CONFIG?.URL_BACKEND || 'http://localhost:8080';
-            const url = `${apiUrl}/v1/user/${userData.userId}`;
+            const url = `${apiUrl}/v1/user/${decodedToken.userId}`;
             
             const response = await fetch(url, {
                 headers: {
@@ -81,12 +79,23 @@ async function loadUserProfile() {
             if (response.ok) {
                 const data = await response.json();
                 
-                const user = data.user;
+                const user = {
+                    ...data.user,
+                    name: decodedToken.userName || data.user.name,
+                    email: decodedToken.userEmail || data.user.email
+                };
                 updateHeaderProfile(user);
                 
                 return user;
             } else {
-                return null;
+                const userData = {
+                    userId: decodedToken.userId,
+                    name: decodedToken.userName || 'Usuário',
+                    email: decodedToken.userEmail || '',
+                    urlImagePerfil: null
+                };
+                updateHeaderProfile(userData);
+                return userData;
             }
         } else {
             return null;
