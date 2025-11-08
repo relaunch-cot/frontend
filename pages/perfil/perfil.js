@@ -208,6 +208,17 @@ function formatRelativeTime(timestamp) {
     return dateCorrigida.toLocaleDateString('pt-BR');
 }
 
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 async function carregarPostsDoUsuario() {
   const container = document.getElementById('userPostsContainer');
   const emptyState = document.getElementById('emptyPostsState');
@@ -390,7 +401,7 @@ async function renderComments(postId) {
   }, 150);
 }
 
-function renderComment(comment, postId, depth = 0) {
+function renderComment(comment, postId, depth = 0, parentUserName = null) {
   const isOwner = comment.userId === currentUserId;
   const avatar = createAvatar(comment.userName || 'Usuário', null, 'small');
   
@@ -400,10 +411,15 @@ function renderComment(comment, postId, depth = 0) {
   const repliesCount = comment.replies?.commentsCount || 0;
   const replies = comment.replies?.comments || [];
   
-  const marginLeft = depth > 0 ? `style="margin-left: ${depth * 40}px;"` : '';
+  // Respostas sempre terão depth = 1, não importa o nível
+  const actualDepth = depth > 0 ? 1 : 0;
+  const marginLeft = actualDepth > 0 ? `style="margin-left: ${actualDepth * 40}px;"` : '';
   
   // ID único para o container de respostas
   const repliesContainerId = `replies-${comment.commentId}`;
+  
+  // Se for resposta a uma resposta (tem parentUserName), mostra o indicativo
+  const replyIndicator = parentUserName ? `<span class="replying-to">@${parentUserName}</span> ` : '';
   
   let html = `
     <div class="comment-item" data-comment-id="${comment.commentId}" ${marginLeft}>
@@ -416,7 +432,7 @@ function renderComment(comment, postId, depth = 0) {
           <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
         </div>
         <div class="comment-text-wrapper">
-          <p class="comment-text">${comment.content}</p>
+          <p class="comment-text">${replyIndicator}${escapeHtml(comment.content)}</p>
           <button class="comment-like-btn ${userLiked ? 'liked' : ''}" data-comment-id="${comment.commentId}" data-post-id="${postId}">
             <svg class="comment-like-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="14" height="14">
               <path fill="currentColor" d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/>
@@ -450,10 +466,10 @@ function renderComment(comment, postId, depth = 0) {
     </div>
   `;
   
-  // Adiciona botão de toggle e container de respostas se houver respostas
-  if (repliesCount > 0) {
+  // Se for comentário principal (depth = 0), adiciona botão de toggle para respostas
+  if (repliesCount > 0 && depth === 0) {
     html += `
-      <div class="replies-toggle-container" style="margin-left: ${(depth + 1) * 40}px;">
+      <div class="replies-toggle-container" style="margin-left: ${(actualDepth + 1) * 40}px;">
         <button class="btn-toggle-replies" data-replies-id="${repliesContainerId}">
           <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="12" height="12">
             <path fill="currentColor" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/>
@@ -462,8 +478,8 @@ function renderComment(comment, postId, depth = 0) {
         </button>
       </div>
       <div class="replies-container" id="${repliesContainerId}" style="display: none;">
-        ${replies.map(reply => renderComment(reply, postId, depth + 1)).join('')}
-        <div class="hide-replies-container" style="margin-left: ${(depth + 1) * 40}px;">
+        ${replies.map(reply => renderComment(reply, postId, actualDepth + 1, comment.userName)).join('')}
+        <div class="hide-replies-container" style="margin-left: ${(actualDepth + 1) * 40}px;">
           <button class="btn-hide-replies" data-replies-id="${repliesContainerId}">
             <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="12" height="12">
               <path fill="currentColor" d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z"/>
@@ -473,6 +489,10 @@ function renderComment(comment, postId, depth = 0) {
         </div>
       </div>
     `;
+  }
+  // Se for resposta (depth > 0) e tiver sub-respostas, renderiza diretamente sem toggle
+  else if (repliesCount > 0 && depth > 0) {
+    html += replies.map(reply => renderComment(reply, postId, actualDepth, comment.userName)).join('');
   }
   
   return html;

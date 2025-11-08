@@ -655,6 +655,17 @@ main {
     transform: none;
 }
 
+/* Estilo para indicativo de resposta */
+.replying-to {
+    color: #0095f6;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.replying-to:hover {
+    color: #00376b;
+}
 
 
 /* Responsivo */

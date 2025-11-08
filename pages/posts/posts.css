@@ -944,6 +944,17 @@ footer > div > select:hover {
     flex: 1;
 }
 
+.replying-to {
+    color: #0095f6;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.replying-to:hover {
+    color: #00376b;
+}
+
 .comment-form {
     display: flex;
     align-items: center;
