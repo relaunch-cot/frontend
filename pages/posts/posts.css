@@ -1080,3 +1080,46 @@ footer > div > select:hover {
     color: #8e8e8e;
     font-size: 0.8rem;
 }
+
+.comment-like-count {
+    font-size: 0.75rem;
+    margin-left: 0.25rem;
+    color: inherit;
+}
+
+.reply-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f0f8ff;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #262626;
+}
+
+.reply-indicator strong {
+    color: #46B1D5;
+}
+
+.cancel-reply-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #8e8e8e;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.cancel-reply-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #262626;
+}

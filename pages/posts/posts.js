@@ -377,7 +377,7 @@ const closeButtons = document.querySelectorAll('.close');
 const createForm = document.getElementById('createPostForm');
 
 let postToDelete = null;
-let commentToDelete = { postId: null, commentId: null };
+let commentToDelete = { postId: null, commentId: null, isReply: false };
 
 createBtn.addEventListener('click', () => {
     resetCreateModal();
@@ -427,9 +427,9 @@ confirmDeleteCommentBtn.addEventListener('click', async () => {
     confirmDeleteCommentBtn.textContent = 'Excluindo...';
     
     try {
-        await handleDeleteComment(commentToDelete.postId, commentToDelete.commentId);
+        await handleDeleteComment(commentToDelete.postId, commentToDelete.commentId, commentToDelete.isReply);
         deleteCommentModal.classList.remove('active');
-        commentToDelete = { postId: null, commentId: null };
+        commentToDelete = { postId: null, commentId: null, isReply: false };
     } catch (error) {
         // Erro já tratado na função handleDeleteComment
     } finally {
@@ -655,31 +655,78 @@ document.addEventListener('click', async (e) => {
     if (e.target.classList.contains('delete-comment-btn')) {
         const commentId = e.target.dataset.commentId;
         const postId = e.target.dataset.postId;
+        const isReply = e.target.dataset.isReply === 'true';
         
         // Fecha o menu
         document.querySelectorAll('.comment-menu-dropdown').forEach(menu => {
             menu.style.display = 'none';
         });
         
-        commentToDelete = { postId, commentId };
+        commentToDelete = { postId, commentId, isReply };
         deleteCommentModal.classList.add('active');
     }
 
-    // Like comment (placeholder - funcionalidade a ser implementada)
+    // Like comment
     if (e.target.closest('.comment-like-btn')) {
         e.stopPropagation();
         const btn = e.target.closest('.comment-like-btn');
-        // TODO: Implementar lógica de curtir comentário
-        console.log('Curtir comentário:', btn.dataset.commentId);
-        btn.classList.toggle('liked');
+        const commentId = btn.dataset.commentId;
+        const postId = btn.dataset.postId;
+        
+        toggleCommentLike(postId, commentId).then(() => {
+            // Recarrega os comentários para atualizar a contagem
+            const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+            const commentsList = card.querySelector('.comments-list');
+            
+            fetchCommentsFromPost(postId).then(commentsData => {
+                const comments = commentsData.comments || [];
+                renderComments(commentsList, comments, postId);
+            });
+        }).catch(error => {
+            console.error('Erro ao curtir comentário:', error);
+        });
     }
 
-    // Reply to comment (placeholder - funcionalidade a ser implementada)
+    // Reply to comment
     if (e.target.classList.contains('reply-comment-btn')) {
         e.stopPropagation();
         const btn = e.target;
-        // TODO: Implementar lógica de responder comentário
-        console.log('Responder comentário:', btn.dataset.commentId);
+        const commentId = btn.dataset.commentId;
+        const postId = btn.dataset.postId;
+        
+        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        const commentInput = card.querySelector('.comment-input');
+        
+        // Marca que está respondendo um comentário
+        commentInput.dataset.replyTo = commentId;
+        commentInput.placeholder = 'Adicione uma resposta...';
+        commentInput.focus();
+        
+        // Adiciona indicador visual de resposta
+        const commentItem = btn.closest('.comment-item');
+        const authorName = commentItem.querySelector('.comment-author').textContent;
+        
+        // Remove indicador anterior se existir
+        const existingIndicator = card.querySelector('.reply-indicator');
+        if (existingIndicator) existingIndicator.remove();
+        
+        // Adiciona novo indicador
+        const replyIndicator = document.createElement('div');
+        replyIndicator.className = 'reply-indicator';
+        replyIndicator.innerHTML = `
+            Respondendo para <strong>${authorName}</strong>
+            <button class="cancel-reply-btn">×</button>
+        `;
+        
+        const commentForm = card.querySelector('.comment-form');
+        commentForm.insertBefore(replyIndicator, commentForm.firstChild);
+        
+        // Handler para cancelar resposta
+        replyIndicator.querySelector('.cancel-reply-btn').addEventListener('click', () => {
+            delete commentInput.dataset.replyTo;
+            commentInput.placeholder = 'Adicione um comentário...';
+            replyIndicator.remove();
+        });
     }
 });
 
@@ -754,6 +801,26 @@ async function toggleLike(postId, currentlyLiked) {
     }
 }
 
+async function toggleCommentLike(postId, commentId) {
+    try {
+        const response = await fetch(`${BASE_URL}/v1/post/like/${postId}?parentCommentId=${commentId}`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao processar like no comentário');
+        }
+
+        return true;
+    } catch (error) {
+        showError('Erro ao processar like no comentário');
+        throw error;
+    }
+}
+
 async function toggleComments(postId) {
     const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
     const commentsSection = card.querySelector('.comments-section');
@@ -784,65 +851,87 @@ function renderComments(commentsList, comments, postId) {
         return;
     }
     
-    commentsList.innerHTML = comments.map(comment => {
-        const isOwner = comment.userId === userId;
-        const avatar = createAvatar(comment.userName || 'Usuário', null, 'small');
-        
-        return `
-            <div class="comment-item" data-comment-id="${comment.commentId}">
-                <div class="comment-avatar">
-                    ${avatar}
-                </div>
-                <div class="comment-content">
-                    <div class="comment-header">
-                        <span class="comment-author">${comment.userName || 'Usuário'}</span>
-                        <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
-                    </div>
-                    <div class="comment-text-wrapper">
-                        <p class="comment-text">${escapeHtml(comment.content)}</p>
-                        <button class="comment-like-btn like-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
-                            <svg class="comment-like-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="14" height="14">
-                                <path fill="currentColor" d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="comment-actions">
-                        <button class="comment-action-btn reply-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
-                            Responder
-                        </button>
-                        ${isOwner ? `
-                            <div class="comment-menu-container">
-                                <button class="btn-comment-menu" data-comment-id="${comment.commentId}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="12" height="12">
-                                        <path fill="currentColor" d="M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"/>
-                                    </svg>
-                                </button>
-                                <div class="comment-menu-dropdown" data-comment-id="${comment.commentId}" style="display: none;">
-                                    <button class="menu-item delete-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="14" height="14">
-                                            <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
-                                        </svg>
-                                        Excluir
-                                    </button>
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+    commentsList.innerHTML = comments.map(comment => renderComment(comment, postId, 0)).join('');
 }
 
-async function addComment(postId, content) {
+function renderComment(comment, postId, depth = 0) {
+    const isOwner = comment.userId === userId;
+    const avatar = createAvatar(comment.userName || 'Usuário', null, 'small');
+    
+    const likesCount = comment.likes?.likesCount || 0;
+    const userLiked = comment.likes?.likes?.some(like => like.userId === userId) || false;
+    
+    const repliesCount = comment.replies?.commentsCount || 0;
+    const replies = comment.replies?.comments || [];
+    
+    const marginLeft = depth > 0 ? `style="margin-left: ${depth * 40}px;"` : '';
+    
+    let html = `
+        <div class="comment-item" data-comment-id="${comment.commentId}" ${marginLeft}>
+            <div class="comment-avatar">
+                ${avatar}
+            </div>
+            <div class="comment-content">
+                <div class="comment-header">
+                    <span class="comment-author">${comment.userName || 'Usuário'}</span>
+                    <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
+                </div>
+                <div class="comment-text-wrapper">
+                    <p class="comment-text">${escapeHtml(comment.content)}</p>
+                    <button class="comment-like-btn ${userLiked ? 'liked' : ''}" data-comment-id="${comment.commentId}" data-post-id="${postId}">
+                        <svg class="comment-like-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="14" height="14">
+                            <path fill="currentColor" d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/>
+                        </svg>
+                        ${likesCount > 0 ? `<span class="comment-like-count">${likesCount}</span>` : ''}
+                    </button>
+                </div>
+                <div class="comment-actions">
+                    <button class="comment-action-btn reply-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}">
+                        Responder
+                    </button>
+                    ${isOwner ? `
+                        <div class="comment-menu-container">
+                            <button class="btn-comment-menu" data-comment-id="${comment.commentId}">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="12" height="12">
+                                    <path fill="currentColor" d="M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"/>
+                                </svg>
+                            </button>
+                            <div class="comment-menu-dropdown" data-comment-id="${comment.commentId}" style="display: none;">
+                                <button class="menu-item delete-comment-btn" data-comment-id="${comment.commentId}" data-post-id="${postId}" data-is-reply="${depth > 0}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="14" height="14">
+                                        <path fill="currentColor" d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"/>
+                                    </svg>
+                                    Excluir
+                                </button>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Renderiza as respostas recursivamente
+    if (replies.length > 0) {
+        html += replies.map(reply => renderComment(reply, postId, depth + 1)).join('');
+    }
+    
+    return html;
+}
+
+async function addComment(postId, content, parentCommentId = null) {
     try {
-        const response = await fetch(`${BASE_URL}/v1/post/comment/${postId}`, {
+        const body = parentCommentId 
+            ? { content, parentCommentId }
+            : { content };
+
+        const response = await fetch(`${BASE_URL}/v1/post/comment-or-reply/${postId}`, {
             method: 'POST',
             headers: {
                 'Authorization': token,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ content })
+            body: JSON.stringify(body)
         });
 
         if (!response.ok) {
@@ -860,17 +949,23 @@ async function addComment(postId, content) {
     }
 }
 
-async function deleteComment(postId, commentId) {
+async function deleteComment(postId, commentId, isReply = false) {
     try {
-        const response = await fetch(`${BASE_URL}/v1/post/comment/${postId}?commentId=${commentId}`, {
+        const body = isReply 
+            ? { replyId: commentId }
+            : { commentId };
+
+        const response = await fetch(`${BASE_URL}/v1/post/comment-or-reply`, {
             method: 'DELETE',
             headers: {
-                'Authorization': token
-            }
+                'Authorization': token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
         });
 
         if (!response.ok) {
-            throw new Error('Erro ao excluir comentário');
+            throw new Error('Erro ao deletar comentário');
         }
 
         // Busca comentários atualizados
@@ -935,40 +1030,58 @@ async function handleAddComment(postId, inputElement) {
     
     if (!content) return;
     
+    const parentCommentId = inputElement.dataset.replyTo || null;
+    
     inputElement.disabled = true;
     const originalPlaceholder = inputElement.placeholder;
     inputElement.placeholder = 'Enviando...';
     
     try {
-        const comments = await addComment(postId, content);
+        await addComment(postId, content, parentCommentId);
         inputElement.value = '';
         
+        // Remove indicador de resposta se existir
+        delete inputElement.dataset.replyTo;
         const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        const replyIndicator = card.querySelector('.reply-indicator');
+        if (replyIndicator) replyIndicator.remove();
+        
+        // Recarrega os comentários
         const commentsList = card.querySelector('.comments-list');
+        const commentsData = await fetchCommentsFromPost(postId);
+        const comments = commentsData.comments || [];
         renderComments(commentsList, comments, postId);
         
+        // Atualiza a contagem no botão
         const commentBtn = card.querySelector('.btn-comment .interaction-count');
-        commentBtn.textContent = comments.length;
+        commentBtn.textContent = commentsData.commentsCount || 0;
         
-        showSuccess('Comentário adicionado!');
+        showSuccess(parentCommentId ? 'Resposta adicionada!' : 'Comentário adicionado!');
     } catch (error) {
         // Erro já tratado na função addComment
     } finally {
         inputElement.disabled = false;
-        inputElement.placeholder = originalPlaceholder;
+        inputElement.placeholder = parentCommentId ? 'Adicione uma resposta...' : 'Adicione um comentário...';
     }
 }
 
-async function handleDeleteComment(postId, commentId) {
+async function handleDeleteComment(postId, commentId, isReply = false) {
     try {
-        const comments = await deleteComment(postId, commentId);
+        await deleteComment(postId, commentId, isReply);
         
+        // Recarrega os comentários
         const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
         const commentsList = card.querySelector('.comments-list');
+        
+        const commentsData = await fetchCommentsFromPost(postId);
+        const comments = commentsData.comments || [];
         renderComments(commentsList, comments, postId);
         
+        // Atualiza a contagem no botão
         const commentBtn = card.querySelector('.btn-comment .interaction-count');
-        commentBtn.textContent = comments.length;
+        commentBtn.textContent = commentsData.commentsCount || 0;
+        
+        showSuccess(isReply ? 'Resposta excluída!' : 'Comentário excluído!');
     } catch (error) {
         // Erro já tratado na função deleteComment
     }
