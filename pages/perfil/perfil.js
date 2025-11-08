@@ -188,6 +188,26 @@ function formatDate(dateString) {
     });
 }
 
+function formatRelativeTime(timestamp) {
+    const now = new Date();
+    const date = new Date(timestamp);
+
+    const dateCorrigida = new Date(date.getTime() + (3 * 60 * 60 * 1000));
+    const diff = now - dateCorrigida;
+    
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (seconds < 60) return 'agora';
+    if (minutes < 60) return `${minutes}min`;
+    if (hours < 24) return `${hours}h`;
+    if (days < 7) return `${days}d`;
+    
+    return dateCorrigida.toLocaleDateString('pt-BR');
+}
+
 async function carregarPostsDoUsuario() {
   const container = document.getElementById('userPostsContainer');
   const emptyState = document.getElementById('emptyPostsState');
@@ -393,7 +413,7 @@ function renderComment(comment, postId, depth = 0) {
       <div class="comment-content">
         <div class="comment-header">
           <span class="comment-author">${comment.userName || 'Usuário'}</span>
-          <span class="comment-time">${formatDate(comment.createdAt)}</span>
+          <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
         </div>
         <div class="comment-text-wrapper">
           <p class="comment-text">${comment.content}</p>
@@ -538,8 +558,6 @@ async function handleAddComment(postId, content, parentCommentId = null) {
 }
 
 async function handleDeleteComment(postId, commentId, isReply) {
-  if (!confirm('Tem certeza que deseja excluir este comentário?')) return;
-
   try {
     const body = isReply ? { replyId: commentId } : { commentId };
 
@@ -716,6 +734,7 @@ async function atualizarPost(postId, postData) {
 }
 
 let postToDelete = null;
+let commentToDelete = { postId: null, commentId: null, isReply: false };
 
 function confirmarExclusaoPost(postId) {
   postToDelete = postId;
@@ -865,6 +884,30 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async () =
   
   try {
     await excluirPost(postToDelete);
+  } finally {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Excluir';
+  }
+});
+
+document.getElementById('cancelDeleteCommentBtn').addEventListener('click', () => {
+  document.getElementById('deleteCommentModal').classList.remove('active');
+  commentToDelete = { postId: null, commentId: null, isReply: false };
+});
+
+document.getElementById('confirmDeleteCommentBtn').addEventListener('click', async () => {
+  if (!commentToDelete.commentId || !commentToDelete.postId) return;
+  
+  const confirmBtn = document.getElementById('confirmDeleteCommentBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Excluindo...';
+  
+  try {
+    await handleDeleteComment(commentToDelete.postId, commentToDelete.commentId, commentToDelete.isReply);
+    document.getElementById('deleteCommentModal').classList.remove('active');
+    commentToDelete = { postId: null, commentId: null, isReply: false };
+  } catch (error) {
+    console.error('Erro ao excluir comentário:', error);
   } finally {
     confirmBtn.disabled = false;
     confirmBtn.textContent = 'Excluir';
@@ -1030,7 +1073,13 @@ document.addEventListener('click', async (e) => {
     const commentId = btn.dataset.commentId;
     const isReply = btn.dataset.isReply === 'true';
     
-    await handleDeleteComment(postId, commentId, isReply);
+    // Fecha o menu
+    document.querySelectorAll('.comment-menu-dropdown').forEach(menu => {
+      menu.style.display = 'none';
+    });
+    
+    commentToDelete = { postId, commentId, isReply };
+    document.getElementById('deleteCommentModal').classList.add('active');
   }
 
   // Toggle respostas
