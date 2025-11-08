@@ -840,6 +840,7 @@ footer > div > select:hover {
     max-height: 400px;
     overflow-y: auto;
     margin-bottom: 1rem;
+    transition: opacity 0.15s ease-in-out;
 }
 
 .comment-item {

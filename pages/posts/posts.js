@@ -673,22 +673,64 @@ document.addEventListener('click', async (e) => {
         const commentId = btn.dataset.commentId;
         const postId = btn.dataset.postId;
         
-        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
-        const commentsList = card.querySelector('.comments-list');
+        // Atualiza visualmente primeiro (feedback instantâneo)
+        const isLiked = btn.classList.contains('liked');
+        const likeCountSpan = btn.querySelector('.comment-like-count');
+        let currentCount = likeCountSpan ? parseInt(likeCountSpan.textContent) : 0;
         
-        // Salva o estado das respostas abertas antes de recarregar
-        const openReplies = getOpenRepliesState(commentsList);
+        // Toggle visual imediato
+        if (isLiked) {
+            btn.classList.remove('liked');
+            currentCount--;
+            if (currentCount > 0) {
+                if (likeCountSpan) {
+                    likeCountSpan.textContent = currentCount;
+                }
+            } else {
+                if (likeCountSpan) {
+                    likeCountSpan.remove();
+                }
+            }
+        } else {
+            btn.classList.add('liked');
+            currentCount++;
+            if (likeCountSpan) {
+                likeCountSpan.textContent = currentCount;
+            } else {
+                const span = document.createElement('span');
+                span.className = 'comment-like-count';
+                span.textContent = currentCount;
+                btn.appendChild(span);
+            }
+        }
         
-        toggleCommentLike(postId, commentId).then(() => {
-            // Recarrega os comentários para atualizar a contagem
-            fetchCommentsFromPost(postId).then(commentsData => {
-                const comments = commentsData.comments || [];
-                renderComments(commentsList, comments, postId);
-                
-                // Restaura o estado das respostas abertas
-                restoreOpenRepliesState(commentsList, openReplies);
-            });
-        }).catch(error => {
+        // Envia para o backend (sem recarregar interface)
+        toggleCommentLike(postId, commentId).catch(error => {
+            // Se der erro, reverte a mudança visual
+            if (isLiked) {
+                btn.classList.add('liked');
+                currentCount++;
+            } else {
+                btn.classList.remove('liked');
+                currentCount--;
+            }
+            
+            const likeCountSpanAfter = btn.querySelector('.comment-like-count');
+            if (currentCount > 0) {
+                if (likeCountSpanAfter) {
+                    likeCountSpanAfter.textContent = currentCount;
+                } else {
+                    const span = document.createElement('span');
+                    span.className = 'comment-like-count';
+                    span.textContent = currentCount;
+                    btn.appendChild(span);
+                }
+            } else {
+                if (likeCountSpanAfter) {
+                    likeCountSpanAfter.remove();
+                }
+            }
+            
             console.error('Erro ao curtir comentário:', error);
         });
     }
@@ -878,7 +920,7 @@ async function toggleComments(postId) {
     }
 }
 
-function renderComments(commentsList, comments, postId) {
+function renderComments(commentsList, comments, postId, preserveScroll = false) {
     if (comments.length === 0) {
         commentsList.innerHTML = `
             <div class="empty-comments">
@@ -889,7 +931,23 @@ function renderComments(commentsList, comments, postId) {
         return;
     }
     
-    commentsList.innerHTML = comments.map(comment => renderComment(comment, postId, 0)).join('');
+    // Salva a posição do scroll se necessário
+    const scrollTop = preserveScroll ? commentsList.scrollTop : 0;
+    
+    // Adiciona fade out
+    commentsList.style.opacity = '0';
+    
+    setTimeout(() => {
+        commentsList.innerHTML = comments.map(comment => renderComment(comment, postId, 0)).join('');
+        
+        // Restaura scroll
+        if (preserveScroll) {
+            commentsList.scrollTop = scrollTop;
+        }
+        
+        // Fade in
+        commentsList.style.opacity = '1';
+    }, 150);
 }
 
 function getOpenRepliesState(container) {
@@ -1137,13 +1195,19 @@ async function handleAddComment(postId, inputElement) {
         const replyIndicator = card.querySelector('.reply-indicator');
         if (replyIndicator) replyIndicator.remove();
         
-        // Recarrega os comentários
+        // Recarrega os comentários com fade
         const commentsData = await fetchCommentsFromPost(postId);
         const comments = commentsData.comments || [];
-        renderComments(commentsList, comments, postId);
         
-        // Restaura o estado das respostas abertas
-        restoreOpenRepliesState(commentsList, openReplies);
+        // Usa timeout para sincronizar com o fade
+        setTimeout(() => {
+            renderComments(commentsList, comments, postId, true);
+            
+            // Restaura o estado das respostas abertas após o fade
+            setTimeout(() => {
+                restoreOpenRepliesState(commentsList, openReplies);
+            }, 200);
+        }, 50);
         
         // Atualiza a contagem no botão
         const commentBtn = card.querySelector('.btn-comment .interaction-count');
@@ -1168,13 +1232,19 @@ async function handleDeleteComment(postId, commentId, isReply = false) {
     try {
         await deleteComment(postId, commentId, isReply);
         
-        // Recarrega os comentários
+        // Recarrega os comentários com fade
         const commentsData = await fetchCommentsFromPost(postId);
         const comments = commentsData.comments || [];
-        renderComments(commentsList, comments, postId);
         
-        // Restaura o estado das respostas abertas
-        restoreOpenRepliesState(commentsList, openReplies);
+        // Usa timeout para sincronizar com o fade
+        setTimeout(() => {
+            renderComments(commentsList, comments, postId, true);
+            
+            // Restaura o estado das respostas abertas após o fade
+            setTimeout(() => {
+                restoreOpenRepliesState(commentsList, openReplies);
+            }, 200);
+        }, 50);
         
         // Atualiza a contagem no botão
         const commentBtn = card.querySelector('.btn-comment .interaction-count');
