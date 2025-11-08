@@ -673,14 +673,20 @@ document.addEventListener('click', async (e) => {
         const commentId = btn.dataset.commentId;
         const postId = btn.dataset.postId;
         
+        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        const commentsList = card.querySelector('.comments-list');
+        
+        // Salva o estado das respostas abertas antes de recarregar
+        const openReplies = getOpenRepliesState(commentsList);
+        
         toggleCommentLike(postId, commentId).then(() => {
             // Recarrega os comentários para atualizar a contagem
-            const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
-            const commentsList = card.querySelector('.comments-list');
-            
             fetchCommentsFromPost(postId).then(commentsData => {
                 const comments = commentsData.comments || [];
                 renderComments(commentsList, comments, postId);
+                
+                // Restaura o estado das respostas abertas
+                restoreOpenRepliesState(commentsList, openReplies);
             });
         }).catch(error => {
             console.error('Erro ao curtir comentário:', error);
@@ -727,6 +733,38 @@ document.addEventListener('click', async (e) => {
             commentInput.placeholder = 'Adicione um comentário...';
             replyIndicator.remove();
         });
+    }
+
+    // Toggle replies visibility
+    if (e.target.closest('.btn-toggle-replies')) {
+        e.stopPropagation();
+        const btn = e.target.closest('.btn-toggle-replies');
+        const repliesId = btn.dataset.repliesId;
+        const repliesContainer = document.getElementById(repliesId);
+        const toggleIcon = btn.querySelector('.toggle-icon');
+        
+        if (repliesContainer) {
+            repliesContainer.style.display = 'block';
+            btn.style.display = 'none';
+        }
+    }
+
+    // Hide replies
+    if (e.target.closest('.btn-hide-replies')) {
+        e.stopPropagation();
+        const btn = e.target.closest('.btn-hide-replies');
+        const repliesId = btn.dataset.repliesId;
+        const repliesContainer = document.getElementById(repliesId);
+        
+        if (repliesContainer) {
+            repliesContainer.style.display = 'none';
+            
+            // Mostra o botão de toggle novamente
+            const toggleBtn = document.querySelector(`.btn-toggle-replies[data-replies-id="${repliesId}"]`);
+            if (toggleBtn) {
+                toggleBtn.style.display = 'flex';
+            }
+        }
     }
 });
 
@@ -854,6 +892,31 @@ function renderComments(commentsList, comments, postId) {
     commentsList.innerHTML = comments.map(comment => renderComment(comment, postId, 0)).join('');
 }
 
+function getOpenRepliesState(container) {
+    const openReplies = [];
+    const repliesContainers = container.querySelectorAll('.replies-container');
+    
+    repliesContainers.forEach(repliesContainer => {
+        if (repliesContainer.style.display === 'block') {
+            openReplies.push(repliesContainer.id);
+        }
+    });
+    
+    return openReplies;
+}
+
+function restoreOpenRepliesState(container, openRepliesIds) {
+    openRepliesIds.forEach(repliesId => {
+        const repliesContainer = container.querySelector(`#${repliesId}`);
+        const toggleBtn = container.querySelector(`.btn-toggle-replies[data-replies-id="${repliesId}"]`);
+        
+        if (repliesContainer && toggleBtn) {
+            repliesContainer.style.display = 'block';
+            toggleBtn.style.display = 'none';
+        }
+    });
+}
+
 function renderComment(comment, postId, depth = 0) {
     const isOwner = comment.userId === userId;
     const avatar = createAvatar(comment.userName || 'Usuário', null, 'small');
@@ -865,6 +928,9 @@ function renderComment(comment, postId, depth = 0) {
     const replies = comment.replies?.comments || [];
     
     const marginLeft = depth > 0 ? `style="margin-left: ${depth * 40}px;"` : '';
+    
+    // ID único para o container de respostas
+    const repliesContainerId = `replies-${comment.commentId}`;
     
     let html = `
         <div class="comment-item" data-comment-id="${comment.commentId}" ${marginLeft}>
@@ -911,9 +977,29 @@ function renderComment(comment, postId, depth = 0) {
         </div>
     `;
     
-    // Renderiza as respostas recursivamente
-    if (replies.length > 0) {
-        html += replies.map(reply => renderComment(reply, postId, depth + 1)).join('');
+    // Adiciona botão de toggle e container de respostas se houver respostas
+    if (repliesCount > 0) {
+        html += `
+            <div class="replies-toggle-container" style="margin-left: ${(depth + 1) * 40}px;">
+                <button class="btn-toggle-replies" data-replies-id="${repliesContainerId}">
+                    <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="12" height="12">
+                        <path fill="currentColor" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/>
+                    </svg>
+                    Ver respostas (${repliesCount})
+                </button>
+            </div>
+            <div class="replies-container" id="${repliesContainerId}" style="display: none;">
+                ${replies.map(reply => renderComment(reply, postId, depth + 1)).join('')}
+                <div class="hide-replies-container" style="margin-left: ${(depth + 1) * 40}px;">
+                    <button class="btn-hide-replies" data-replies-id="${repliesContainerId}">
+                        <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="12" height="12">
+                            <path fill="currentColor" d="M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z"/>
+                        </svg>
+                        Ocultar respostas
+                    </button>
+                </div>
+            </div>
+        `;
     }
     
     return html;
@@ -1036,21 +1122,28 @@ async function handleAddComment(postId, inputElement) {
     const originalPlaceholder = inputElement.placeholder;
     inputElement.placeholder = 'Enviando...';
     
+    const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+    const commentsList = card.querySelector('.comments-list');
+    
+    // Salva o estado das respostas abertas antes de recarregar
+    const openReplies = getOpenRepliesState(commentsList);
+    
     try {
         await addComment(postId, content, parentCommentId);
         inputElement.value = '';
         
         // Remove indicador de resposta se existir
         delete inputElement.dataset.replyTo;
-        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
         const replyIndicator = card.querySelector('.reply-indicator');
         if (replyIndicator) replyIndicator.remove();
         
         // Recarrega os comentários
-        const commentsList = card.querySelector('.comments-list');
         const commentsData = await fetchCommentsFromPost(postId);
         const comments = commentsData.comments || [];
         renderComments(commentsList, comments, postId);
+        
+        // Restaura o estado das respostas abertas
+        restoreOpenRepliesState(commentsList, openReplies);
         
         // Atualiza a contagem no botão
         const commentBtn = card.querySelector('.btn-comment .interaction-count');
@@ -1066,16 +1159,22 @@ async function handleAddComment(postId, inputElement) {
 }
 
 async function handleDeleteComment(postId, commentId, isReply = false) {
+    const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+    const commentsList = card.querySelector('.comments-list');
+    
+    // Salva o estado das respostas abertas antes de recarregar
+    const openReplies = getOpenRepliesState(commentsList);
+    
     try {
         await deleteComment(postId, commentId, isReply);
         
         // Recarrega os comentários
-        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
-        const commentsList = card.querySelector('.comments-list');
-        
         const commentsData = await fetchCommentsFromPost(postId);
         const comments = commentsData.comments || [];
         renderComments(commentsList, comments, postId);
+        
+        // Restaura o estado das respostas abertas
+        restoreOpenRepliesState(commentsList, openReplies);
         
         // Atualiza a contagem no botão
         const commentBtn = card.querySelector('.btn-comment .interaction-count');
