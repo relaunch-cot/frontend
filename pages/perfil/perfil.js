@@ -223,11 +223,13 @@ async function carregarPostsDoUsuario() {
   const container = document.getElementById('userPostsContainer');
   const emptyState = document.getElementById('emptyPostsState');
   const postsCount = document.querySelector('.posts-count');
+  const postsTitle = document.querySelector('.posts-header h2');
 
   try {
     container.innerHTML = '<div class="loading">Carregando posts...</div>';
     
-    const response = await fetch(`${BASE_URL}/v1/post/user`, {
+    // Usa o endpoint com userId específico ao invés de /user
+    const response = await fetch(`${BASE_URL}/v1/post/user/${userId}`, {
       method: 'GET',
       headers: {
         'Authorization': token
@@ -242,6 +244,11 @@ async function carregarPostsDoUsuario() {
     const posts = data.posts || [];
 
     container.innerHTML = '';
+
+    // Atualiza o título baseado em quem está visualizando
+    if (postsTitle) {
+      postsTitle.textContent = isOwnProfile ? 'Meus Posts' : 'Posts';
+    }
 
     if (posts.length === 0) {
       emptyState.style.display = 'block';
