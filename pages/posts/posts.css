@@ -948,11 +948,30 @@ footer > div > select:hover {
     color: #0095f6;
     font-weight: 600;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: all 0.2s;
+    text-decoration: none;
+    position: relative;
+    padding-right: 18px;
 }
 
 .replying-to:hover {
     color: #00376b;
+    text-decoration: underline;
+}
+
+.replying-to::after {
+    content: '→';
+    position: absolute;
+    right: 2px;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    transform: translateX(-5px);
+    font-size: 0.9em;
+}
+
+.replying-to:hover::after {
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .comment-form {

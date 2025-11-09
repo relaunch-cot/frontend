@@ -814,6 +814,15 @@ document.addEventListener('click', async (e) => {
             }
         }
     }
+    
+    // Redirecionar ao clicar em @nomeDoUsuario
+    if (e.target.classList.contains('replying-to')) {
+        e.stopPropagation();
+        const mentionedUserId = e.target.dataset.userId;
+        if (mentionedUserId) {
+            window.location.href = `/pages/perfil/perfil.html?userId=${mentionedUserId}`;
+        }
+    }
 });
 
 let editingPostId = null;
@@ -978,7 +987,7 @@ function restoreOpenRepliesState(container, openRepliesIds) {
     });
 }
 
-function renderComment(comment, postId, depth = 0, parentUserName = null, postAuthorId = null) {
+function renderComment(comment, postId, depth = 0, parentUserName = null, postAuthorId = null, parentUserId = null) {
     const isOwner = comment.userId === userId;
     const isPostAuthor = postAuthorId && comment.userId === postAuthorId;
     const avatar = createAvatar(comment.userName || 'Usuário', null, 'small');
@@ -996,8 +1005,10 @@ function renderComment(comment, postId, depth = 0, parentUserName = null, postAu
     // ID único para o container de respostas
     const repliesContainerId = `replies-${comment.commentId}`;
     
-    // Se for resposta a uma resposta (tem parentUserName), mostra o indicativo
-    const replyIndicator = parentUserName ? `<span class="replying-to">@${parentUserName}</span> ` : '';
+    // Se for resposta a uma resposta (tem parentUserName), mostra o indicativo clicável
+    const replyIndicator = parentUserName && parentUserId 
+        ? `<span class="replying-to" data-user-id="${parentUserId}" title="Ver perfil de ${parentUserName}">@${parentUserName}</span> ` 
+        : '';
     
     let html = `
         <div class="comment-item" data-comment-id="${comment.commentId}" ${marginLeft}>
@@ -1057,7 +1068,7 @@ function renderComment(comment, postId, depth = 0, parentUserName = null, postAu
                 </button>
             </div>
             <div class="replies-container" id="${repliesContainerId}" style="display: none;">
-                ${replies.map(reply => renderComment(reply, postId, actualDepth + 1, comment.userName, postAuthorId)).join('')}
+                ${replies.map(reply => renderComment(reply, postId, actualDepth + 1, comment.userName, postAuthorId, comment.userId)).join('')}
                 <div class="hide-replies-container" style="margin-left: ${(actualDepth + 1) * 40}px;">
                     <button class="btn-hide-replies" data-replies-id="${repliesContainerId}">
                         <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="12" height="12">
@@ -1071,7 +1082,7 @@ function renderComment(comment, postId, depth = 0, parentUserName = null, postAu
     }
     // Se for resposta (depth > 0) e tiver sub-respostas, renderiza diretamente sem toggle
     else if (repliesCount > 0 && depth > 0) {
-        html += replies.map(reply => renderComment(reply, postId, actualDepth, comment.userName, postAuthorId)).join('');
+        html += replies.map(reply => renderComment(reply, postId, actualDepth, comment.userName, postAuthorId, comment.userId)).join('');
     }
     
     return html;
