@@ -944,20 +944,13 @@ function renderComments(commentsList, comments, postId, preserveScroll = false) 
     // Salva a posição do scroll se necessário
     const scrollTop = preserveScroll ? commentsList.scrollTop : 0;
     
-    // Adiciona fade out
-    commentsList.style.opacity = '0';
+    // Renderiza diretamente sem delay
+    commentsList.innerHTML = comments.map(comment => renderComment(comment, postId, 0, null, postAuthorId)).join('');
     
-    setTimeout(() => {
-        commentsList.innerHTML = comments.map(comment => renderComment(comment, postId, 0, null, postAuthorId)).join('');
-        
-        // Restaura scroll
-        if (preserveScroll) {
-            commentsList.scrollTop = scrollTop;
-        }
-        
-        // Fade in
-        commentsList.style.opacity = '1';
-    }, 150);
+    // Restaura scroll
+    if (preserveScroll) {
+        commentsList.scrollTop = scrollTop;
+    }
 }
 
 function getOpenRepliesState(container) {

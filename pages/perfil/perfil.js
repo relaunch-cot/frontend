@@ -390,22 +390,17 @@ async function renderComments(postId) {
   const postAuthorId = card?.dataset.authorId || null;
   const commentsData = await fetchCommentsFromPost(postId);
   
-  commentsList.style.opacity = '0';
-  
-  setTimeout(() => {
-    if (commentsData && commentsData.comments && commentsData.comments.length > 0) {
-      commentsList.innerHTML = commentsData.comments.map(comment => renderComment(comment, postId, 0, null, postAuthorId)).join('');
-    } else {
-      commentsList.innerHTML = `
-        <div class="empty-comments">
-          <p>Nenhum comentário ainda</p>
-          <small>Seja o primeiro a comentar!</small>
-        </div>
-      `;
-    }
-    
-    commentsList.style.opacity = '1';
-  }, 150);
+  // Renderiza diretamente sem delay
+  if (commentsData && commentsData.comments && commentsData.comments.length > 0) {
+    commentsList.innerHTML = commentsData.comments.map(comment => renderComment(comment, postId, 0, null, postAuthorId)).join('');
+  } else {
+    commentsList.innerHTML = `
+      <div class="empty-comments">
+        <p>Nenhum comentário ainda</p>
+        <small>Seja o primeiro a comentar!</small>
+      </div>
+    `;
+  }
 }
 
 function renderComment(comment, postId, depth = 0, parentUserName = null, postAuthorId = null) {
