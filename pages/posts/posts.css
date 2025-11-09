@@ -1001,6 +1001,43 @@ footer > div > select:hover {
     color: #8e8e8e;
 }
 
+.btn-send-comment {
+    background: none;
+    border: none;
+    color: #0095f6;
+    cursor: pointer;
+    padding: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    opacity: 0.7;
+}
+
+.btn-send-comment:hover {
+    opacity: 1;
+    background: rgba(0, 149, 246, 0.1);
+    transform: scale(1.1);
+}
+
+.btn-send-comment:active {
+    transform: scale(0.95);
+}
+
+.author-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #46B1D5, #3a8eb5);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 0.375rem;
+}
+
 .comment-actions {
     display: flex;
     align-items: center;

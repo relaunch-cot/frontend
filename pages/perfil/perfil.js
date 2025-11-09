@@ -291,6 +291,7 @@ async function criarCardPost(post) {
   const card = document.createElement('div');
   card.className = 'post-card';
   card.dataset.postId = post.postId;
+  card.dataset.authorId = post.authorId;
 
   const isAuthor = post.authorId === currentUserId;
 
@@ -367,6 +368,11 @@ async function criarCardPost(post) {
         <div class="comment-input-wrapper">
           <div class="user-avatar-small">${(userName && userName.trim()) ? userName.charAt(0).toUpperCase() : 'U'}</div>
           <input type="text" class="comment-input" placeholder="Adicione um comentário..." data-post-id="${post.postId}">
+          <button class="btn-send-comment" data-post-id="${post.postId}" title="Enviar comentário">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="18" height="18">
+              <path fill="currentColor" d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -381,13 +387,14 @@ async function renderComments(postId) {
   const commentsList = card?.querySelector('.comments-list');
   if (!commentsList) return;
 
+  const postAuthorId = card?.dataset.authorId || null;
   const commentsData = await fetchCommentsFromPost(postId);
   
   commentsList.style.opacity = '0';
   
   setTimeout(() => {
     if (commentsData && commentsData.comments && commentsData.comments.length > 0) {
-      commentsList.innerHTML = commentsData.comments.map(comment => renderComment(comment, postId, 0)).join('');
+      commentsList.innerHTML = commentsData.comments.map(comment => renderComment(comment, postId, 0, null, postAuthorId)).join('');
     } else {
       commentsList.innerHTML = `
         <div class="empty-comments">
@@ -401,8 +408,9 @@ async function renderComments(postId) {
   }, 150);
 }
 
-function renderComment(comment, postId, depth = 0, parentUserName = null) {
+function renderComment(comment, postId, depth = 0, parentUserName = null, postAuthorId = null) {
   const isOwner = comment.userId === currentUserId;
+  const isPostAuthor = postAuthorId && comment.userId === postAuthorId;
   const avatar = createAvatar(comment.userName || 'Usuário', null, 'small');
   
   const likesCount = comment.likes?.likesCount || 0;
@@ -429,6 +437,7 @@ function renderComment(comment, postId, depth = 0, parentUserName = null) {
       <div class="comment-content">
         <div class="comment-header">
           <span class="comment-author">${comment.userName || 'Usuário'}</span>
+          ${isPostAuthor ? '<span class="author-badge">Autor</span>' : ''}
           <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
         </div>
         <div class="comment-text-wrapper">
@@ -478,7 +487,7 @@ function renderComment(comment, postId, depth = 0, parentUserName = null) {
         </button>
       </div>
       <div class="replies-container" id="${repliesContainerId}" style="display: none;">
-        ${replies.map(reply => renderComment(reply, postId, actualDepth + 1, comment.userName)).join('')}
+        ${replies.map(reply => renderComment(reply, postId, actualDepth + 1, comment.userName, postAuthorId)).join('')}
         <div class="hide-replies-container" style="margin-left: ${(actualDepth + 1) * 40}px;">
           <button class="btn-hide-replies" data-replies-id="${repliesContainerId}">
             <svg class="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="12" height="12">
@@ -492,7 +501,7 @@ function renderComment(comment, postId, depth = 0, parentUserName = null) {
   }
   // Se for resposta (depth > 0) e tiver sub-respostas, renderiza diretamente sem toggle
   else if (repliesCount > 0 && depth > 0) {
-    html += replies.map(reply => renderComment(reply, postId, actualDepth, comment.userName)).join('');
+    html += replies.map(reply => renderComment(reply, postId, actualDepth, comment.userName, postAuthorId)).join('');
   }
   
   return html;
@@ -1215,6 +1224,34 @@ document.addEventListener('keydown', async (e) => {
     if (!content) return;
     
     const postId = input.dataset.postId;
+    const parentCommentId = input.dataset.parentCommentId || null;
+    
+    await handleAddComment(postId, content, parentCommentId);
+    
+    input.value = '';
+    delete input.dataset.parentCommentId;
+    input.placeholder = 'Adicionar um comentário...';
+    
+    const replyIndicator = input.parentElement.querySelector('.reply-indicator');
+    if (replyIndicator) {
+      replyIndicator.style.display = 'none';
+    }
+  }
+});
+
+// Handler para botão de enviar comentário
+document.addEventListener('click', async (e) => {
+  if (e.target.closest('.btn-send-comment')) {
+    const btn = e.target.closest('.btn-send-comment');
+    const postId = btn.dataset.postId;
+    const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+    const input = card?.querySelector('.comment-input');
+    
+    if (!input) return;
+    
+    const content = input.value.trim();
+    if (!content) return;
+    
     const parentCommentId = input.dataset.parentCommentId || null;
     
     await handleAddComment(postId, content, parentCommentId);
