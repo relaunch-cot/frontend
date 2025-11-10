@@ -230,7 +230,6 @@ async function createPostCard(post) {
                 </div>
             </div>
             <div class="post-header-actions">
-                <button class="btn-read-more" data-post-id="${post.postId}">Ler mais</button>
                 ${isAuthor ? `
                     <div class="post-menu-container">
                         <button class="btn-post-menu" data-post-id="${post.postId}">
@@ -259,7 +258,9 @@ async function createPostCard(post) {
 
         <div class="post-content">
             <h3 class="post-title">${post.title}</h3>
-            <p class="post-text">${post.content.substring(0, 200)}${post.content.length > 200 ? '...' : ''}</p>
+            <p class="post-text">
+                ${post.content.substring(0, 200)}${post.content.length > 200 ? '... <span class="btn-read-more" data-post-id="' + post.postId + '">mais</span>' : ''}
+            </p>
             ${post.urlImagePost ? `<img src="${post.urlImagePost}" alt="${post.title}" class="post-image">` : ''}
         </div>
 

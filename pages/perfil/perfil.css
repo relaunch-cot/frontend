@@ -229,6 +229,17 @@ main {
     margin-bottom: 1rem;
 }
 
+.btn-read-more {
+    color: #737373;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-read-more:hover {
+    opacity: 0.6;
+}
+
 .post-card-image {
     width: 100%;
     max-height: 300px;
@@ -453,46 +464,6 @@ main {
     line-height: 1.8;
     white-space: pre-wrap;
     margin-bottom: 2rem;
-}
-
-.post-detail-actions {
-    display: flex;
-    gap: 1rem;
-    padding-top: 2rem;
-    border-top: 2px solid #f0f0f0;
-}
-
-.post-detail-actions .btn-action {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.8rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.post-detail-actions .btn-edit {
-    background: #46B1D5;
-    color: white;
-}
-
-.post-detail-actions .btn-edit:hover {
-    background: #3a8eb5;
-    transform: translateY(-2px);
-}
-
-.post-detail-actions .btn-delete {
-    background: #e74c3c;
-    color: white;
-}
-
-.post-detail-actions .btn-delete:hover {
-    background: #c0392b;
-    transform: translateY(-2px);
 }
 
 /* Modal de Confirmação de Exclusão */
