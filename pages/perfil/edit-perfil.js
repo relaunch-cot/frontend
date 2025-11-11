@@ -168,7 +168,10 @@ editProfileForm.addEventListener('submit', (e) => {
     }
     
     if (currentData.dateOfBirth && currentData.dateOfBirth !== originalData.dateOfBirth) {
-        changes.push(`Data de Nascimento: ${new Date(currentData.dateOfBirth).toLocaleDateString('pt-BR')}`);
+        // Formata a data corretamente sem problemas de timezone
+        const [year, month, day] = currentData.dateOfBirth.split('-');
+        const formattedDate = `${day}/${month}/${year}`;
+        changes.push(`Data de Nascimento: ${formattedDate}`);
         pendingChanges.settings.dateOfBirth = currentData.dateOfBirth;
     }
     
