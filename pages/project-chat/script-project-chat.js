@@ -132,20 +132,35 @@ function adicionarMensagem(texto, tipo, timestamp) {
   const mensagemHora = document.createElement('div');
   mensagemHora.className = 'mensagem-hora';
   
+  // compute message date (in local timezone)
+  let messageDateObj;
   if (timestamp) {
     const data = new Date(timestamp);
+    // keep existing +3h correction if timestamps are UTC without timezone
     const dataCorrigida = new Date(data.getTime() + (3 * 60 * 60 * 1000));
-    mensagemHora.textContent = dataCorrigida.toLocaleTimeString('pt-BR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-    novaMensagem.dataset.date = dataCorrigida.toDateString();
+    messageDateObj = dataCorrigida;
+    mensagemHora.textContent = dataCorrigida.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   } else {
-    mensagemHora.textContent = new Date().toLocaleTimeString('pt-BR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-    novaMensagem.dataset.date = new Date().toDateString();
+    messageDateObj = new Date();
+    mensagemHora.textContent = messageDateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  const messageDateString = messageDateObj.toDateString();
+  novaMensagem.dataset.date = messageDateString;
+
+  // Ensure a date separator exists when the new message date differs from the last message
+  // Find the last message element (exclude separators and typing indicator)
+  const mensagens = mensagensContainer.querySelectorAll('.mensagem');
+  const ultimaMensagem = mensagens.length ? mensagens[mensagens.length - 1] : null;
+
+  if (!ultimaMensagem) {
+    // no messages yet -> add separator for this date
+    adicionarSeparadorData(messageDateObj);
+  } else {
+    const ultimaData = ultimaMensagem.dataset.date;
+    if (ultimaData !== messageDateString) {
+      adicionarSeparadorData(messageDateObj);
+    }
   }
   
   novaMensagem.appendChild(mensagemTexto);
@@ -206,17 +221,8 @@ async function carregarMensagens() {
     mensagensContainer.innerHTML = '';
 
     if (Array.isArray(data.messages)) {
-      let ultimaData = null;
-      
+      // Rely on adicionarMensagem to insert date separators to avoid duplicates
       data.messages.forEach(msg => {
-        const dataMsg = new Date(msg.createdAt || msg.timestamp || Date.now());
-        const dataAtual = dataMsg.toDateString();
-        
-        if (ultimaData !== dataAtual) {
-          adicionarSeparadorData(dataMsg);
-          ultimaData = dataAtual;
-        }
-        
         const tipo = msg.senderId == userId ? 'usuario' : 'outra-pessoa';
         adicionarMensagem(msg.messageContent, tipo, msg.createdAt || msg.timestamp);
       });
@@ -479,9 +485,14 @@ document.addEventListener('DOMContentLoaded', () => {
           const tipo = 'outra-pessoa';
           
           const dataMsg = new Date(message.createdAt || Date.now());
-          const ultimaMensagem = mensagensContainer.lastElementChild;
-          
-          if (ultimaMensagem && !ultimaMensagem.classList.contains('separador-data')) {
+
+          // find last message element (exclude separators and typing indicator)
+          const mensagens = mensagensContainer.querySelectorAll('.mensagem');
+          const ultimaMensagem = mensagens.length ? mensagens[mensagens.length - 1] : null;
+
+          if (!ultimaMensagem) {
+            adicionarSeparadorData(dataMsg);
+          } else {
             const ultimaData = ultimaMensagem.dataset.date;
             if (ultimaData !== dataMsg.toDateString()) {
               adicionarSeparadorData(dataMsg);
