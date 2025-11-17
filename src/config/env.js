@@ -1,6 +1,6 @@
 const ENV_CONFIG = {
-  URL_BACKEND: 'http://localhost:8080',
-  WS_BACKEND: 'ws://localhost:8080',
+  URL_BACKEND: 'bff-relaunch.up.railway.app',
+  WS_BACKEND: 'ws://bff-relaunch.up.railway.app',
   API_VERSION: 'v1',
   TIMEOUT: 10000
 };
