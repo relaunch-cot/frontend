@@ -145,10 +145,51 @@
     }
     
     const isNotificationPage = window.location.pathname.includes('/notification/notification.html');
-    if (!isNotificationPage && typeof showInfo === 'function') {
-      showInfo(notification.title || 'Nova notificação recebida!');
+    const isChatPage = window.location.pathname.includes('/project-chat/project-chat.html');
+    
+    // Não mostrar notificação se estiver na página de notificações OU na página de chat
+    if (!isNotificationPage && !isChatPage) {
+      // Se for mensagem de chat, usa o card especial
+      if (notification.type === 'CHAT_MESSAGE') {
+        this.mostrarCardNovaMensagem(notification.title, notification.content);
+      } else if (typeof showInfo === 'function') {
+        // Para outras notificações, usa o sistema padrão
+        showInfo(notification.title || 'Nova notificação recebida!');
+      }
+    }
+  }
+
+  mostrarCardNovaMensagem(title, content) {
+    const iconAnterior = document.getElementById('new-message-icon');
+    if (iconAnterior) {
+      iconAnterior.remove();
     }
     
+    const iconContainer = document.createElement('div');
+    iconContainer.id = 'new-message-icon';
+    iconContainer.className = 'new-message-notification';
+    iconContainer.title = title;
+    
+    iconContainer.innerHTML = `
+      <div class="notification-content">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
+          <path d="M256 448c141.4 0 256-93.1 256-208S397.4 32 256 32S0 125.1 0 240c0 45.1 17.7 86.8 47.7 120.9c-1.9 24.5-11.4 46.3-21.4 62.9c-5.5 9.2-11.1 16.6-15.2 21.6c-2.1 2.5-3.7 4.4-4.9 5.7c-.6 .6-1 1.1-1.3 1.4l-.3 .3c0 0 0 0 0 0c0 0 0 0 0 0s0 0 0 0s0 0 0 0c-4.6 4.6-5.9 11.4-3.4 17.4c2.5 6 8.3 9.9 14.8 9.9c28.7 0 57.6-8.9 81.6-19.3c22.9-10 42.4-21.9 54.3-30.6c31.8 11.5 67 17.9 104.1 17.9z"/>
+        </svg>
+        <div class="notification-text-content">
+          <strong>${title}</strong>
+          <span>${content}</span>
+        </div>
+      </div>
+      <div class="pulse-ring"></div>
+    `;
+    
+    document.body.appendChild(iconContainer);
+    
+    setTimeout(() => {
+      iconContainer.classList.add('fade-out');
+      setTimeout(() => iconContainer.remove(), 300);
+    }, 5000);
+  }
     window.dispatchEvent(new CustomEvent('newNotification', { detail: notification }));
   }
 

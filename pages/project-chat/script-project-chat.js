@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (message.senderId != userId) {
           esconderIndicadorDigitacao();
           
-          mostrarIconeNovaMensagem(contactName);
+          // Removido: mostrarIconeNovaMensagem (agora será tratado pelo sistema global)
           
           const tipo = 'outra-pessoa';
           
