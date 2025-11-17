@@ -61,6 +61,16 @@
   status = 200
 
 [[redirects]]
+  from = "/posts"
+  to = "/pages/posts/posts.html"
+  status = 200
+
+[[redirects]]
+  from = "/publicacoes"
+  to = "/pages/posts/posts.html"
+  status = 200
+
+[[redirects]]
   from = "/editar-perfil"
   to = "/pages/perfil/edit-perfil.html"
   status = 200
