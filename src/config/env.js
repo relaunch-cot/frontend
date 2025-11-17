@@ -1,4 +1,3 @@
-// Detecta automaticamente o ambiente baseado no hostname
 const isNetlify = window.location.hostname.includes('netlify.app');
 const isProduction = isNetlify || window.location.hostname === 'relaunch-cot.netlify.app';
 
