@@ -32,7 +32,10 @@
     { "source": "/arquivos-projeto", "destination": "/pages/project-file/project-file-0.html" },
     
     { "source": "/project-payment", "destination": "/pages/project-payment/project-payment-0.html" },
-    { "source": "/pagamento-projeto", "destination": "/pages/project-payment/project-payment-0.html" }
+    { "source": "/pagamento-projeto", "destination": "/pages/project-payment/project-payment-0.html" },
+    
+    { "source": "/posts", "destination": "/pages/posts/posts.html" },
+    { "source": "/publicacoes", "destination": "/pages/posts/posts.html" }
   ],
   "trailingSlash": false,
   "cleanUrls": true
