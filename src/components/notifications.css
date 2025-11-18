@@ -128,64 +128,95 @@
     right: 20px;
     background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(52, 152, 219, 0.35);
+    padding: 12px 16px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.35);
     z-index: 10000;
     animation: slideInFromTop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    min-width: 320px;
-    max-width: 400px;
+    min-width: 280px;
+    max-width: 350px;
 }
 
 .new-message-notification:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(52, 152, 219, 0.45);
+    box-shadow: 0 8px 24px rgba(52, 152, 219, 0.45);
 }
 
-.new-message-notification .notification-content {
+/* Generic Notification Card */
+.generic-notification-card {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(23, 162, 184, 0.35);
+    z-index: 10000;
+    animation: slideInFromTop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-width: 280px;
+    max-width: 350px;
+}
+
+.generic-notification-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(23, 162, 184, 0.45);
+}
+
+.new-message-notification .notification-content,
+.generic-notification-card .notification-content {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
-.new-message-notification .message-icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    animation: floatIcon 2s ease-in-out infinite;
-}
-
-.new-message-notification .message-icon svg {
-    width: 24px;
-    height: 24px;
+.new-message-notification .notification-content svg,
+.generic-notification-card .notification-content svg {
+    width: 20px;
+    height: 20px;
     fill: white;
+    flex-shrink: 0;
 }
 
-.new-message-notification .notification-text {
+.new-message-notification .notification-text-content,
+.generic-notification-card .notification-text-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
 }
 
-.new-message-notification .notification-title {
-    font-size: 15px;
+.new-message-notification .notification-text-content strong,
+.generic-notification-card .notification-text-content strong {
+    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 4px;
     font-family: "Poppins", sans-serif;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.new-message-notification .notification-message {
-    font-size: 13px;
+.new-message-notification .notification-text-content span,
+.generic-notification-card .notification-text-content span {
+    font-size: 12px;
     opacity: 0.95;
     font-family: "Poppins", sans-serif;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.new-message-notification.fade-out {
+.new-message-notification.fade-out,
+.generic-notification-card.fade-out {
     animation: fadeOutUp 0.3s ease-out forwards;
 }
 
