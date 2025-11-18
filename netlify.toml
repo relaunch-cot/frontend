@@ -1,6 +1,26 @@
 # Configuração Netlify para URLs limpas
 
 [[redirects]]
+  from = "/posts"
+  to = "/pages/posts/posts.html"
+  status = 200
+
+[[redirects]]
+  from = "/posts/*"
+  to = "/pages/posts/posts.html"
+  status = 200
+
+[[redirects]]
+  from = "/publicacoes"
+  to = "/pages/posts/posts.html"
+  status = 200
+
+[[redirects]]
+  from = "/publicacoes/*"
+  to = "/pages/posts/posts.html"
+  status = 200
+
+[[redirects]]
   from = "/home"
   to = "/index.html"
   status = 200
@@ -58,16 +78,6 @@
 [[redirects]]
   from = "/profile"
   to = "/pages/perfil/perfil.html"
-  status = 200
-
-[[redirects]]
-  from = "/posts"
-  to = "/pages/posts/posts.html"
-  status = 200
-
-[[redirects]]
-  from = "/publicacoes"
-  to = "/pages/posts/posts.html"
   status = 200
 
 [[redirects]]

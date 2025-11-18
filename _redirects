@@ -35,6 +35,10 @@
 /notificacoes /pages/notification/notification.html 200
 /notifications /pages/notification/notification.html 200
 
+# Posts
+/posts /pages/posts/posts.html 200
+/publicacoes /pages/posts/posts.html 200
+
 # Arquivos de Projeto
 /project-file /pages/project-file/project-file-0.html 200
 /arquivos-projeto /pages/project-file/project-file-0.html 200
