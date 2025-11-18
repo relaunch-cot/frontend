@@ -1,6 +1,5 @@
 const isNetlify = window.location.hostname.includes('netlify.app');
-const isVercel = window.location.hostname.includes('vercel.app');
-const isProduction = isNetlify || isVercel || window.location.hostname === 'relaunch-cot.netlify.app';
+const isProduction = isNetlify || window.location.hostname === 'relaunch-cot.netlify.app';
 
 const ENV_CONFIG = {
   URL_BACKEND: isProduction ? 'https://bff-relaunch.up.railway.app' : 'http://localhost:8080',
