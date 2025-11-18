@@ -97,6 +97,30 @@
   }
 }
 
+/* Badge sobre o menu hamburguer em telas menores */
+@media (max-width: 768px) {
+  .notification-badge-mobile {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #17a2b8;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: "Poppins", sans-serif;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    animation: badgePop 0.3s ease-out;
+  }
+}
+
 /* Chat Message Notification Card */
 .new-message-notification {
     position: fixed;
