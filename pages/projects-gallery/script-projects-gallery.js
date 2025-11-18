@@ -142,6 +142,10 @@ function formatProjectDate(createdAt) {
 function renderProjectCard(project) {
   const card = document.createElement('div');
   card.className = 'Projeto';
+  
+  // Define o status do projeto (padrão: pendente)
+  const status = project.status ? project.status.toLowerCase() : 'pendente';
+  card.setAttribute('data-status', status);
 
   const imagemProjeto = project.urlImageProject && project.urlImageProject.trim() !== ''
     ? project.urlImageProject
@@ -149,7 +153,10 @@ function renderProjectCard(project) {
 
   card.innerHTML = `
     <div class="title">
-      <h1>${project.name}</h1>
+      <div class="title-with-status">
+        <span class="status-indicator" data-status="${status}"></span>
+        <h1>${project.name}</h1>
+      </div>
       <h3>${formatProjectDate(project.createdAt)}</h3>
     </div>
 
@@ -158,11 +165,14 @@ function renderProjectCard(project) {
       <div id="projeto-logo">
         <img src="${imagemProjeto}" alt="${project.name || 'Projeto'}">
       </div>
-      <div id="project-open">
-        <a href="/projeto?id=${project.projectId}" class="project-page">Abrir</a>
-      </div>
     </div>
   `;
+
+  // Tornar o card clicável
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', () => {
+    window.location.href = `/projeto?id=${project.projectId}`;
+  });
 
   main.appendChild(card);
 }
