@@ -49,6 +49,12 @@ function validarStatus(status) {
 function preencherPaginaComProjeto(project) {
   projectData = project;
   
+  // Ocultar loader e mostrar conteúdo
+  const loader = document.getElementById('project-loader');
+  const section = document.querySelector('main section');
+  if (loader) loader.style.display = 'none';
+  if (section) section.style.display = 'grid';
+  
   const profileImg = document.querySelector("#profile img");
   if (profileImg) {
     if (project.urlImageProject && project.urlImageProject.trim() !== '') {
