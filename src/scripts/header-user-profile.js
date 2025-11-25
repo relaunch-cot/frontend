@@ -20,11 +20,11 @@ function updateHeaderProfile(userData) {
     
     const avatarContainer = document.getElementById('userAvatar');
     if (avatarContainer && typeof window.updateAvatar === 'function') {
-        window.updateAvatar(avatarContainer, userData.name || 'Usuário', userData.urlImagePerfil);
+        window.updateAvatar(avatarContainer, userData.name || 'Usuário', userData.UrlImageUser);
     } else if (avatarContainer) {
-        if (userData.urlImagePerfil && userData.urlImagePerfil.trim() !== '') {
+        if (userData.UrlImageUser && userData.UrlImageUser.trim() !== '') {
             avatarContainer.innerHTML = `
-                <img src="${userData.urlImagePerfil}" 
+                <img src="${userData.UrlImageUser}" 
                      alt="${userData.name}" 
                      class="avatar-img avatar-small" 
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -92,7 +92,7 @@ async function loadUserProfile() {
                     userId: decodedToken.userId,
                     name: decodedToken.userName || 'Usuário',
                     email: decodedToken.userEmail || '',
-                    urlImagePerfil: null
+                    UrlImageUser: null
                 };
                 updateHeaderProfile(userData);
                 return userData;

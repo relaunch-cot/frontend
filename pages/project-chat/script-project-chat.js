@@ -66,9 +66,9 @@ async function loadContactAvatar() {
         if (oldSvg) oldSvg.remove();
         
         let avatarHtml;
-        if (user.urlImagePerfil && user.urlImagePerfil.trim() !== '') {
+        if (user.UrlImageUser && user.UrlImageUser.trim() !== '') {
           avatarHtml = `
-            <img src="${user.urlImagePerfil}" 
+            <img src="${user.UrlImageUser}" 
                  alt="${user.name}" 
                  class="avatar-img avatar-large" 
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">

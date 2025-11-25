@@ -105,17 +105,17 @@ async function carregarChats() {
     for (const chat of data.chats) {
       let nomeOutroUsuario = 'Desconhecido';
       let outroUserId = null;
-      let urlImagePerfil = null;
+      let UrlImageUser = null;
 
       if (chat.user1 && chat.user2) {
         if (chat.user1.userId === userId) {
           nomeOutroUsuario = chat.user2.name || `Usuário ${chat.user2.userId}`;
           outroUserId = chat.user2.userId;
-          urlImagePerfil = chat.user2.urlImagePerfil;
+          UrlImageUser = chat.user2.UrlImageUser;
         } else {
           nomeOutroUsuario = chat.user1.name || `Usuário ${chat.user1.userId}`;
           outroUserId = chat.user1.userId;
-          urlImagePerfil = chat.user1.urlImagePerfil;
+          UrlImageUser = chat.user1.UrlImageUser;
         }
       }
 
@@ -133,9 +133,9 @@ async function carregarChats() {
       const isOnline = window.presenceManager && window.presenceManager.isUserOnline(outroUserId);
 
       let avatarHtml;
-      if (urlImagePerfil && urlImagePerfil.trim() !== '') {
+      if (UrlImageUser && UrlImageUser.trim() !== '') {
         avatarHtml = `
-          <img src="${urlImagePerfil}" 
+          <img src="${UrlImageUser}" 
                alt="${nomeOutroUsuario}" 
                class="avatar-img" 
                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">

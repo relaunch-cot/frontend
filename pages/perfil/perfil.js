@@ -37,7 +37,16 @@ const userId = userIdFromUrl || currentUserId;
 const isOwnProfile = userId === currentUserId;
 
 async function carregarPerfil() {
+  const avatarContainer = document.querySelector('.avatar');
+  
   try {
+    // Show loading state
+    avatarContainer.innerHTML = `
+      <div style="width: 100%; height: 100%; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
+        <div style="width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #46B1D5; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+      </div>
+    `;
+    
     const response = await fetch(`${BASE_URL}/v1/user/${userId}`, {
       method: 'GET',
       headers: {
@@ -58,6 +67,19 @@ async function carregarPerfil() {
     if (data.user) {
       userNameElement.textContent = data.user.name || 'Nome não disponível';
       userEmailElement.textContent = data.user.email || 'Email não disponível';
+      
+      // Update avatar with profile image
+      if (data.user.UrlImageUser) {
+        avatarContainer.innerHTML = `<img src="${data.user.UrlImageUser}" alt="${data.user.name}">`;
+      } else {
+        // Keep default avatar with initial
+        const initial = data.user.name ? data.user.name.charAt(0).toUpperCase() : 'U';
+        avatarContainer.innerHTML = `
+          <div style="width: 100%; height: 100%; border-radius: 50%; background: #46B1D5; display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; font-family: 'Poppins', sans-serif;">
+            ${initial}
+          </div>
+        `;
+      }
       
       if (isOwnProfile && typeof window.updateHeaderProfile === 'function') {
         window.updateHeaderProfile(data.user);

@@ -76,6 +76,95 @@ function removeTag(index) {
 competenciasInput.addEventListener('input', updateTagsPreview);
 
 let originalData = {};
+let currentProfileImage = null;
+let profileImageChanged = false;
+
+// Compress image before upload (more aggressive compression)
+function compressImage(file, maxWidth = 400, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // Calculate new dimensions maintaining aspect ratio
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxWidth) {
+                        width = Math.round((width * maxWidth) / height);
+                        height = maxWidth;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Convert to base64 with more compression
+                const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedBase64);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Handle profile image upload
+document.getElementById('profileImage').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        try {
+            // Check file size (limit to 5MB before compression)
+            if (file.size > 5 * 1024 * 1024) {
+                showError('Imagem muito grande. Por favor, escolha uma imagem menor que 5MB.');
+                this.value = '';
+                return;
+            }
+            
+            // Compress image before storing
+            currentProfileImage = await compressImage(file, 400, 0.7);
+            profileImageChanged = true;
+            
+            const imgElement = document.getElementById('currentProfileImage');
+            const placeholder = document.querySelector('.profile-image-placeholder');
+            
+            imgElement.src = currentProfileImage;
+            imgElement.style.display = 'block';
+            placeholder.style.display = 'none';
+            
+            document.getElementById('removeImageBtn').style.display = 'flex';
+        } catch (error) {
+            showError('Erro ao processar imagem. Tente outra imagem.');
+            this.value = '';
+        }
+    }
+});
+
+function removeProfileImage() {
+    currentProfileImage = null;
+    profileImageChanged = true;
+    
+    const imgElement = document.getElementById('currentProfileImage');
+    const placeholder = document.querySelector('.profile-image-placeholder');
+    
+    imgElement.style.display = 'none';
+    placeholder.style.display = 'flex';
+    
+    document.getElementById('profileImage').value = '';
+    document.getElementById('removeImageBtn').style.display = 'none';
+}
 
 async function loadUserData() {
     try {
@@ -105,8 +194,22 @@ async function loadUserData() {
                 cpf: data.user.settings?.cpf || '',
                 dateOfBirth: data.user.settings?.dateOfBirth || '',
                 biography: data.user.settings?.biography || '',
-                skills: data.user.settings?.skills || []
+                skills: data.user.settings?.skills || [],
+                UrlImageUser: data.user.UrlImageUser || ''
             };
+            
+            // Load profile image if exists
+            if (originalData.UrlImageUser) {
+                const imgElement = document.getElementById('currentProfileImage');
+                const placeholder = document.querySelector('.profile-image-placeholder');
+                
+                imgElement.src = originalData.UrlImageUser;
+                imgElement.style.display = 'block';
+                placeholder.style.display = 'none';
+                
+                document.getElementById('removeImageBtn').style.display = 'flex';
+                currentProfileImage = originalData.urlImageUser;
+            }
             
             document.getElementById('name').value = originalData.name;
             document.getElementById('email').value = originalData.email;
@@ -145,7 +248,22 @@ editProfileForm.addEventListener('submit', (e) => {
     };
     
     const changes = [];
-    pendingChanges = { settings: {} };
+    pendingChanges = {};
+    
+    // Check for profile image changes
+    if (profileImageChanged) {
+        if (currentProfileImage && currentProfileImage !== originalData.UrlImageUser) {
+            changes.push('Foto de perfil: Nova imagem');
+            pendingChanges.UrlImageUser = currentProfileImage;
+        } else if (!currentProfileImage && originalData.UrlImageUser) {
+            changes.push('Foto de perfil: Removida');
+            pendingChanges.UrlImageUser = '';
+        }
+    }
+    
+    // Initialize settings object only if needed
+    let hasSettingsChanges = false;
+    const settingsChanges = {};
     
     if (currentData.name && currentData.name !== originalData.name) {
         changes.push(`Nome: ${currentData.name}`);
@@ -159,12 +277,14 @@ editProfileForm.addEventListener('submit', (e) => {
     
     if (currentData.phone && currentData.phone !== originalData.phone) {
         changes.push(`Telefone: ${currentData.phone}`);
-        pendingChanges.settings.phone = currentData.phone;
+        settingsChanges.phone = currentData.phone;
+        hasSettingsChanges = true;
     }
     
     if (currentData.cpf && currentData.cpf !== originalData.cpf) {
         changes.push(`CPF: ${currentData.cpf}`);
-        pendingChanges.settings.cpf = currentData.cpf;
+        settingsChanges.cpf = currentData.cpf;
+        hasSettingsChanges = true;
     }
     
     if (currentData.dateOfBirth && currentData.dateOfBirth !== originalData.dateOfBirth) {
@@ -172,17 +292,25 @@ editProfileForm.addEventListener('submit', (e) => {
         const [year, month, day] = currentData.dateOfBirth.split('-');
         const formattedDate = `${day}/${month}/${year}`;
         changes.push(`Data de Nascimento: ${formattedDate}`);
-        pendingChanges.settings.dateOfBirth = currentData.dateOfBirth;
+        settingsChanges.dateOfBirth = currentData.dateOfBirth;
+        hasSettingsChanges = true;
     }
     
     if (currentData.biography && currentData.biography !== originalData.biography) {
         changes.push(`Biografia: ${currentData.biography.substring(0, 50)}${currentData.biography.length > 50 ? '...' : ''}`);
-        pendingChanges.settings.biography = currentData.biography;
+        settingsChanges.biography = currentData.biography;
+        hasSettingsChanges = true;
     }
     
     if (currentData.skills.length > 0 && JSON.stringify(currentData.skills) !== JSON.stringify(originalData.skills)) {
         changes.push(`Competências: ${currentData.skills.join(', ')}`);
-        pendingChanges.settings.skills = currentData.skills;
+        settingsChanges.skills = currentData.skills;
+        hasSettingsChanges = true;
+    }
+    
+    // Add settings to pendingChanges only if there are changes
+    if (hasSettingsChanges) {
+        pendingChanges.settings = settingsChanges;
     }
     
     if (changes.length === 0) {
