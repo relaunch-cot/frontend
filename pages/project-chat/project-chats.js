@@ -105,17 +105,15 @@ async function carregarChats() {
     for (const chat of data.chats) {
       let nomeOutroUsuario = 'Desconhecido';
       let outroUserId = null;
-      let UrlImageUser = null;
+      let UrlImageUser = chat.otherUserProfileImageUrl || null;
 
       if (chat.user1 && chat.user2) {
         if (chat.user1.userId === userId) {
           nomeOutroUsuario = chat.user2.name || `Usuário ${chat.user2.userId}`;
           outroUserId = chat.user2.userId;
-          UrlImageUser = chat.user2.UrlImageUser;
         } else {
           nomeOutroUsuario = chat.user1.name || `Usuário ${chat.user1.userId}`;
           outroUserId = chat.user1.userId;
-          UrlImageUser = chat.user1.UrlImageUser;
         }
       }
 
