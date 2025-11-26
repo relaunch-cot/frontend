@@ -267,14 +267,13 @@ async function carregarPostsDoUsuario() {
     const data = await response.json();
     const posts = data.posts || [];
 
-    container.innerHTML = '';
-
     // Atualiza o título baseado em quem está visualizando
     if (postsTitle) {
       postsTitle.textContent = isOwnProfile ? 'Meus Posts' : 'Posts';
     }
 
     if (posts.length === 0) {
+      container.innerHTML = '';
       emptyState.style.display = 'block';
       postsCount.textContent = '0 posts';
       return;
@@ -285,10 +284,13 @@ async function carregarPostsDoUsuario() {
 
     posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    for (const post of posts) {
-      const card = await criarCardPost(post);
-      container.appendChild(card);
-    }
+    // Carrega todos os cards em paralelo
+    const cardPromises = posts.map(post => criarCardPost(post));
+    const cards = await Promise.all(cardPromises);
+    
+    // Limpa o container e adiciona todos os cards de uma vez
+    container.innerHTML = '';
+    cards.forEach(card => container.appendChild(card));
 
   } catch (error) {
     container.innerHTML = '<div class="loading">Erro ao carregar posts. Tente novamente.</div>';

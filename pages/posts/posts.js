@@ -371,9 +371,8 @@ async function renderPosts() {
 
     const posts = await fetchAllPosts();
 
-    container.innerHTML = '';
-
     if (posts.length === 0) {
+        container.innerHTML = '';
         emptyState.style.display = 'block';
         return;
     }
@@ -382,10 +381,13 @@ async function renderPosts() {
 
     posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    for (const post of posts) {
-        const card = await createPostCard(post);
-        container.appendChild(card);
-    }
+    // Carrega todos os cards em paralelo
+    const cardPromises = posts.map(post => createPostCard(post));
+    const cards = await Promise.all(cardPromises);
+    
+    // Limpa o container e adiciona todos os cards de uma vez
+    container.innerHTML = '';
+    cards.forEach(card => container.appendChild(card));
 }
 
 const createModal = document.getElementById('createPostModal');
