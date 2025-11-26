@@ -189,11 +189,13 @@ async function toggleLike(postId, currentlyLiked) {
 }
 
 function createAvatar(name, imageUrl = null, size = 'default') {
-    if (imageUrl) {
-        return `<img src="${imageUrl}" alt="${name}" class="avatar-image ${size}">`;
+    const initial = name ? name.charAt(0).toUpperCase() : 'U';
+    
+    if (imageUrl && imageUrl.trim() !== '') {
+        return `<img src="${imageUrl}" alt="${name}" class="avatar-image ${size}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="avatar-letter ${size}" style="display: none;">${initial}</div>`;
     }
     
-    const initial = name ? name.charAt(0).toUpperCase() : 'U';
     return `<div class="avatar-letter ${size}">${initial}</div>`;
 }
 
