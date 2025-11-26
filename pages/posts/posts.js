@@ -221,16 +221,20 @@ async function createPostCard(post) {
     const commentsCount = commentsData.commentsCount || 0;
 
     const authorAvatar = post.userUrlImage 
-        ? `<img src="${post.userUrlImage}" alt="${post.authorName}" class="avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-           <div class="author-avatar" style="display: none;">${post.authorName.charAt(0).toUpperCase()}</div>`
-        : `<div class="author-avatar">${post.authorName.charAt(0).toUpperCase()}</div>`;
+        ? `<a href="/perfil?userId=${post.authorId}" class="avatar-link">
+             <img src="${post.userUrlImage}" alt="${post.authorName}" class="avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             <div class="author-avatar" style="display: none;">${post.authorName.charAt(0).toUpperCase()}</div>
+           </a>`
+        : `<a href="/perfil?userId=${post.authorId}" class="avatar-link">
+             <div class="author-avatar">${post.authorName.charAt(0).toUpperCase()}</div>
+           </a>`;
 
     card.innerHTML = `
         <div class="post-header">
             <div class="post-author">
                 ${authorAvatar}
                 <div class="author-info">
-                    <span class="author-name">${post.authorName}</span>
+                    <a href="/perfil?userId=${post.authorId}" class="author-name-link">${post.authorName}</a>
                     <span class="post-date">${formatDate(post.createdAt)}</span>
                 </div>
             </div>
@@ -261,7 +265,7 @@ async function createPostCard(post) {
             </div>
         </div>
 
-        <div class="post-content">
+        <div class="post-content" data-post-id="${post.postId}" style="cursor: pointer;">
             <h3 class="post-title">${post.title}</h3>
             <p class="post-text">
                 ${post.content.substring(0, 200)}${post.content.length > 200 ? '... <span class="btn-read-more" data-post-id="' + post.postId + '">mais</span>' : ''}
@@ -311,16 +315,20 @@ function showPostDetail(post) {
     const isAuthor = post.authorId === userId;
 
     const postDetailAvatar = post.userUrlImage 
-        ? `<img src="${post.userUrlImage}" alt="${post.authorName}" class="avatar-img avatar-large" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-           <div class="author-avatar large" style="display: none;">${post.authorName.charAt(0).toUpperCase()}</div>`
-        : `<div class="author-avatar large">${post.authorName.charAt(0).toUpperCase()}</div>`;
+        ? `<a href="/perfil?userId=${post.authorId}" class="avatar-link">
+             <img src="${post.userUrlImage}" alt="${post.authorName}" class="avatar-img avatar-large" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             <div class="author-avatar large" style="display: none;">${post.authorName.charAt(0).toUpperCase()}</div>
+           </a>`
+        : `<a href="/perfil?userId=${post.authorId}" class="avatar-link">
+             <div class="author-avatar large">${post.authorName.charAt(0).toUpperCase()}</div>
+           </a>`;
 
     detailContainer.innerHTML = `
         <div class="post-detail-header">
             <div class="post-author">
                 ${postDetailAvatar}
                 <div class="author-info">
-                    <span class="author-name">${post.authorName}</span>
+                    <a href="/perfil?userId=${post.authorId}" class="author-name-link">${post.authorName}</a>
                     <span class="post-date">${formatDate(post.createdAt)}</span>
                     ${post.updatedAt && post.updatedAt !== post.createdAt ? 
                         `<span class="post-updated">(editado em ${formatDate(post.updatedAt)})</span>` : ''}
@@ -558,6 +566,21 @@ createForm.addEventListener('submit', async (e) => {
 });
 
 document.addEventListener('click', async (e) => {
+    // Click no conteúdo do post (exceto se clicar em botões ou links)
+    if (e.target.closest('.post-content') && 
+        !e.target.classList.contains('btn-read-more') &&
+        !e.target.closest('.interaction-btn') &&
+        !e.target.closest('a')) {
+        const postContent = e.target.closest('.post-content');
+        const postId = postContent.dataset.postId;
+        if (postId) {
+            const post = await fetchPost(postId);
+            if (post) {
+                showPostDetail(post);
+            }
+        }
+    }
+
     if (e.target.classList.contains('btn-read-more')) {
         const postId = e.target.dataset.postId;
         const post = await fetchPost(postId);
@@ -1001,7 +1024,8 @@ function restoreOpenRepliesState(container, openRepliesIds) {
 function renderComment(comment, postId, depth = 0, parentUserName = null, postAuthorId = null, parentUserId = null) {
     const isOwner = comment.userId === userId;
     const isPostAuthor = postAuthorId && comment.userId === postAuthorId;
-    const avatar = createAvatar(comment.userName || 'Usuário', comment.userUrlImage, 'small');
+    const avatarContent = createAvatar(comment.userName || 'Usuário', comment.userUrlImage, 'small');
+    const avatar = `<a href="/perfil?userId=${comment.userId}" class="avatar-link">${avatarContent}</a>`;
     
     const likesCount = comment.likes?.likesCount || 0;
     const userLiked = comment.likes?.likes?.some(like => like.userId === userId) || false;
@@ -1028,7 +1052,7 @@ function renderComment(comment, postId, depth = 0, parentUserName = null, postAu
             </div>
             <div class="comment-content">
                 <div class="comment-header">
-                    <span class="comment-author">${comment.userName || 'Usuário'}</span>
+                    <a href="/perfil?userId=${comment.userId}" class="comment-author-link">${comment.userName || 'Usuário'}</a>
                     ${isPostAuthor ? '<span class="author-badge">Autor</span>' : ''}
                     <span class="comment-time">${formatRelativeTime(comment.createdAt)}</span>
                 </div>

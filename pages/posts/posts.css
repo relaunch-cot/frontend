@@ -193,6 +193,23 @@ main {
     color: #222;
 }
 
+.author-name-link {
+    font-weight: 600;
+    color: #222;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.author-name-link:hover {
+    color: #46B1D5;
+}
+
+.avatar-link {
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
 .post-date {
     font-size: 0.85rem;
     color: #666;
@@ -923,6 +940,18 @@ footer > div > select:hover {
     font-weight: 600;
     color: #262626;
     font-size: 0.875rem;
+}
+
+.comment-author-link {
+    font-weight: 600;
+    color: #262626;
+    font-size: 0.875rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.comment-author-link:hover {
+    color: #46B1D5;
 }
 
 .comment-time {
