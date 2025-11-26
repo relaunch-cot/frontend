@@ -47,10 +47,10 @@ if (!chatId) {
 document.getElementById('contactName').textContent = contactName;
 
 async function loadContactAvatar() {
-  if (!contactUserId) return;
+  if (!chatId) return;
   
   try {
-    const response = await fetch(`${BASE_URL}/v1/user/${contactUserId}`, {
+    const response = await fetch(`${BASE_URL}/v1/chat/chatId/${chatId}`, {
       headers: {
         'Authorization': token
       }
@@ -58,27 +58,30 @@ async function loadContactAvatar() {
     
     if (response.ok) {
       const data = await response.json();
-      const user = data.user;
+      const chat = data.chat;
       
       const contactAvatarDiv = document.querySelector('.contact-avatar');
-      if (contactAvatarDiv) {
+      if (contactAvatarDiv && chat) {
         const oldSvg = contactAvatarDiv.querySelector('svg:not(.status-indicator)');
         if (oldSvg) oldSvg.remove();
         
+        const otherUserProfileImageUrl = chat.otherUserProfileImageUrl;
+        const otherUserName = contactName;
+        
         let avatarHtml;
-        if (user.UrlImageUser && user.UrlImageUser.trim() !== '') {
+        if (otherUserProfileImageUrl && otherUserProfileImageUrl.trim() !== '') {
           avatarHtml = `
-            <img src="${user.UrlImageUser}" 
-                 alt="${user.name}" 
+            <img src="${otherUserProfileImageUrl}" 
+                 alt="${otherUserName}" 
                  class="avatar-img avatar-large" 
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="avatar-letter avatar-large" style="display: none;">
-              ${user.name.charAt(0).toUpperCase()}
+              ${otherUserName.charAt(0).toUpperCase()}
             </div>`;
         } else {
           avatarHtml = `
             <div class="avatar-letter avatar-large">
-              ${user.name.charAt(0).toUpperCase()}
+              ${otherUserName.charAt(0).toUpperCase()}
             </div>`;
         }
         

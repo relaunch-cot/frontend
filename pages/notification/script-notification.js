@@ -440,9 +440,10 @@ async function startChat(userId) {
                             ? chatData.chat.user2 
                             : chatData.chat.user1;
                         const otherUserName = otherUser.name || 'Contato';
+                        const otherUserProfileImageUrl = chatData.chat.otherUserProfileImageUrl;
                         
                         setTimeout(() => {
-                            window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(otherUserName)}`;
+                            window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(otherUserName)}&contactUserId=${otherUser.userId}`;
                         }, 1000);
                     } else {
                         setTimeout(() => {

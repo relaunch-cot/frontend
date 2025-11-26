@@ -78,7 +78,8 @@ async function buscarUltimaMensagem(chatId) {
 
 async function carregarChats() {
   try {
-    const res = await fetch(`${BASE_URL}/v1/chat/${userId}`, {
+    // Backend now returns chats for the authenticated user without needing userId in the path
+    const res = await fetch(`${BASE_URL}/v1/chat`, {
       headers: {
         'Authorization': token
       }
