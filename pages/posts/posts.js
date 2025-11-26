@@ -220,10 +220,15 @@ async function createPostCard(post) {
     const commentsData = await fetchCommentsFromPost(post.postId);
     const commentsCount = commentsData.commentsCount || 0;
 
+    const authorAvatar = post.userUrlImage 
+        ? `<img src="${post.userUrlImage}" alt="${post.authorName}" class="avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+           <div class="author-avatar" style="display: none;">${post.authorName.charAt(0).toUpperCase()}</div>`
+        : `<div class="author-avatar">${post.authorName.charAt(0).toUpperCase()}</div>`;
+
     card.innerHTML = `
         <div class="post-header">
             <div class="post-author">
-                <div class="author-avatar">${post.authorName.charAt(0).toUpperCase()}</div>
+                ${authorAvatar}
                 <div class="author-info">
                     <span class="author-name">${post.authorName}</span>
                     <span class="post-date">${formatDate(post.createdAt)}</span>
@@ -305,10 +310,15 @@ function showPostDetail(post) {
 
     const isAuthor = post.authorId === userId;
 
+    const postDetailAvatar = post.userUrlImage 
+        ? `<img src="${post.userUrlImage}" alt="${post.authorName}" class="avatar-img avatar-large" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+           <div class="author-avatar large" style="display: none;">${post.authorName.charAt(0).toUpperCase()}</div>`
+        : `<div class="author-avatar large">${post.authorName.charAt(0).toUpperCase()}</div>`;
+
     detailContainer.innerHTML = `
         <div class="post-detail-header">
             <div class="post-author">
-                <div class="author-avatar large">${post.authorName.charAt(0).toUpperCase()}</div>
+                ${postDetailAvatar}
                 <div class="author-info">
                     <span class="author-name">${post.authorName}</span>
                     <span class="post-date">${formatDate(post.createdAt)}</span>
@@ -991,7 +1001,7 @@ function restoreOpenRepliesState(container, openRepliesIds) {
 function renderComment(comment, postId, depth = 0, parentUserName = null, postAuthorId = null, parentUserId = null) {
     const isOwner = comment.userId === userId;
     const isPostAuthor = postAuthorId && comment.userId === postAuthorId;
-    const avatar = createAvatar(comment.userName || 'Usuário', null, 'small');
+    const avatar = createAvatar(comment.userName || 'Usuário', comment.userUrlImage, 'small');
     
     const likesCount = comment.likes?.likesCount || 0;
     const userLiked = comment.likes?.likes?.some(like => like.userId === userId) || false;
