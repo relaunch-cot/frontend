@@ -192,3 +192,124 @@ h1 {
   margin: 2rem 0;
   font-size: 1.1rem;
 }
+
+/* Seção de busca de usuários */
+.search-users-section {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-user-input {
+  width: 100%;
+  padding: 0.875rem 3rem 0.875rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  background: #f9f9f9;
+}
+
+.search-user-input:focus {
+  outline: none;
+  border-color: #46B1D5;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(70, 177, 213, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  right: 1rem;
+  color: #999;
+  pointer-events: none;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  margin-top: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background: #f9f9f9;
+}
+
+.search-result-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  margin-right: 1rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #46B1D5;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.search-result-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.search-result-info {
+  flex: 1;
+}
+
+.search-result-name {
+  font-weight: 600;
+  color: #222;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+}
+
+.search-result-email {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.search-no-results {
+  padding: 1.5rem;
+  text-align: center;
+  color: #999;
+  font-size: 0.95rem;
+}
+
+.search-loading {
+  padding: 1.5rem;
+  text-align: center;
+  color: #46B1D5;
+  font-size: 0.95rem;
+}

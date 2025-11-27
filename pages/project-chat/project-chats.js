@@ -245,3 +245,149 @@ if (window.presenceManager && window.presenceManager.isConnected()) {
 }
 
 setInterval(carregarChats, 30000);
+
+// ============= BUSCA DE USUÁRIOS =============
+
+const searchInput = document.getElementById('searchUserInput');
+const searchResults = document.getElementById('searchResults');
+let searchTimeout;
+
+searchInput.addEventListener('input', (e) => {
+  const query = e.target.value.trim();
+  
+  clearTimeout(searchTimeout);
+  
+  if (query.length === 0) {
+    searchResults.style.display = 'none';
+    return;
+  }
+  
+  if (query.length < 2) {
+    searchResults.innerHTML = '<div class="search-no-results">Digite pelo menos 2 caracteres</div>';
+    searchResults.style.display = 'block';
+    return;
+  }
+  
+  searchResults.innerHTML = '<div class="search-loading">Buscando...</div>';
+  searchResults.style.display = 'block';
+  
+  searchTimeout = setTimeout(() => {
+    buscarUsuarios(query);
+  }, 500);
+});
+
+// Fechar resultados ao clicar fora
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-users-section')) {
+    searchResults.style.display = 'none';
+  }
+});
+
+async function buscarUsuarios(userName) {
+  try {
+    const response = await fetch(`${BASE_URL}/v1/user/search/${encodeURIComponent(userName)}`, {
+      headers: {
+        'Authorization': token
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erro ao buscar usuários');
+    }
+    
+    const data = await response.json();
+    const users = data.users || [];
+    
+    if (users.length === 0) {
+      searchResults.innerHTML = '<div class="search-no-results">Nenhum usuário encontrado</div>';
+      return;
+    }
+    
+    renderSearchResults(users);
+  } catch (error) {
+    console.error('Erro na busca:', error);
+    searchResults.innerHTML = '<div class="search-no-results">Erro ao buscar usuários</div>';
+  }
+}
+
+function renderSearchResults(users) {
+  searchResults.innerHTML = users.map(user => {
+    // Não mostrar o próprio usuário nos resultados
+    if (user.userId === userId) return '';
+    
+    const avatarHtml = user.UrlImageUser 
+      ? `<img src="${user.UrlImageUser}" alt="${user.name}">`
+      : user.name.charAt(0).toUpperCase();
+    
+    return `
+      <div class="search-result-item" data-user-id="${user.userId}" data-user-name="${user.name}">
+        <div class="search-result-avatar">
+          ${avatarHtml}
+        </div>
+        <div class="search-result-info">
+          <div class="search-result-name">${user.name}</div>
+          <div class="search-result-email">${user.email || ''}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Adicionar event listeners aos resultados
+  document.querySelectorAll('.search-result-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const targetUserId = item.dataset.userId;
+      const targetUserName = item.dataset.userName;
+      criarOuAbrirChat(targetUserId, targetUserName);
+    });
+  });
+}
+
+async function criarOuAbrirChat(targetUserId, targetUserName) {
+  try {
+    // Tentar criar o chat
+    const response = await fetch(`${BASE_URL}/v1/chat`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userIds: [userId, targetUserId],
+        createdBy: userId
+      })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const chatId = data.chatId;
+      
+      // Redirecionar para o chat
+      window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(targetUserName)}&contactUserId=${targetUserId}`;
+    } else {
+      const errorText = await response.text();
+      
+      // Se o chat já existe, buscar o chat existente
+      if (errorText.includes('already exists') || errorText.includes('AlreadyExists')) {
+        const chatsResponse = await fetch(`${BASE_URL}/v1/chat/users?user1Id=${userId}&user2Id=${targetUserId}`, {
+          headers: {
+            'Authorization': token
+          }
+        });
+        
+        if (chatsResponse.ok) {
+          const chatData = await chatsResponse.json();
+          
+          if (chatData && chatData.chat && chatData.chat.chatId) {
+            const chatId = chatData.chat.chatId;
+            window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(targetUserName)}&contactUserId=${targetUserId}`;
+          }
+        }
+      } else {
+        showError('Erro ao criar chat');
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao criar/abrir chat:', error);
+    showError('Erro ao criar chat. Tente novamente.');
+  }
+}
