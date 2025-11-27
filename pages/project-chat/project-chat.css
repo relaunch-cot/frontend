@@ -172,6 +172,37 @@ nav{
     flex-direction: column;
 }
 
+/* Mensagem de chat vazio */
+.empty-chat-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.empty-chat-message svg {
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+}
+
+.empty-chat-message h3 {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.empty-chat-message p {
+    font-family: "Poppins", sans-serif;
+    font-size: 1rem;
+    color: #999;
+}
+
 .mensagem {
     display: flex;
     align-items: flex-end;
