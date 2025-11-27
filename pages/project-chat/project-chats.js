@@ -315,8 +315,8 @@ function renderSearchResults(users) {
     // Não mostrar o próprio usuário nos resultados
     if (user.userId === userId) return '';
     
-    const avatarHtml = user.UrlImageUser 
-      ? `<img src="${user.UrlImageUser}" alt="${user.name}">`
+    const avatarHtml = user.urlImageUser && user.urlImageUser.trim() !== ''
+      ? `<img src="${user.urlImageUser}" alt="${user.name}" onerror="this.style.display='none'; this.parentElement.textContent='${user.name.charAt(0).toUpperCase()}';">`
       : user.name.charAt(0).toUpperCase();
     
     return `
@@ -344,50 +344,29 @@ function renderSearchResults(users) {
 
 async function criarOuAbrirChat(targetUserId, targetUserName) {
   try {
-    // Tentar criar o chat
-    const response = await fetch(`${BASE_URL}/v1/chat`, {
-      method: 'POST',
+    // Verificar se já existe um chat entre os usuários
+    const chatsResponse = await fetch(`${BASE_URL}/v1/chat/users?user1Id=${userId}&user2Id=${targetUserId}`, {
       headers: {
-        'Authorization': token,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        userIds: [userId, targetUserId],
-        createdBy: userId
-      })
+        'Authorization': token
+      }
     });
     
-    if (response.ok) {
-      const data = await response.json();
-      const chatId = data.chatId;
+    if (chatsResponse.ok) {
+      const chatData = await chatsResponse.json();
       
-      // Redirecionar para o chat
-      window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(targetUserName)}&contactUserId=${targetUserId}`;
-    } else {
-      const errorText = await response.text();
-      
-      // Se o chat já existe, buscar o chat existente
-      if (errorText.includes('already exists') || errorText.includes('AlreadyExists')) {
-        const chatsResponse = await fetch(`${BASE_URL}/v1/chat/users?user1Id=${userId}&user2Id=${targetUserId}`, {
-          headers: {
-            'Authorization': token
-          }
-        });
-        
-        if (chatsResponse.ok) {
-          const chatData = await chatsResponse.json();
-          
-          if (chatData && chatData.chat && chatData.chat.chatId) {
-            const chatId = chatData.chat.chatId;
-            window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(targetUserName)}&contactUserId=${targetUserId}`;
-          }
-        }
-      } else {
-        showError('Erro ao criar chat');
+      if (chatData && chatData.chat && chatData.chat.chatId) {
+        // Chat já existe, redirecionar normalmente
+        const chatId = chatData.chat.chatId;
+        window.location.href = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(targetUserName)}&contactUserId=${targetUserId}`;
+        return;
       }
     }
+    
+    // Chat não existe, abrir preview sem criar
+    window.location.href = `/chat?contactName=${encodeURIComponent(targetUserName)}&contactUserId=${targetUserId}&preview=true`;
+    
   } catch (error) {
-    console.error('Erro ao criar/abrir chat:', error);
-    showError('Erro ao criar chat. Tente novamente.');
+    console.error('Erro ao verificar chat:', error);
+    showError('Erro ao abrir chat. Tente novamente.');
   }
 }

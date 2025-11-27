@@ -35,11 +35,12 @@ const entrada = document.getElementById('entradaMensagem');
 const mensagensContainer = document.getElementById('mensagens');
 
 const urlParams = new URLSearchParams(window.location.search);
-const chatId = urlParams.get('chatId') || 1;
+let chatId = urlParams.get('chatId');
 const contactName = urlParams.get('contactName') || 'Contato';
 const contactUserId = urlParams.get('contactUserId');
+const isPreview = urlParams.get('preview') === 'true';
 
-if (!chatId) {
+if (!chatId && !isPreview) {
   showError('Nenhum chat selecionado.');
   setTimeout(() => window.location.href = '/home', 2000);
 }
@@ -47,6 +48,58 @@ if (!chatId) {
 document.getElementById('contactName').textContent = contactName;
 
 async function loadContactAvatar() {
+  // Em modo preview, carregar avatar do usuário diretamente
+  if (isPreview && contactUserId) {
+    try {
+      const response = await fetch(`${BASE_URL}/v1/user/${contactUserId}`, {
+        headers: {
+          'Authorization': token
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const user = data.user;
+        
+        const contactAvatarDiv = document.querySelector('.contact-avatar');
+        if (contactAvatarDiv && user) {
+          const oldSvg = contactAvatarDiv.querySelector('svg:not(.status-indicator)');
+          if (oldSvg) oldSvg.remove();
+          
+          const otherUserProfileImageUrl = user.UrlImageUser;
+          const otherUserName = user.name;
+          
+          let avatarHtml;
+          if (otherUserProfileImageUrl && otherUserProfileImageUrl.trim() !== '') {
+            avatarHtml = `
+              <img src="${otherUserProfileImageUrl}" 
+                   alt="${otherUserName}" 
+                   class="avatar-img avatar-large" 
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="avatar-letter avatar-large" style="display: none;">
+                ${otherUserName.charAt(0).toUpperCase()}
+              </div>`;
+          } else {
+            avatarHtml = `
+              <div class="avatar-letter avatar-large">
+                ${otherUserName.charAt(0).toUpperCase()}
+              </div>`;
+          }
+          
+          const statusIndicator = contactAvatarDiv.querySelector('.status-indicator');
+          if (statusIndicator) {
+            statusIndicator.insertAdjacentHTML('beforebegin', avatarHtml);
+          } else {
+            contactAvatarDiv.innerHTML = avatarHtml;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar avatar do contato:', error);
+    }
+    return;
+  }
+  
   if (!chatId) return;
   
   try {
@@ -207,6 +260,11 @@ function adicionarSeparadorData(data) {
 }
 
 async function carregarMensagens() {
+  // Não carregar mensagens se estiver em modo preview sem chatId
+  if (isPreview && !chatId) {
+    return;
+  }
+  
   try {
     const res = await fetch(`${API_BASE}/messages/${chatId}`, {
       method: 'GET',
@@ -237,6 +295,38 @@ async function carregarMensagens() {
 
 async function enviarMensagemParaBackend(texto) {
   try {
+    // Se está em modo preview, criar o chat primeiro
+    if (isPreview && !chatId && contactUserId) {
+      const createResponse = await fetch(`${BASE_URL}/v1/chat`, {
+        method: 'POST',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userIds: [userId, contactUserId],
+          createdBy: userId
+        })
+      });
+      
+      if (!createResponse.ok) {
+        showError('Erro ao criar chat.');
+        return;
+      }
+      
+      const createData = await createResponse.json();
+      chatId = createData.chatId;
+      
+      // Atualizar URL sem recarregar a página
+      const newUrl = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(contactName)}&contactUserId=${contactUserId}`;
+      window.history.replaceState({}, '', newUrl);
+      
+      // Inicializar WebSocket do chat
+      if (window.ChatWebSocket) {
+        window.chatWS = new window.ChatWebSocket(chatId, userId, token);
+      }
+    }
+    
     const body = {
       chatId: chatId,
       messageContent: texto
@@ -265,6 +355,7 @@ async function enviarMensagemParaBackend(texto) {
     }
 
   } catch (err) {
+    console.error('Erro ao enviar mensagem:', err);
     showError('Erro ao enviar mensagem. Tente novamente.');
   }
 }
@@ -472,7 +563,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   
-  if (typeof ChatWebSocket !== 'undefined') {
+  // Só conectar WebSocket se não estiver em modo preview
+  if (typeof ChatWebSocket !== 'undefined' && chatId && !isPreview) {
     window.chatWS = new ChatWebSocket();
     window.chatWS.connect(chatId, userId, token);
     
