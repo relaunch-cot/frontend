@@ -38,7 +38,7 @@ const urlParams = new URLSearchParams(window.location.search);
 let chatId = urlParams.get('chatId');
 const contactName = urlParams.get('contactName') || 'Contato';
 const contactUserId = urlParams.get('contactUserId');
-const isPreview = urlParams.get('preview') === 'true';
+let isPreview = urlParams.get('preview') === 'true';
 
 if (!chatId && !isPreview) {
   showError('Nenhum chat selecionado.');
@@ -295,8 +295,9 @@ async function carregarMensagens() {
 
 async function enviarMensagemParaBackend(texto) {
   try {
-    // Se está em modo preview, criar o chat primeiro
+    // Se está em modo preview, criar o chat primeiro e buscar o ID
     if (isPreview && !chatId && contactUserId) {
+      // Criar o chat
       const createResponse = await fetch(`${BASE_URL}/v1/chat`, {
         method: 'POST',
         headers: {
@@ -314,8 +315,30 @@ async function enviarMensagemParaBackend(texto) {
         return;
       }
       
-      const createData = await createResponse.json();
-      chatId = createData.chatId;
+      // Buscar o chat criado para obter o chatId
+      const getChatResponse = await fetch(`${BASE_URL}/v1/chat/users?user1Id=${userId}&user2Id=${contactUserId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token
+        }
+      });
+      
+      if (!getChatResponse.ok) {
+        showError('Erro ao buscar chat criado.');
+        return;
+      }
+      
+      const chatData = await getChatResponse.json();
+      chatId = chatData.chat.chatId;
+      
+      // Desativar modo preview
+      isPreview = false;
+      
+      // Remover mensagem de boas-vindas se existir
+      const emptyMessage = mensagensContainer.querySelector('.empty-chat-message');
+      if (emptyMessage) {
+        emptyMessage.remove();
+      }
       
       // Atualizar URL sem recarregar a página
       const newUrl = `/chat?chatId=${chatId}&contactName=${encodeURIComponent(contactName)}&contactUserId=${contactUserId}`;
