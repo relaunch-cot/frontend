@@ -47,5 +47,9 @@
 /project-payment /pages/project-payment/project-payment-0.html 200
 /pagamento-projeto /pages/project-payment/project-payment-0.html 200
 
+# Termos de Uso
+/terms /pages/terms/terms.html 200
+/termos /pages/terms/terms.html 200
+
 # Redireciona 404 para home (APENAS para rotas não encontradas)
 /* /index.html 404

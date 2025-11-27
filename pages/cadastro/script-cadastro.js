@@ -68,6 +68,12 @@ submitButtons.forEach(button => {
 async function submitForm() {
     const passwordEl = document.getElementById('password');
     const confirmPasswordEl = document.getElementById('confirmPassword');
+    const acceptTermsEl = document.getElementById('acceptTerms');
+    
+    if (!acceptTermsEl.checked) {
+        showError("Você precisa aceitar os Termos de Uso para se cadastrar.");
+        return;
+    }
     
     if (passwordEl.value !== confirmPasswordEl.value) {
         showError("As senhas não coincidem.");

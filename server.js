@@ -33,7 +33,9 @@ const routes = {
   '/project-payment': '/pages/project-payment/project-payment-0.html',
   '/pagamento-projeto': '/pages/project-payment/project-payment-0.html',
   '/posts': '/pages/posts/posts.html',
-  '/postagens': '/pages/posts/posts.html'
+  '/postagens': '/pages/posts/posts.html',
+  '/terms': '/pages/terms/terms.html',
+  '/termos': '/pages/terms/terms.html'
 };
 
 const mimeTypes = {

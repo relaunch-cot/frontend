@@ -1,0 +1,167 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background-image: url(../../src/images/BackgroundLogin.png);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.terms-header {
+    background: linear-gradient(135deg, #46B1D5 0%, #2C3E50 100%);
+    color: white;
+    padding: 3rem 2rem 2rem;
+    position: relative;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    text-decoration: none;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    transition: opacity 0.3s;
+}
+
+.back-link:hover {
+    opacity: 0.8;
+}
+
+.terms-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.last-update {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.terms-content {
+    padding: 3rem 2rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.terms-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terms-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.terms-content::-webkit-scrollbar-thumb {
+    background: #46B1D5;
+    border-radius: 4px;
+}
+
+.terms-content::-webkit-scrollbar-thumb:hover {
+    background: #2C3E50;
+}
+
+.terms-section {
+    margin-bottom: 2.5rem;
+}
+
+.terms-section:last-child {
+    margin-bottom: 0;
+}
+
+.terms-section h2 {
+    color: #2C3E50;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.terms-section p {
+    color: #444;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    text-align: justify;
+}
+
+.terms-section p:last-child {
+    margin-bottom: 0;
+}
+
+.terms-section ul {
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.terms-section ul li {
+    color: #444;
+    line-height: 1.8;
+    margin-bottom: 0.5rem;
+}
+
+.terms-footer {
+    background: #2C3E50;
+    padding: 2rem;
+    border-top: 3px solid #46B1D5;
+}
+
+.terms-footer p {
+    color: white;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 1rem 0.5rem;
+    }
+
+    .container {
+        border-radius: 12px;
+    }
+
+    .terms-header {
+        padding: 2rem 1.5rem 1.5rem;
+    }
+
+    .terms-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .terms-content {
+        padding: 2rem 1.5rem;
+        max-height: 60vh;
+    }
+
+    .terms-section h2 {
+        font-size: 1.3rem;
+    }
+
+    .terms-section p,
+    .terms-section ul li {
+        font-size: 0.95rem;
+    }
+
+    .terms-footer {
+        padding: 1.5rem;
+    }
+}
